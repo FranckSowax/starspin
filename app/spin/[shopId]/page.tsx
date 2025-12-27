@@ -103,16 +103,21 @@ export default function SpinPage() {
     // Segment i starts at i * segmentAngle
     // Center is at i * segmentAngle + segmentAngle / 2
     const segmentCenter = (winningSegmentIndex * segmentAngle) + (segmentAngle / 2);
+    
+    // Add random offset within the segment to avoid always landing on center
+    // Range: -40% to +40% of segment angle (staying away from edges)
+    const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.8;
 
     // Target is Top (270 degrees)
     const currentRot = currentRotationRef.current;
-    const baseTarget = 270 - segmentCenter;
+    const baseTarget = 270 - segmentCenter - randomOffset;
     
     // Calculate smallest positive delta to reach target
     const distToTarget = (baseTarget - (currentRot % 360) + 360) % 360;
     
-    // Add 5 full spins (1800 deg) + distance
-    const totalRotation = currentRot + 1800 + distToTarget;
+    // Add 4-6 full spins for variety
+    const extraSpins = 1440 + Math.random() * 720; // 4-6 spins
+    const totalRotation = currentRot + extraSpins + distToTarget;
 
     if (wheelRef.current) {
       wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
@@ -408,7 +413,7 @@ export default function SpinPage() {
                   
                   // Text position: start from near center, extend toward edge
                   // Text should be readable from center outward (vertical orientation)
-                  const textDistance = 18; // % from center where text starts
+                  const textDistance = 22; // % from center where text starts (moved further from SPIN button)
                   const textX = cx + textDistance * Math.cos(midRad);
                   const textY = cy + textDistance * Math.sin(midRad);
 
