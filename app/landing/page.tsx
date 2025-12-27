@@ -46,103 +46,143 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen overflow-hidden">
-        {/* Background Image */}
+        {/* Parallax Background */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-fixed"
           style={{
-            backgroundImage: 'url(/BANNER-SPIN-HERO-.png)',
-            backgroundPosition: 'center left'
+            backgroundImage: 'url(/imgi_48_background.jpg)',
+            backgroundAttachment: 'fixed'
           }}
         >
-          {/* Dark overlay for better text readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0A2F23]/95 via-[#1B4332]/90 to-[#2D6A4F]/85"></div>
         </div>
 
         <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center min-h-[calc(100vh-8rem)]">
-            {/* Left column - Empty/Image space */}
-            <div className="hidden md:block">
-              {/* This space is for the background image to show through */}
-            </div>
-
-            {/* Right column - Content */}
-            <div className="text-left space-y-8">
-              {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-                <div className="w-2 h-2 bg-[#52B788] rounded-full animate-pulse"></div>
-                <span className="text-sm font-semibold text-white uppercase tracking-wide">Boostez votre réputation</span>
-              </div>
-
+          <div className="grid md:grid-cols-3 gap-8 items-center min-h-[calc(100vh-8rem)]">
+            {/* Left column - Text Content */}
+            <div className="text-left space-y-6">
               {/* Main Title */}
-              <h1 className="text-5xl md:text-7xl font-black text-white leading-tight">
+              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
                 Transformez vos clients satisfaits en
-                <span className="block mt-2 text-[#52B788]">ambassadeurs</span>
+                <span className="block mt-3 text-transparent bg-clip-text bg-gradient-to-r from-[#52B788] to-[#95D5B2]">
+                  Étoiles
+                </span>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-xl">
-                La roue gamifiée qui booste vos avis Google et fidélise vos clients dans les zones touristiques de Thaïlande
+              <p className="text-lg md:text-xl text-white/80 leading-relaxed">
+                La roue gamifiée qui booste vos avis Google
               </p>
 
-              {/* Features list */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-[#52B788] rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-white/90 text-lg">Interface multilingue (6 langues)</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-[#52B788] rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-white/90 text-lg">+1 point Google = +5 à 9% de CA</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-[#52B788] rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-white/90 text-lg">Filtrage intelligent des avis négatifs</span>
-                </div>
-              </div>
-
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              {/* CTA Button */}
+              <div className="pt-4">
                 <Button size="lg" className="bg-[#52B788] hover:bg-[#40916C] text-white px-10 py-6 text-lg font-bold rounded-full shadow-2xl">
                   Essayer gratuitement
                 </Button>
-                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-10 py-6 text-lg font-bold rounded-full backdrop-blur-sm">
-                  Voir la démo
-                </Button>
               </div>
 
-              {/* Social proof */}
-              <div className="flex items-center gap-6 pt-4">
-                <div className="flex -space-x-3">
-                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
-                    MA
-                  </div>
-                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
-                    SP
-                  </div>
-                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
-                    CL
-                  </div>
-                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
-                    +100K
-                  </div>
-                </div>
-                <div className="text-white/80">
-                  <p className="font-semibold">100K+ commerces</p>
-                  <p className="text-sm">utilisent StarSpin</p>
-                </div>
+              {/* Features badges */}
+              <div className="flex flex-wrap gap-3 pt-4">
+                <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
+                  Multilingue
+                </Badge>
+                <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
+                  Sans engagement
+                </Badge>
+                <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
+                  Setup 5 min
+                </Badge>
               </div>
+            </div>
+
+            {/* Center column - DESIGNSPIN Image */}
+            <div className="flex items-center justify-center">
+              <div className="relative">
+                <img 
+                  src="/DESIGNSPIN.png" 
+                  alt="StarSpin Wheel" 
+                  className="w-full max-w-md mx-auto drop-shadow-2xl animate-pulse"
+                  style={{
+                    filter: 'drop-shadow(0 0 60px rgba(82, 183, 136, 0.4))'
+                  }}
+                />
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#52B788]/20 to-transparent rounded-full blur-3xl"></div>
+              </div>
+            </div>
+
+            {/* Right column - Smartphone Mockup */}
+            <div className="flex items-center justify-center">
+              <div className="relative">
+                {/* Smartphone frame */}
+                <div className="relative w-[280px] h-[560px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl border-8 border-gray-800">
+                  {/* Screen */}
+                  <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden relative">
+                    {/* Status bar */}
+                    <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-gray-100 to-transparent z-10"></div>
+                    
+                    {/* Content - StarSpin Interface Preview */}
+                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] flex flex-col items-center justify-center p-6">
+                      <div className="text-center space-y-4">
+                        <div className="w-32 h-32 mx-auto">
+                          <img 
+                            src="/DESIGNSPIN.png" 
+                            alt="Wheel" 
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <h3 className="text-white font-bold text-lg">Tournez la roue !</h3>
+                        <p className="text-white/80 text-sm">Gagnez votre récompense</p>
+                        <div className="bg-[#52B788] text-white px-6 py-3 rounded-full font-bold text-sm">
+                          Tourner
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Home indicator */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-800 rounded-full"></div>
+                  </div>
+                  
+                  {/* Notch */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-gray-900 rounded-b-3xl"></div>
+                </div>
+
+                {/* Floating badge */}
+                <div className="absolute -top-4 -right-4 bg-white rounded-full px-4 py-2 shadow-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📱</span>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-gray-900">Mobile App</p>
+                      <p className="text-xs text-gray-600">Available</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative elements */}
+                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-[#52B788]/20 rounded-full blur-2xl"></div>
+                <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#52B788]/10 rounded-full blur-3xl"></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom stats bar */}
+          <div className="mt-16 flex flex-wrap items-center justify-center gap-12 text-white/80">
+            <div className="text-center">
+              <div className="text-3xl font-black text-white">100K+</div>
+              <div className="text-sm">Commerces actifs</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-black text-white">4.9★</div>
+              <div className="text-sm">Note moyenne</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-black text-white">+45%</div>
+              <div className="text-sm">Avis positifs</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-black text-white">6</div>
+              <div className="text-sm">Langues supportées</div>
             </div>
           </div>
         </div>
