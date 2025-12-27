@@ -285,7 +285,7 @@ export default function AdminDashboard() {
               alt="StarSpin Logo" 
               className="h-8 w-auto"
             />
-            <p className="text-xs text-slate-400">Admin Dashboard</p>
+            <p className="text-xs text-white">Admin Dashboard</p>
           </div>
         </div>
 
@@ -295,8 +295,8 @@ export default function AdminDashboard() {
             onClick={() => setActiveSection('dashboard')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
               activeSection === 'dashboard'
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                ? 'bg-purple-500/20 text-white border border-purple-500/30'
+                : 'text-white hover:bg-slate-800/50'
             }`}
           >
             <LayoutDashboard className="w-5 h-5" />
@@ -307,8 +307,8 @@ export default function AdminDashboard() {
             onClick={() => setActiveSection('merchants')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
               activeSection === 'merchants'
-                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                ? 'bg-purple-500/20 text-white border border-purple-500/30'
+                : 'text-white hover:bg-slate-800/50'
             }`}
           >
             <Store className="w-5 h-5" />
@@ -357,8 +357,8 @@ export default function AdminDashboard() {
                 onClick={() => setTimeRange('day')}
                 className={`gap-2 ${
                   timeRange === 'day'
-                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                    ? 'bg-purple-500/20 text-white border-purple-500/30'
+                    : 'bg-slate-800 text-white border-slate-700'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -368,8 +368,8 @@ export default function AdminDashboard() {
                 onClick={() => setTimeRange('week')}
                 className={`gap-2 ${
                   timeRange === 'week'
-                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                    ? 'bg-purple-500/20 text-white border-purple-500/30'
+                    : 'bg-slate-800 text-white border-slate-700'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -379,8 +379,8 @@ export default function AdminDashboard() {
                 onClick={() => setTimeRange('month')}
                 className={`gap-2 ${
                   timeRange === 'month'
-                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
-                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                    ? 'bg-purple-500/20 text-white border-purple-500/30'
+                    : 'bg-slate-800 text-white border-slate-700'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
