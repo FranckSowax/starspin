@@ -13,110 +13,133 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0A1F44] via-[#1a3a6e] to-[#0A1F44]">
+    <div className="min-h-screen bg-[#E8EDE8]">
       {/* Header */}
-      <header className="fixed top-0 w-full bg-[#0A1F44]/80 backdrop-blur-xl z-50 border-b border-cyan-500/30 shadow-2xl shadow-cyan-500/10">
-        <div className="container mx-auto px-4 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3 group">
-            <div className="text-5xl animate-pulse group-hover:scale-110 transition-transform">⭐</div>
-            <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400">
-              StarSpin
+      <header className="fixed top-0 w-full bg-[#1B4332]/95 backdrop-blur-sm z-50">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-[#FF6B6B] rounded-full"></div>
+            <span className="text-2xl font-bold text-white">
+              starspin
             </span>
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-white hover:text-cyan-400 transition-all hover:scale-110 font-semibold">Fonctionnalités</a>
-            <a href="#pricing" className="text-white hover:text-pink-400 transition-all hover:scale-110 font-semibold">Tarifs</a>
-            <a href="#testimonials" className="text-white hover:text-yellow-400 transition-all hover:scale-110 font-semibold">Témoignages</a>
+            <a href="#features" className="text-white/90 hover:text-white transition text-sm">How it works</a>
+            <a href="#pricing" className="text-white/90 hover:text-white transition text-sm">Stories</a>
+            <a href="#testimonials" className="text-white/90 hover:text-white transition text-sm">Video message</a>
           </nav>
 
           <div className="flex items-center gap-4">
-            <select 
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-gradient-to-r from-[#1a3a6e] to-[#0A1F44] text-white px-4 py-2 rounded-xl border-2 border-cyan-500/50 hover:border-cyan-400 transition-all cursor-pointer font-semibold shadow-lg"
-            >
-              <option>🇫🇷 FR</option>
-              <option>🇬🇧 EN</option>
-              <option>🇪🇸 ES</option>
-              <option>🇸🇦 AR</option>
-            </select>
-            <Button className="bg-gradient-to-r from-[#FF1B8D] via-[#FF6B35] to-[#FFB703] hover:scale-110 transition-all shadow-2xl shadow-pink-500/50 font-bold text-lg px-6 py-3 hover:shadow-pink-500/70">
-              ✨ Démarrer Gratuitement
-            </Button>
+            <button className="px-6 py-2 border-2 border-white rounded-full text-white text-sm font-medium hover:bg-white hover:text-[#1B4332] transition">
+              Get Started
+            </button>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-yellow-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <section className="relative min-h-screen bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] overflow-hidden">
+        {/* Snowflakes/Stars floating animation */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 text-white/20 text-2xl animate-pulse">❄️</div>
+          <div className="absolute top-40 right-20 text-white/20 text-3xl animate-pulse" style={{ animationDelay: '1s' }}>❄️</div>
+          <div className="absolute bottom-40 left-1/4 text-white/20 text-2xl animate-pulse" style={{ animationDelay: '2s' }}>❄️</div>
+          <div className="absolute top-1/3 right-1/3 text-white/20 text-3xl animate-pulse" style={{ animationDelay: '1.5s' }}>❄️</div>
         </div>
 
-        <div className="container mx-auto text-center relative z-10">
-          <div className="inline-block mb-6 px-6 py-3 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 backdrop-blur-sm rounded-full border border-cyan-500/30">
-            <span className="text-cyan-300 font-bold text-sm">🚀 Nouveau : Multilingue automatique en 6 langues</span>
-          </div>
+        <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
+          <div className="text-center mb-16">
+            {/* Main Title */}
+            <h1 className="text-8xl md:text-9xl font-black text-white mb-8 tracking-tight">
+              REVIEW<span className="text-[#FF6B6B]">WISH</span>
+            </h1>
 
-          <h1 className="text-6xl md:text-8xl font-black mb-8 text-transparent bg-clip-text bg-gradient-to-r from-[#FF1B8D] via-[#00D9FF] to-[#FFB703] animate-gradient leading-tight">
-            Transformez vos clients<br />en ambassadeurs ⭐⭐⭐⭐⭐
-          </h1>
-          
-          <p className="text-2xl md:text-3xl text-cyan-100 mb-12 max-w-4xl mx-auto font-semibold leading-relaxed">
-            La première solution qui <span className="text-pink-400 font-bold">filtre les avis négatifs</span>, booste votre visibilité Google<br />
-            et fait revenir vos clients sous 48h grâce à la <span className="text-yellow-400 font-bold">gamification</span>
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <button className="group relative bg-gradient-to-r from-[#FF1B8D] via-[#FF6B35] to-[#FFB703] text-white text-2xl font-black py-6 px-16 rounded-full hover:scale-110 transition-all shadow-2xl shadow-pink-500/50 hover:shadow-pink-500/80 overflow-hidden">
-              <span className="relative z-10">🎯 Créer mon QR Code</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </button>
-            <button className="text-white text-xl font-bold py-6 px-12 rounded-full border-2 border-cyan-400 hover:bg-cyan-400/20 transition-all hover:scale-105">
-              📺 Voir la démo
-            </button>
-          </div>
-
-          {/* Hero Visual */}
-          <div className="relative max-w-6xl mx-auto">
-            <div className="relative bg-gradient-to-br from-[#1a3a6e]/40 to-[#0A1F44]/40 backdrop-blur-xl rounded-3xl p-12 border-2 border-cyan-500/30 shadow-2xl shadow-cyan-500/20">
-              <div className="grid md:grid-cols-3 gap-8 items-center">
-                {/* Phone with wheel */}
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-br from-[#FF1B8D] to-[#9D4EDD] rounded-3xl p-8 transform hover:scale-105 transition-all shadow-2xl">
-                    <div className="text-9xl mb-4 animate-bounce">📱</div>
-                    <div className="text-7xl animate-spin" style={{ animationDuration: '3s' }}>🎡</div>
-                  </div>
-                  <div className="absolute -top-6 -right-6 text-7xl animate-bounce">⭐</div>
-                  <div className="absolute -bottom-6 -left-6 text-6xl animate-pulse">🎁</div>
+            {/* Interactive elements */}
+            <div className="flex items-center justify-center gap-32 mb-12">
+              <div className="text-left">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                  <div className="h-px w-32 bg-white/30"></div>
                 </div>
-                
-                {/* QR Code */}
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                  <div className="relative bg-white rounded-3xl p-8 transform hover:scale-105 transition-all shadow-2xl">
-                    <div className="text-8xl mb-4">📋</div>
-                    <div className="w-40 h-40 mx-auto bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl flex items-center justify-center shadow-inner">
-                      <div className="text-white text-sm font-bold">QR CODE</div>
+                <p className="text-white/80 text-sm">Write a review</p>
+                <p className="text-white/60 text-xs">Get a reward</p>
+              </div>
+
+              {/* Center 3D Element - Spinning Wheel */}
+              <div className="relative">
+                <div className="w-96 h-96 relative">
+                  {/* Wheel base */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#52B788] to-[#2D6A4F] rounded-full shadow-2xl">
+                    {/* Wheel segments */}
+                    <div className="absolute inset-8 bg-gradient-to-br from-[#74C69D] to-[#40916C] rounded-full flex items-center justify-center">
+                      <div className="text-9xl">🎡</div>
                     </div>
-                    <div className="mt-4 text-gray-800 font-bold">Scan & Win!</div>
+                    {/* Decorative balls */}
+                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-8 h-8 bg-[#FF6B6B] rounded-full shadow-lg"></div>
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg"></div>
+                    <div className="absolute left-8 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#FF6B6B] rounded-full shadow-lg"></div>
+                    <div className="absolute right-8 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg"></div>
+                  </div>
+                  {/* Santa hat on top */}
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-7xl">🎅</div>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="flex items-center gap-3 mb-2 justify-end">
+                  <div className="h-px w-32 bg-white/30"></div>
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+                <p className="text-white/80 text-sm">Make a wish</p>
+                <p className="text-white/60 text-xs">Get instant rewards</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom CTA Section */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-3xl p-12 shadow-2xl relative">
+              {/* Toggle button */}
+              <div className="absolute -top-6 left-1/2 -translate-x-1/2">
+                <button className="bg-[#FF6B6B] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-[#FF5252] transition">
+                  Review Mode
+                  <div className="w-12 h-6 bg-white/30 rounded-full relative">
+                    <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="text-center pt-8">
+                <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                  Get a personalized<br />
+                  reward for reviews and<br />
+                  boost your reputation
+                </h2>
+                <button className="mt-8 bg-[#1B4332] text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-[#2D6A4F] transition shadow-lg">
+                  START FREE TRIAL
+                </button>
+              </div>
+
+              {/* Decorative envelope */}
+              <div className="absolute -left-12 bottom-12">
+                <div className="relative">
+                  <div className="text-8xl">📧</div>
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <p className="text-xs font-bold text-[#FF6B6B] whitespace-nowrap">WRITE TO</p>
+                    <p className="text-xs font-bold text-[#1B4332]">STARSPIN</p>
                   </div>
                 </div>
+              </div>
 
-                {/* Stats */}
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                  <div className="relative bg-gradient-to-br from-[#FFB703] to-[#FB8500] rounded-3xl p-8 transform hover:scale-105 transition-all shadow-2xl">
-                    <div className="text-9xl mb-4">📊</div>
-                    <div className="text-white font-black text-4xl">+25%</div>
-                    <div className="text-white font-bold text-lg">Avis positifs</div>
-                  </div>
-                  <div className="absolute -top-6 -right-6 text-6xl animate-bounce" style={{ animationDelay: '0.5s' }}>🚀</div>
+              {/* Stats card */}
+              <div className="absolute -right-12 bottom-12 bg-[#2D6A4F] text-white rounded-2xl p-6 shadow-xl">
+                <div className="text-5xl font-black mb-2">100K</div>
+                <p className="text-sm opacity-80">Businesses received</p>
+                <p className="text-sm opacity-80">positive reviews</p>
+                <div className="flex gap-2 mt-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👨‍🍳</div>
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👩‍💼</div>
                 </div>
               </div>
             </div>
