@@ -233,6 +233,10 @@ export default function SpinPage() {
           background: linear-gradient(135deg, #2d8a3e 0%, #1e6b2f 50%, #2d8a3e 100%);
         }
 
+        .segment-content.black {
+          background: linear-gradient(135deg, #1a1a1a 0%, #000000 50%, #1a1a1a 100%);
+        }
+
         .segment-content.yellow {
           background: linear-gradient(135deg, #ffd700 0%, #ffb700 50%, #ffa500 100%);
           box-shadow: inset 0 0 30px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.4);
@@ -249,7 +253,7 @@ export default function SpinPage() {
           font-family: 'Arial Black', Arial, sans-serif;
           font-size: clamp(1.4rem, 4.4vw, 2.4rem);
           font-weight: 900;
-          text-align: left;
+          text-align: center;
           text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.5);
           white-space: nowrap;
           overflow: hidden;
@@ -297,17 +301,17 @@ export default function SpinPage() {
           {/* Wheel Wrapper */}
           <div className="relative w-full aspect-square max-w-[450px] mx-auto">
             {/* Pointer */}
-            <div className="absolute top-[-75px] left-1/2 -translate-x-1/2 z-[100]" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
+            <div className="absolute top-[-160px] left-1/2 -translate-x-1/2 z-[100]" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
               {merchant?.logo_url ? (
                 <div className="relative">
-                  <div className="w-20 h-20 bg-white rounded-full p-1 shadow-xl flex items-center justify-center border-4 border-[#ffd700]">
+                  <div className="w-40 h-40 bg-white rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#ffd700]">
                     <img 
                       src={merchant.logo_url} 
                       alt="Merchant Logo" 
                       className="w-full h-full object-contain rounded-full"
                     />
                   </div>
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[20px] border-t-[#ffd700]"></div>
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-t-[40px] border-t-[#ffd700]"></div>
                 </div>
               ) : (
                 <>
@@ -339,15 +343,19 @@ export default function SpinPage() {
               >
                 {prizes.map((prize, index) => {
                   const isHighValue = (prize.probability || 0) <= 10;
+                  const isBlack = !isHighValue && index % 2 !== 0;
+                  const segmentColor = isHighValue ? 'yellow' : (isBlack ? 'black' : 'green');
+                  const displayText = isBlack ? 'UNLUCKY' : prize.name;
+                  
                   return (
                     <div
                       key={prize.id}
                       className="segment"
                       style={{ transform: `rotate(${index * segmentAngle}deg)` }}
                     >
-                      <div className={`segment-content ${isHighValue ? 'yellow' : 'green'}`}>
+                      <div className={`segment-content ${segmentColor}`}>
                         <div className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}>
-                          {prize.name}
+                          {displayText}
                         </div>
                       </div>
                     </div>
