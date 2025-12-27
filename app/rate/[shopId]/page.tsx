@@ -52,6 +52,67 @@ export default function RatingPage() {
     setRating(selectedRating);
   };
 
+  const getRedirectMessage = () => {
+    if (!merchant || !rating || rating < 4) return null;
+
+    // Get current day of week (0 = Sunday, 1 = Monday, etc.)
+    const today = new Date().getDay();
+    // Convert to Monday-based index (0 = Monday, 6 = Sunday)
+    const dayIndex = today === 0 ? 6 : today - 1;
+    
+    // Get weekly schedule if available
+    let strategy = 'google_maps';
+    if (merchant.weekly_schedule) {
+      try {
+        const schedule = JSON.parse(merchant.weekly_schedule);
+        if (Array.isArray(schedule) && schedule.length === 7) {
+          strategy = schedule[dayIndex];
+        }
+      } catch (e) {
+        strategy = merchant.redirect_strategy || 'google_maps';
+      }
+    } else {
+      strategy = merchant.redirect_strategy || 'google_maps';
+    }
+
+    switch (strategy) {
+      case 'google_maps':
+        return {
+          icon: '🗺️',
+          text: 'Avant de lancer la roue, donnez-nous de la force sur Google puis revenez tourner la roue !',
+          bg: 'bg-red-50',
+          border: 'border-red-200',
+          text_color: 'text-red-800'
+        };
+      case 'tripadvisor':
+        return {
+          icon: '⭐',
+          text: 'Avant de lancer la roue, donnez-nous de la force sur TripAdvisor puis revenez tourner la roue !',
+          bg: 'bg-green-50',
+          border: 'border-green-200',
+          text_color: 'text-green-800'
+        };
+      case 'tiktok':
+        return {
+          icon: '🎵',
+          text: 'Abonnez-vous avant de tourner la roue !',
+          bg: 'bg-gray-50',
+          border: 'border-gray-300',
+          text_color: 'text-gray-800'
+        };
+      case 'instagram':
+        return {
+          icon: '📸',
+          text: 'Abonnez-vous avant de tourner la roue !',
+          bg: 'bg-pink-50',
+          border: 'border-pink-200',
+          text_color: 'text-pink-800'
+        };
+      default:
+        return null;
+    }
+  };
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -235,6 +296,16 @@ export default function RatingPage() {
                 )}
               </div>
 
+              {/* Redirect Information Message */}
+              {getRedirectMessage() && (
+                <div className={`${getRedirectMessage()?.bg} ${getRedirectMessage()?.border} border-2 rounded-xl p-4`}>
+                  <p className={`text-sm font-medium ${getRedirectMessage()?.text_color} text-center flex items-center justify-center gap-2`}>
+                    <span className="text-2xl">{getRedirectMessage()?.icon}</span>
+                    <span>{getRedirectMessage()?.text}</span>
+                  </p>
+                </div>
+              )}
+
               <Button
                 onClick={handleFeedbackSubmit}
                 disabled={loading}
@@ -277,6 +348,16 @@ export default function RatingPage() {
                   </p>
                 )}
               </div>
+
+              {/* Redirect Information Message */}
+              {getRedirectMessage() && (
+                <div className={`${getRedirectMessage()?.bg} ${getRedirectMessage()?.border} border-2 rounded-xl p-4`}>
+                  <p className={`text-sm font-medium ${getRedirectMessage()?.text_color} text-center flex items-center justify-center gap-2`}>
+                    <span className="text-2xl">{getRedirectMessage()?.icon}</span>
+                    <span>{getRedirectMessage()?.text}</span>
+                  </p>
+                </div>
+              )}
 
               <Button
                 onClick={handleFeedbackSubmit}
