@@ -135,6 +135,9 @@ export default function SpinPage() {
     const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.6;
 
     // Target rotation
+    // Align segment center to -90 (Top)
+    // We use a clean geometric calculation: Target = Top(-90) - Center - Random
+    // Note: extraSpins must be a multiple of 360 to preserve this alignment.
     const currentRot = currentRotationRef.current;
     const targetAngle = -90 - segmentVisualCenter - randomOffset;
     
