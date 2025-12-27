@@ -38,9 +38,11 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button variant="outline" className="border-2 border-white rounded-full text-white hover:bg-white hover:text-[#1B4332]">
-              Get Started
-            </Button>
+            <Link href="/auth/signup">
+              <Button variant="outline" className="border-2 border-white rounded-full text-white hover:bg-white hover:text-[#1B4332]">
+                Get Started
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -78,9 +80,11 @@ export default function LandingPage() {
 
               {/* CTA Button */}
               <div className="pt-4">
-                <Button size="lg" className="bg-[#52B788] hover:bg-[#40916C] text-white px-10 py-6 text-lg font-bold rounded-full shadow-2xl">
-                  Essayer gratuitement
-                </Button>
+                <Link href="/auth/signup">
+                  <Button size="lg" className="bg-[#52B788] hover:bg-[#40916C] text-white px-10 py-6 text-lg font-bold rounded-full shadow-2xl">
+                    Essayer gratuitement
+                  </Button>
+                </Link>
               </div>
 
               {/* Features badges */}
@@ -400,9 +404,11 @@ export default function LandingPage() {
               <p className="text-xl text-white/90 mb-8">
                 Rejoignez les 100K+ commerces qui utilisent StarSpin
               </p>
-              <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-6 text-lg font-bold">
-                Démarrer l'essai gratuit
-              </Button>
+              <Link href="/auth/signup">
+                <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-6 text-lg font-bold">
+                  Démarrer l'essai gratuit
+                </Button>
+              </Link>
             </Card>
           </div>
         </div>
@@ -663,9 +669,11 @@ export default function LandingPage() {
                   <span className="text-gray-700">Statistiques essentielles</span>
                 </li>
               </ul>
-              <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
-                Commencer gratuitement
-              </Button>
+              <Link href="/auth/signup" className="w-full">
+                <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
+                  Commencer gratuitement
+                </Button>
+              </Link>
             </Card>
 
             {/* Pro Plan - Featured */}
@@ -720,9 +728,11 @@ export default function LandingPage() {
                   <span className="text-white font-semibold">Multilingue (6 langues)</span>
                 </li>
               </ul>
-              <Button className="w-full bg-white text-[#2D6A4F] hover:bg-gray-100 font-bold">
-                Essayer 14 jours gratuits
-              </Button>
+              <Link href="/auth/signup" className="w-full">
+                <Button className="w-full bg-white text-[#2D6A4F] hover:bg-gray-100 font-bold">
+                  Essayer 14 jours gratuits
+                </Button>
+              </Link>
             </Card>
 
             {/* Enterprise Plan */}
@@ -766,9 +776,11 @@ export default function LandingPage() {
                   <span className="text-gray-700">Account manager dédié</span>
                 </li>
               </ul>
-              <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
-                Nous contacter
-              </Button>
+              <Link href="/contact" className="w-full">
+                <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
+                  Nous contacter
+                </Button>
+              </Link>
             </Card>
           </div>
 
@@ -916,12 +928,16 @@ export default function LandingPage() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-7 text-xl font-bold rounded-full shadow-2xl">
-                Essayer gratuitement 14 jours
-              </Button>
-              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-12 py-7 text-xl font-bold rounded-full">
-                Voir une démo
-              </Button>
+              <Link href="/auth/signup">
+                <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-7 text-xl font-bold rounded-full shadow-2xl">
+                  Essayer gratuitement 14 jours
+                </Button>
+              </Link>
+              <Link href="/demo">
+                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-12 py-7 text-xl font-bold rounded-full">
+                  Voir une démo
+                </Button>
+              </Link>
             </div>
             
             <div className="mt-10 flex items-center justify-center gap-8 text-white/80">
