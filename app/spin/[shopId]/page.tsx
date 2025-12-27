@@ -56,6 +56,10 @@ export default function SpinPage() {
         .eq('id', shopId)
         .single();
 
+      if (merchantData) {
+        setMerchant(merchantData);
+      }
+
       const { data: prizesData } = await supabase
         .from('prizes')
         .select('*')
@@ -357,23 +361,23 @@ export default function SpinPage() {
           {/* Wheel Wrapper */}
           <div className="relative w-full aspect-square max-w-[450px] mx-auto">
             {/* Pointer */}
-            <div className="absolute top-[-160px] left-1/2 -translate-x-1/2 z-[100]" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
+            <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
               {merchant?.logo_url ? (
-                <div className="relative">
-                  <div className="w-40 h-40 bg-white rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#ffd700]">
+                <>
+                  <div className="w-24 h-24 bg-white rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#ffd700] mb-[-15px] relative z-10">
                     <img 
                       src={merchant.logo_url} 
                       alt="Merchant Logo" 
                       className="w-full h-full object-contain rounded-full"
                     />
                   </div>
-                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-t-[40px] border-t-[#ffd700]"></div>
-                </div>
+                  <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[40px] border-t-[#ffd700] relative z-0"></div>
+                </>
               ) : (
                 <>
-                  <div className="absolute top-[-25px] left-1/2 -translate-x-1/2 w-[18px] h-[18px] bg-[#1a1a1a] rounded-full" style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}></div>
-                  <div className="absolute top-[-55px] left-[-18px] w-[36px] h-[22px] rounded-t-[18px]" style={{ background: 'linear-gradient(180deg, #ffb84d 0%, #ffa500 100%)', boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3)' }}></div>
-                  <div className="w-0 h-0 border-l-[22px] border-l-transparent border-r-[22px] border-r-transparent border-t-[45px] border-t-[#ffa500] relative" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}></div>
+                  <div className="w-[18px] h-[18px] bg-[#1a1a1a] rounded-full mb-[-8px] relative z-10" style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}></div>
+                  <div className="w-[36px] h-[22px] rounded-t-[18px] mb-[-1px]" style={{ background: 'linear-gradient(180deg, #ffb84d 0%, #ffa500 100%)', boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3)' }}></div>
+                  <div className="w-0 h-0 border-l-[22px] border-l-transparent border-r-[22px] border-r-transparent border-t-[45px] border-t-[#ffa500]" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}></div>
                 </>
               )}
             </div>
