@@ -20,6 +20,7 @@ export default function ScanPage() {
   const [couponDetails, setCouponDetails] = useState<any>(null);
   const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'verifying' | 'valid' | 'invalid' | 'redeemed'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sessionHistory, setSessionHistory] = useState<any[]>([]);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
@@ -163,11 +164,14 @@ export default function ScanPage() {
       setScanStatus('redeemed');
       
       // Update local state to reflect change immediately
-      setCouponDetails({ 
+      const updatedCoupon = { 
         ...couponDetails, 
         used: true, 
         used_at: new Date().toISOString() 
-      });
+      };
+      
+      setCouponDetails(updatedCoupon);
+      setSessionHistory(prev => [updatedCoupon, ...prev]);
 
     } catch (err) {
       console.error('Redemption error:', err);
@@ -278,6 +282,34 @@ export default function ScanPage() {
             </div>
           )}
         </Card>
+
+        {/* Session History */}
+        {sessionHistory.length > 0 && (
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Historique de la session</h3>
+            <div className="space-y-4">
+              {sessionHistory.map((coupon, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                      <Gift className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{coupon.prize_name}</p>
+                      <p className="text-sm text-gray-500 font-mono">{coupon.code}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-green-600">Validé</p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(coupon.used_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
