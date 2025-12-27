@@ -18,7 +18,8 @@ import {
   Users,
   Bell,
   CreditCard,
-  Target
+  Target,
+  ScanLine
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -39,6 +40,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+    { name: 'Scan Coupon', href: '/dashboard/scan', icon: ScanLine },
     { name: 'Strategy', href: '/dashboard/strategy', icon: Target },
     { name: 'Prizes', href: '/dashboard/prizes', icon: Gift },
     { name: 'QR Code', href: '/dashboard/qr', icon: QrCode },
