@@ -23,7 +23,8 @@ import {
   LayoutDashboard,
   Filter,
   Calendar,
-  ChevronRight
+  ChevronRight,
+  RotateCw
 } from 'lucide-react';
 import QRCode from 'qrcode';
 
@@ -62,6 +63,7 @@ export default function AdminDashboard() {
     activeMerchants: 0,
     totalReviews: 0,
     totalRevenue: 0,
+    totalSpins: 0,
   });
 
   // Estimated monthly revenue per tier
@@ -137,19 +139,22 @@ export default function AdminDashboard() {
 
       // Load stats for each merchant
       const statsPromises = merchantsData.map(async (merchant) => {
+        // Optimize feedback fetch: only get necessary columns
         const { data: feedbackData } = await supabase
           .from('feedback')
-          .select('*')
+          .select('rating, is_positive')
           .eq('merchant_id', merchant.id);
 
-        const { data: spinsData } = await supabase
+        // Optimize spins fetch: only get count
+        const { count: spinsCount } = await supabase
           .from('spins')
-          .select('*')
+          .select('*', { count: 'exact', head: true })
           .eq('merchant_id', merchant.id);
 
-        const totalReviews = feedbackData?.length || 0;
-        const positiveReviews = feedbackData?.filter(f => f.is_positive).length || 0;
-        const avgRating = feedbackData?.reduce((sum, f) => sum + f.rating, 0) / (totalReviews || 1);
+        const safeFeedbackData = feedbackData || [];
+        const totalReviews = safeFeedbackData.length;
+        const positiveReviews = safeFeedbackData.filter(f => f.is_positive).length;
+        const avgRating = safeFeedbackData.reduce((sum, f) => sum + f.rating, 0) / (totalReviews || 1);
 
         return {
           merchantId: merchant.id,
@@ -157,7 +162,7 @@ export default function AdminDashboard() {
             totalReviews,
             positiveReviews,
             avgRating: Math.round(avgRating * 10) / 10,
-            totalSpins: spinsData?.length || 0,
+            totalSpins: spinsCount || 0,
           }
         };
       });
@@ -171,6 +176,7 @@ export default function AdminDashboard() {
 
       // Calculate global stats
       const totalReviews = Object.values(statsMap).reduce((sum, s) => sum + s.totalReviews, 0);
+      const totalSpins = Object.values(statsMap).reduce((sum, s) => sum + s.totalSpins, 0);
       
       const totalRevenue = merchantsData.reduce((sum, m) => {
         // Only count active merchants for MRR if desired, otherwise all
@@ -187,6 +193,7 @@ export default function AdminDashboard() {
         activeMerchants: merchantsData.filter(m => m.is_active !== false).length,
         totalReviews,
         totalRevenue,
+        totalSpins,
       });
     }
   };
@@ -449,18 +456,16 @@ export default function AdminDashboard() {
             <div className="relative">
               <div className="flex items-center justify-between mb-4">
                 <div className="p-2.5 bg-pink-500/20 rounded-xl">
-                  <BarChart3 className="w-6 h-6 text-pink-400" />
+                  <RotateCw className="w-6 h-6 text-pink-400" />
                 </div>
                 <div className="flex items-center gap-1 text-green-400 text-sm">
                   <TrendingUp className="w-4 h-4" />
                   <span className="font-semibold">+5%</span>
                 </div>
               </div>
-              <p className="text-slate-400 text-sm mb-2">Avg Reviews/Shop</p>
-              <p className="text-4xl font-bold text-white mb-1">
-                {stats.totalMerchants > 0 ? (stats.totalReviews / stats.totalMerchants).toFixed(1) : '0'}
-              </p>
-              <p className="text-xs text-slate-500">Performance moyenne</p>
+              <p className="text-slate-400 text-sm mb-2">Total Spins</p>
+              <p className="text-4xl font-bold text-white mb-1">{stats.totalSpins}</p>
+              <p className="text-xs text-slate-500">Tours de roue totaux</p>
             </div>
           </div>
         </div>
