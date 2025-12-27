@@ -111,238 +111,278 @@ export default function DashboardPage() {
   return (
     <DashboardLayout merchant={merchant}>
       <div className="space-y-6">
-        {/* Date Range Selector */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Dashboard
-            </h1>
+            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-1">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="px-3 py-1.5 text-sm">
-              <Calendar className="w-4 h-4 mr-2" />
-              Last 30 days
-            </Badge>
-            <Button size="sm" className="bg-teal-600 hover:bg-teal-700">
-              Export
-            </Button>
+            <select className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <option>Mar - Apr 2021</option>
+              <option>Last 30 days</option>
+              <option>Last 7 days</option>
+            </select>
           </div>
         </div>
 
-        {/* Hero Card - Total Balance */}
-        <Card className="bg-gradient-to-br from-teal-600 to-teal-700 border-0 shadow-xl">
-          <div className="p-8">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-teal-100 text-sm font-medium mb-2">Total Reviews</p>
-                <div className="flex items-baseline gap-3 mb-1">
-                  <h2 className="text-5xl font-bold text-white">{stats.totalScans}</h2>
-                  <div className="flex items-center gap-1 text-teal-100">
-                    <TrendingUp className="w-4 h-4" />
-                    <span className="text-sm font-semibold">16.5%</span>
-                  </div>
-                </div>
-                <p className="text-teal-100 text-sm">vs. previous period</p>
+        {/* Stats Cards Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Active Now */}
+          <Card className="p-5 bg-gradient-to-br from-pink-50 to-pink-100 border-pink-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-pink-500 rounded-lg">
+                <Users className="w-5 h-5 text-white" />
               </div>
-              <div className="flex gap-2">
-                <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-0">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Add
-                </Button>
-                <Button size="sm" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/20">
-                  Manage
-                </Button>
-              </div>
+              <span className="text-sm text-gray-600">Active now</span>
             </div>
-          </div>
-        </Card>
+            <p className="text-3xl font-bold text-gray-900">{stats.positiveReviews}</p>
+          </Card>
+
+          {/* Total Users */}
+          <Card className="p-5 bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-purple-500 rounded-lg">
+                <Users className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-gray-600">Total users</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{stats.totalScans}</p>
+          </Card>
+
+          {/* Total Reviews */}
+          <Card className="p-5 bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-orange-500 rounded-lg">
+                <Star className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-gray-600">Total review</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{stats.totalScans}</p>
+          </Card>
+
+          {/* New Reviews */}
+          <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-blue-500 rounded-lg">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-gray-600">New review</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900">{stats.rewardsDistributed}</p>
+          </Card>
+        </div>
 
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Chart */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Chart */}
-            <ChartAreaInteractive />
+            {/* Reviews Chart */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Reviews in the last 1 month</h3>
+                <button className="text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+              </div>
+              <ChartAreaInteractive />
+            </Card>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Card className="p-5 hover:shadow-lg transition-shadow border-l-4 border-l-teal-500">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 bg-teal-50 rounded-lg">
-                    <BarChart3 className="w-5 h-5 text-teal-600" />
+            {/* Data Distribution */}
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Data distribution</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-pink-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">5 Stars</span>
                   </div>
-                  <span className="text-xs text-gray-500">Last 30 days</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Positive Reviews</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-gray-900">{stats.positiveReviews}</p>
-                  <span className="text-xs text-teal-600 font-semibold">+16.0%</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">vs. {stats.positiveReviews - 12} Last Period</p>
-              </Card>
-
-              <Card className="p-5 hover:shadow-lg transition-shadow border-l-4 border-l-emerald-500">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 bg-emerald-50 rounded-lg">
-                    <Users className="w-5 h-5 text-emerald-600" />
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-semibold text-gray-900">{Math.round(stats.positiveReviews * 0.6)}</span>
+                    <div className="w-16 h-8">
+                      <svg viewBox="0 0 64 32" className="w-full h-full">
+                        <path d="M0,16 Q16,8 32,12 T64,16" fill="none" stroke="#ec4899" strokeWidth="2"/>
+                      </svg>
+                    </div>
                   </div>
-                  <span className="text-xs text-gray-500">Last 30 days</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-1">Total Saving</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-gray-900">{stats.conversionRate}%</p>
-                  <span className="text-xs text-red-600 font-semibold">-8.2%</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">vs. {stats.conversionRate + 3}% Last Period</p>
-              </Card>
-
-              <Card className="p-5 hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="p-2 bg-blue-50 rounded-lg">
-                    <Gift className="w-5 h-5 text-blue-600" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">4 Stars</span>
                   </div>
-                  <span className="text-xs text-gray-500">Last 30 days</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-semibold text-gray-900">{Math.round(stats.positiveReviews * 0.3)}</span>
+                    <div className="w-16 h-8">
+                      <svg viewBox="0 0 64 32" className="w-full h-full">
+                        <path d="M0,20 Q16,12 32,16 T64,20" fill="none" stroke="#3b82f6" strokeWidth="2"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-1">Rewards Given</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="text-2xl font-bold text-gray-900">{stats.rewardsDistributed}</p>
-                  <span className="text-xs text-teal-600 font-semibold">+35.2%</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">3 Stars</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-semibold text-gray-900">{Math.round((stats.totalScans - stats.positiveReviews) * 0.5)}</span>
+                    <div className="w-16 h-8">
+                      <svg viewBox="0 0 64 32" className="w-full h-full">
+                        <path d="M0,18 Q16,14 32,18 T64,18" fill="none" stroke="#f97316" strokeWidth="2"/>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">vs. {stats.rewardsDistributed - 8} Last Period</p>
-              </Card>
-            </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Others</span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm font-semibold text-gray-900">{Math.round((stats.totalScans - stats.positiveReviews) * 0.5)}</span>
+                    <div className="w-16 h-8">
+                      <svg viewBox="0 0 64 32" className="w-full h-full">
+                        <path d="M0,22 Q16,18 32,20 T64,22" fill="none" stroke="#6b7280" strokeWidth="2"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <Button className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white">
+                See Details
+              </Button>
+            </Card>
           </div>
 
-          {/* Right Column - Income/Expense & Cards */}
+          {/* Right Column - Device Usage & Recent Reviews */}
           <div className="space-y-6">
-            {/* Income Card */}
-            <Card className="p-6 bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-teal-600 rounded-xl">
-                  <TrendingUp className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-xs text-gray-600">Last 30 days</span>
+            {/* Use by Device */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Use by device</h3>
+                <button className="text-gray-400 hover:text-gray-600">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
               </div>
-              <p className="text-sm text-gray-600 mb-2">Positive Reviews</p>
-              <div className="flex items-baseline gap-2 mb-1">
-                <h3 className="text-3xl font-bold text-gray-900">{stats.positiveReviews}</h3>
-                <span className="text-sm text-teal-600 font-semibold">+46.0%</span>
+              <div className="flex justify-center mb-6">
+                <div className="relative w-40 h-40">
+                  <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" strokeWidth="12"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#14b8a6" strokeWidth="12" strokeDasharray="{Math.PI * 80 * 0.5} {Math.PI * 80}" strokeLinecap="round"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="12" strokeDasharray="{Math.PI * 80 * 0.3} {Math.PI * 80}" strokeDashoffset="-{Math.PI * 80 * 0.5}" strokeLinecap="round"/>
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="#f97316" strokeWidth="12" strokeDasharray="{Math.PI * 80 * 0.2} {Math.PI * 80}" strokeDashoffset="-{Math.PI * 80 * 0.8}" strokeLinecap="round"/>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-gray-900">65%</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-teal-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Desktop</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Mobile</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600">Others</span>
+                  </div>
+                </div>
               </div>
             </Card>
 
-            {/* Expense Card */}
-            <Card className="p-6 bg-gradient-to-br from-red-50 to-orange-50 border-red-200">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-2.5 bg-red-600 rounded-xl">
-                  <TrendingDown className="w-5 h-5 text-white" />
+            {/* New Reviews */}
+            <Card className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">New reviews</h3>
+                  <p className="text-xs text-teal-600 mt-1">+49 this month</p>
                 </div>
-                <span className="text-xs text-gray-600">Last 30 days</span>
               </div>
-              <p className="text-sm text-gray-600 mb-2">Negative Feedback</p>
-              <div className="flex items-baseline gap-2 mb-1">
-                <h3 className="text-3xl font-bold text-gray-900">{stats.totalScans - stats.positiveReviews}</h3>
-                <span className="text-sm text-red-600 font-semibold">-12.6%</span>
-              </div>
-            </Card>
-
-            {/* QR Card */}
-            <Card className="p-6 bg-gradient-to-br from-teal-600 to-teal-700 border-0 text-white">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <span className="text-xl">💳</span>
+              <div className="space-y-4">
+                {recentActivity.slice(0, 5).map((activity, idx) => (
+                  <div key={activity.id} className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-600 rounded-full flex items-center justify-center text-white font-semibold">
+                      {String.fromCharCode(65 + idx)}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-900">Customer {idx + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-xs ${
+                          activity.type === 'positive' 
+                            ? 'bg-teal-100 text-teal-700' 
+                            : 'bg-pink-100 text-pink-700'
+                        }`}>
+                          {activity.type === 'positive' ? 'Freelancer' : 'Customer'}
+                        </Badge>
+                        <span className="text-xs text-gray-500">
+                          {new Date(activity.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-teal-100">VISA</p>
-                    <p className="text-xs text-teal-100">•••• •••• •••• 2104</p>
-                  </div>
-                </div>
-                <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
-                  See All
-                </Button>
+                ))}
               </div>
-              <p className="text-3xl font-bold mb-2">★ {stats.avgRating}</p>
-              <p className="text-sm text-teal-100">Average Rating</p>
+              <Button variant="ghost" className="w-full mt-4 text-sm text-gray-600 hover:text-gray-900">
+                View all
+              </Button>
             </Card>
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <Card>
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-gray-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+        {/* New Users Section */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">New users</h3>
+            <button className="text-gray-400 hover:text-gray-600">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+              </svg>
+            </button>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* New Users This Week Chart */}
+            <div>
+              <p className="text-sm text-gray-600 mb-2">New users this week</p>
+              <div className="flex items-baseline gap-2 mb-4">
+                <p className="text-4xl font-bold text-gray-900">{Math.round(stats.totalScans * 0.3)}</p>
+                <span className="text-sm text-teal-600 font-semibold">+7.8%</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="ghost" className="text-sm">
-                  Filter
-                </Button>
-                <Button size="sm" variant="ghost" className="text-sm">
-                  Sort
-                </Button>
+              <div className="h-24 flex items-end gap-1">
+                {[40, 60, 45, 70, 55, 80, 65].map((height, idx) => (
+                  <div key={idx} className="flex-1 bg-gradient-to-t from-purple-200 to-purple-400 rounded-t" style={{ height: `${height}%` }}></div>
+                ))}
               </div>
             </div>
-          </div>
-          <div className="divide-y">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((activity) => (
-                <div key={activity.id} className="p-6 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className={`p-2 rounded-lg ${
-                        activity.type === 'positive' ? 'bg-teal-50' : 'bg-red-50'
-                      }`}>
-                        {activity.type === 'positive' ? (
-                          <TrendingUp className="w-5 h-5 text-teal-600" />
-                        ) : (
-                          <TrendingDown className="w-5 h-5 text-red-600" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-gray-900">
-                            {activity.type === 'positive' ? 'Positive Review' : 'Feedback Received'}
-                          </p>
-                          <Badge variant="outline" className="text-xs">
-                            {activity.rating} ⭐
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {activity.comment || 'No comment provided'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">
-                          {new Date(activity.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Badge 
-                        className={activity.status === 'success' 
-                          ? 'bg-teal-100 text-teal-700 border-teal-200' 
-                          : 'bg-orange-100 text-orange-700 border-orange-200'
-                        }
-                      >
-                        {activity.status === 'success' ? (
-                          <CheckCircle2 className="w-3 h-3 mr-1" />
-                        ) : (
-                          <Clock className="w-3 h-3 mr-1" />
-                        )}
-                        {activity.status === 'success' ? 'Success' : 'Pending'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-12 text-center">
-                <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No recent activity</p>
+
+            {/* New Users This Month Chart */}
+            <div>
+              <p className="text-sm text-gray-600 mb-2">New users this month</p>
+              <div className="flex items-baseline gap-2 mb-4">
+                <p className="text-4xl font-bold text-gray-900">{Math.round(stats.totalScans * 0.8)}</p>
+                <span className="text-sm text-teal-600 font-semibold">+6.27%</span>
               </div>
-            )}
+              <div className="h-24 flex items-end gap-1">
+                {[50, 70, 55, 85, 65, 90, 75].map((height, idx) => (
+                  <div key={idx} className="flex-1 bg-gradient-to-t from-orange-200 to-orange-400 rounded-t" style={{ height: `${height}%` }}></div>
+                ))}
+              </div>
+            </div>
           </div>
         </Card>
 
