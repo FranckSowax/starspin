@@ -59,8 +59,8 @@ export default function LandingPage() {
         </div>
 
         <div className="container mx-auto px-6 pt-24 pb-12 relative z-10">
-          <div className="grid md:grid-cols-3 gap-8 items-center min-h-[calc(100vh-8rem)]">
-            {/* Left column - Text Content */}
+          <div className="grid md:grid-cols-3 gap-12 items-center min-h-[calc(100vh-8rem)]">
+            {/* Left column - Text Content (1/3) */}
             <div className="text-left space-y-6">
               {/* Main Title */}
               <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'Arco, sans-serif' }}>
@@ -96,61 +96,23 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Center column - DESIGNSPIN Image */}
-            <div className="flex items-center justify-center">
-              <div className="relative">
+            {/* Right column - DESIGNSPIN Image (2/3) */}
+            <div className="md:col-span-2 flex items-center justify-center">
+              <div className="relative w-full max-w-3xl">
                 <img 
                   src="/DESIGNSPIN.png" 
                   alt="StarSpin Wheel" 
-                  className="w-full max-w-md mx-auto drop-shadow-2xl animate-pulse"
+                  className="w-full h-auto drop-shadow-2xl animate-pulse"
                   style={{
-                    filter: 'drop-shadow(0 0 60px rgba(82, 183, 136, 0.4))'
+                    filter: 'drop-shadow(0 0 80px rgba(82, 183, 136, 0.5))'
                   }}
                 />
                 {/* Glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#52B788]/20 to-transparent rounded-full blur-3xl"></div>
-              </div>
-            </div>
-
-            {/* Right column - Smartphone Mockup */}
-            <div className="flex items-center justify-center">
-              <div className="relative">
-                {/* Smartphone frame */}
-                <div className="relative w-[280px] h-[560px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl border-8 border-gray-800">
-                  {/* Screen */}
-                  <div className="w-full h-full bg-white rounded-[2.5rem] overflow-hidden relative">
-                    {/* Status bar */}
-                    <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-gray-100 to-transparent z-10"></div>
-                    
-                    {/* Content - StarSpin Interface Preview */}
-                    <div className="w-full h-full bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] flex flex-col items-center justify-center p-6">
-                      <div className="text-center space-y-4">
-                        <div className="w-32 h-32 mx-auto">
-                          <img 
-                            src="/DESIGNSPIN.png" 
-                            alt="Wheel" 
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                        <h3 className="text-white font-bold text-lg">Tournez la roue !</h3>
-                        <p className="text-white/80 text-sm">Gagnez votre récompense</p>
-                        <div className="bg-[#52B788] text-white px-6 py-3 rounded-full font-bold text-sm">
-                          Tourner
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Home indicator */}
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-gray-800 rounded-full"></div>
-                  </div>
-                  
-                  {/* Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-gray-900 rounded-b-3xl"></div>
-                </div>
-
+                
                 {/* Decorative elements */}
-                <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-[#52B788]/20 rounded-full blur-2xl"></div>
-                <div className="absolute -top-8 -right-8 w-32 h-32 bg-[#52B788]/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[#52B788]/20 rounded-full blur-3xl"></div>
+                <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#52B788]/10 rounded-full blur-3xl"></div>
               </div>
             </div>
           </div>
