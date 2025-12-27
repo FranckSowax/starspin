@@ -63,7 +63,7 @@ export default function LandingPage() {
             {/* Left column - Text Content */}
             <div className="text-left space-y-6">
               {/* Main Title */}
-              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight">
+              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'Arco, sans-serif' }}>
                 Transformez vos clients satisfaits en
                 <span className="block mt-3 text-transparent bg-clip-text bg-gradient-to-r from-[#52B788] to-[#95D5B2]">
                   Étoiles
