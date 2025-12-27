@@ -151,86 +151,148 @@ export default function LandingPage() {
       </section>
 
       {/* Problem Section */}
-      <section className="relative py-20 px-4 bg-gradient-to-br from-[#2D6A4F] via-[#40916C] to-[#52B788] overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-64 h-64 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto relative z-10">
+      <section className="relative py-24 px-4 bg-white">
+        <div className="container mx-auto max-w-7xl">
           {/* Section header */}
           <div className="text-center mb-16">
-            <Badge className="bg-[#FF6B6B]/20 text-white border-[#FF6B6B]/30 mb-6 px-6 py-2 text-sm font-bold">
-              Le Problème
-            </Badge>
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-6">
-              😔 Pourquoi vos clients heureux<br />
-              <GradientText colors={['#ffffff', '#FFB703', '#ffffff']}>
-                se taisent ?
-              </GradientText>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Le Défi</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+              Pourquoi vos clients satisfaits ne laissent pas d'avis ?
             </h2>
-            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Le paradoxe de la satisfaction client dans la restauration
             </p>
           </div>
           
           {/* Problem cards */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-12">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
             {/* Negative reviews card */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-700 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <Card className="relative bg-white/10 backdrop-blur-xl border-2 border-red-400/30 rounded-3xl p-8 transform hover:scale-105 hover:-translate-y-2 transition-all shadow-2xl">
-                <div className="text-8xl mb-6 group-hover:scale-110 transition-transform">😞</div>
-                <h3 className="text-2xl font-black text-white mb-3">Clients Mécontents</h3>
-                <p className="text-white/90 text-lg font-semibold">Laissent des avis négatifs publics qui nuisent à votre réputation</p>
-                <div className="mt-4 flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-red-200 font-bold text-sm">80%</span>
+            <Card className="bg-white border-2 border-red-100 rounded-2xl p-8 hover:shadow-xl transition-shadow">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="flex-shrink-0 w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
                 </div>
-              </Card>
-            </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Clients Mécontents</h3>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 rounded-full mb-4">
+                    <span className="text-sm font-bold text-red-600">80% d'activité</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                Les clients insatisfaits sont 3 fois plus susceptibles de laisser un avis public négatif, impactant directement votre réputation en ligne.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                  <span className="text-gray-600">Avis publics négatifs</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                  <span className="text-gray-600">Impact sur la note Google</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
+                  <span className="text-gray-600">Perte de visibilité</span>
+                </div>
+              </div>
+            </Card>
             
             {/* Silent satisfied card */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-400 to-gray-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <Card className="relative bg-white/10 backdrop-blur-xl border-2 border-gray-400/30 rounded-3xl p-8 transform hover:scale-105 hover:-translate-y-2 transition-all shadow-2xl">
-                <div className="text-8xl mb-6 group-hover:scale-110 transition-transform">😐</div>
-                <h3 className="text-2xl font-black text-white mb-3">Clients Satisfaits</h3>
-                <p className="text-white/90 text-lg font-semibold">Ne laissent rien du tout, votre note stagne</p>
-                <div className="mt-4 flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-200 font-bold text-sm">20%</span>
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-shadow">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="flex-shrink-0 w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center">
+                  <svg className="w-7 h-7 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-              </Card>
-            </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Clients Satisfaits</h3>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full mb-4">
+                    <span className="text-sm font-bold text-gray-600">20% d'activité</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                La majorité de vos clients satisfaits ne prennent pas le temps de laisser un avis positif, laissant votre note stagner ou baisser.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                  <span className="text-gray-600">Aucun avis laissé</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                  <span className="text-gray-600">Note qui stagne</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
+                  <span className="text-gray-600">Potentiel inexploité</span>
+                </div>
+              </div>
+            </Card>
           </div>
 
           {/* Impact card */}
-          <div className="relative max-w-4xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
-            <ShineBorder color="#FFB703" borderRadius={24} borderWidth={3} duration={2}>
-              <Card className="relative bg-gradient-to-br from-[#FFB703]/20 to-[#FF6B6B]/20 backdrop-blur-xl border-0 rounded-3xl p-12 shadow-2xl">
-                <div className="text-center">
-                  <div className="text-9xl mb-6 animate-bounce">📈</div>
-                  <h3 className="text-5xl font-black text-white mb-4">
-                    <GradientText colors={['#FFB703', '#FF6B6B', '#FFB703']}>
-                      +1 point sur Google
-                    </GradientText>
+          <div className="max-w-5xl mx-auto">
+            <Card className="bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-12 shadow-2xl">
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-6">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                    </svg>
+                    <span className="text-sm font-semibold text-white uppercase tracking-wide">Impact Prouvé</span>
+                  </div>
+                  <h3 className="text-4xl font-bold text-white mb-4">
+                    +1 point sur Google
                   </h3>
-                  <div className="flex items-center justify-center gap-4 mb-6">
-                    <div className="text-6xl font-black text-white">=</div>
-                    <div className="text-right">
-                      <div className="text-6xl font-black text-white">+5 à 9%</div>
-                      <div className="text-2xl text-white/80 font-bold">de Chiffre d'Affaires</div>
+                  <p className="text-xl text-white/90 mb-8">
+                    Augmente votre chiffre d'affaires de 5 à 9%
+                  </p>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
+                      <span className="text-white/90">Meilleure visibilité locale</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
+                      <span className="text-white/90">Plus de réservations</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
+                      <span className="text-white/90">Confiance renforcée</span>
                     </div>
                   </div>
-                  <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                    Une meilleure note Google = Plus de visibilité = Plus de clients
-                  </p>
                 </div>
-              </Card>
-            </ShineBorder>
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
+                  <div className="text-center mb-6">
+                    <div className="text-7xl font-black text-white mb-2">+5-9%</div>
+                    <div className="text-lg text-white/80 font-semibold">Chiffre d'Affaires</div>
+                  </div>
+                  <div className="h-px bg-white/20 mb-6"></div>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/80">Note actuelle</span>
+                      <span className="text-white font-bold">4.2 ⭐</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/80">Note cible</span>
+                      <span className="text-[#52B788] font-bold">4.5+ ⭐</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-white/80">Impact CA</span>
+                      <span className="text-[#52B788] font-bold">+7% moyen</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
