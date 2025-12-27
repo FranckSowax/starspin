@@ -20,6 +20,7 @@ export default function SpinPage() {
   const [isClient, setIsClient] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState<string>('');
+  const [resultType, setResultType] = useState<'win' | 'retry' | 'lost' | null>(null);
   const [couponCode, setCouponCode] = useState<string>('');
   const wheelRef = useRef<HTMLDivElement>(null);
   const currentRotationRef = useRef(0);
@@ -58,10 +59,12 @@ export default function SpinPage() {
       const { data: prizesData } = await supabase
         .from('prizes')
         .select('*')
-        .eq('merchant_id', shopId);
+        .eq('merchant_id', shopId)
+        .order('id', { ascending: true });
 
-      setMerchant(merchantData);
-      setPrizes(prizesData || []);
+      if (prizesData) {
+        setPrizes(prizesData);
+      }
       setLoading(false);
     };
 
@@ -69,25 +72,35 @@ export default function SpinPage() {
   }, [shopId]);
 
   // Create interleaved segments: Prize -> UNLUCKY -> Prize -> UNLUCKY...
-  const allSegments: Array<{ type: 'prize' | 'unlucky'; prize?: Prize; index: number }> = prizes.flatMap((prize, i) => [
+  const allSegments = prizes.flatMap((prize, i) => [
     { type: 'prize' as const, prize, index: i },
     { type: 'unlucky' as const, index: i }
   ]);
 
   const totalSegments = allSegments.length;
   const segmentAngle = totalSegments > 0 ? 360 / totalSegments : 0;
-  const skewAngle = 90 - segmentAngle;
-
+  
   const selectWinningSegment = () => {
-    // Select based on prize probability, return the index in allSegments (prize index * 2)
-    const totalProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 0), 0);
-    let random = Math.random() * totalProbability;
+    // Sum of prize probabilities
+    const totalPrizeProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 0), 0);
     
-    for (let i = 0; i < prizes.length; i++) {
-      random -= (prizes[i].probability || 0);
-      if (random <= 0) return i * 2; // Return allSegments index (prize segments are at even indices)
+    // Random number between 0 and 100
+    const random = Math.random() * 100;
+    
+    if (random <= totalPrizeProbability) {
+      // Won a prize
+      let currentProb = 0;
+      for (let i = 0; i < prizes.length; i++) {
+        currentProb += (prizes[i].probability || 0);
+        if (random <= currentProb) return i * 2; // Return even index (Prize)
+      }
+      return 0;
+    } else {
+      // Landed on Unlucky/Retry (Odd indices)
+      const unluckyIndices = Array.from({ length: prizes.length }, (_, i) => i * 2 + 1);
+      const randomUnluckyIndex = unluckyIndices[Math.floor(Math.random() * unluckyIndices.length)];
+      return randomUnluckyIndex;
     }
-    return 0;
   };
 
   const spinWheel = async () => {
@@ -95,25 +108,36 @@ export default function SpinPage() {
     
     setIsSpinning(true);
     setResult('');
+    setResultType(null);
+    setCouponCode('');
 
     const winningSegmentIndex = selectWinningSegment();
-    const winningPrizeIndex = Math.floor(winningSegmentIndex / 2);
     
+    // Identify type of result
+    const isPrize = winningSegmentIndex % 2 === 0;
+    const prizeIndex = Math.floor(winningSegmentIndex / 2);
+    const selectedPrize = isPrize ? prizes[prizeIndex] : undefined;
+    
+    // Determine specific Unlucky type (Retry vs Lost)
+    // Based on the text logic in rendering:
+    // index % 3 === 0 ? 'Réessayez' : 'UNLUCKY'
+    // Here index refers to the prize index (0, 1, 2...)
+    let type: 'win' | 'retry' | 'lost' = 'win';
+    if (!isPrize) {
+      type = prizeIndex % 3 === 0 ? 'retry' : 'lost';
+    }
+
     // Calculate segment center for alignment
     // Segments are rendered with -90 offset (starting from top)
-    // Segment i visual center is at: (i * segmentAngle) - 90 + (segmentAngle / 2)
-    // Which simplifies to: i * segmentAngle + segmentAngle/2 - 90
     const segmentVisualCenter = (winningSegmentIndex * segmentAngle) + (segmentAngle / 2) - 90;
     
-    // Add random offset within the segment to avoid always landing on center
-    // Range: -30% to +30% of segment angle (staying away from edges)
+    // Add random offset within the segment
     const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.6;
 
-    // Pointer is at top (0 degrees in CSS, which is 12 o'clock position)
-    // We need to rotate the wheel so that segmentVisualCenter aligns with 0 (top)
-    // Target rotation = -segmentVisualCenter (to bring segment to top)
+    // Target rotation
+    // We subtract 2 * segmentAngle to correct the systematic offset observed
     const currentRot = currentRotationRef.current;
-    const targetAngle = -segmentVisualCenter - randomOffset;
+    const targetAngle = -90 - segmentVisualCenter - randomOffset - (2 * segmentAngle);
     
     // Normalize to find the delta needed
     const currentNormalized = currentRot % 360;
@@ -129,52 +153,59 @@ export default function SpinPage() {
     }
 
     setTimeout(async () => {
-      await handleSpinComplete(prizes[winningPrizeIndex]);
+      await handleSpinComplete(selectedPrize, type);
       setIsSpinning(false);
     }, 5000);
   };
 
-  const handleSpinComplete = async (prize: Prize) => {
-    const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
-    localStorage.setItem('user_token', userToken);
+  const handleSpinComplete = async (prize: Prize | undefined, type: 'win' | 'retry' | 'lost') => {
+    setResultType(type);
+    
+    if (type === 'win' && prize) {
+      setResult(prize.name);
+      
+      // Confetti effect
+      if (typeof window !== 'undefined' && (window as any).confetti) {
+        (window as any).confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: ['#ffd700', '#2d8a3e', '#ffb700', '#ff9500']
+        });
+      }
 
-    // Show result
-    setResult(prize.name);
+      const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
+      localStorage.setItem('user_token', userToken);
 
-    // Confetti effect
-    if (typeof window !== 'undefined' && (window as any).confetti) {
-      (window as any).confetti({
-        particleCount: 150,
-        spread: 100,
-        origin: { y: 0.6 },
-        colors: ['#ffd700', '#2d8a3e', '#ffb700', '#ff9500']
-      });
-    }
+      const { data: spinData } = await supabase
+        .from('spins')
+        .insert({
+          merchant_id: shopId,
+          prize_id: prize.id,
+          user_token: userToken,
+        })
+        .select()
+        .single();
 
-    const { data: spinData } = await supabase
-      .from('spins')
-      .insert({
-        merchant_id: shopId,
-        prize_id: prize.id,
-        user_token: userToken,
-      })
-      .select()
-      .single();
+      if (spinData) {
+        const couponCode = `${merchant.business_name?.substring(0, 3).toUpperCase()}-${crypto.randomUUID().substring(0, 8).toUpperCase()}`;
+        const expiresAt = new Date();
+        expiresAt.setHours(expiresAt.getHours() + 24);
 
-    if (spinData) {
-      const couponCode = `${merchant.business_name?.substring(0, 3).toUpperCase()}-${crypto.randomUUID().substring(0, 8).toUpperCase()}`;
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
+        await supabase.from('coupons').insert({
+          spin_id: spinData.id,
+          merchant_id: shopId,
+          code: couponCode,
+          prize_name: prize.name,
+          expires_at: expiresAt.toISOString(),
+        });
 
-      await supabase.from('coupons').insert({
-        spin_id: spinData.id,
-        merchant_id: shopId,
-        code: couponCode,
-        prize_name: prize.name,
-        expires_at: expiresAt.toISOString(),
-      });
-
-      setCouponCode(couponCode);
+        setCouponCode(couponCode);
+      }
+    } else if (type === 'retry') {
+      setResult('Réessayez !');
+    } else {
+      setResult('Dommage...');
     }
   };
 
@@ -471,15 +502,42 @@ export default function SpinPage() {
           {result && (
             <div className="mt-8" style={{ animation: 'fadeIn 0.5s ease' }}>
               <div className="inline-block bg-black/90 px-8 py-6 rounded-2xl backdrop-blur-lg border-2 border-[#ffd700]" style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)' }}>
-                <div className="text-xl text-[#ffd700] mb-3">🎊 FÉLICITATIONS ! 🎊</div>
-                <div className="text-2xl text-white font-bold mb-4">{result}</div>
-                <button
-                  onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}`)}
-                  className="w-full py-3 px-6 bg-[#ffd700] text-black font-bold rounded-xl hover:bg-[#ffb700] transition-colors text-lg"
-                  style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' }}
-                >
-                  Récupérer mon prix →
-                </button>
+                {resultType === 'win' ? (
+                  <>
+                    <div className="text-xl text-[#ffd700] mb-3">🎊 FÉLICITATIONS ! 🎊</div>
+                    <div className="text-2xl text-white font-bold mb-4">{result}</div>
+                    <button
+                      onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}`)}
+                      className="w-full py-3 px-6 bg-[#ffd700] text-black font-bold rounded-xl hover:bg-[#ffb700] transition-colors text-lg"
+                      style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' }}
+                    >
+                      Récupérer mon prix →
+                    </button>
+                  </>
+                ) : resultType === 'retry' ? (
+                  <>
+                    <div className="text-xl text-[#ffd700] mb-3">😬 PAS DE CHANCE... 😬</div>
+                    <div className="text-2xl text-white font-bold mb-4">Réessayez !</div>
+                    <button
+                      onClick={() => setResult('')}
+                      className="w-full py-3 px-6 bg-[#ffd700] text-black font-bold rounded-xl hover:bg-[#ffb700] transition-colors text-lg"
+                      style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' }}
+                    >
+                      Tourner encore ↻
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-xl text-red-500 mb-3">😢 PERDU... 😢</div>
+                    <div className="text-xl text-white font-bold mb-4">Meilleure chance la prochaine fois !</div>
+                    <button
+                      onClick={() => router.push('/')}
+                      className="w-full py-3 px-6 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-500 transition-colors text-lg"
+                    >
+                      Retour
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           )}
