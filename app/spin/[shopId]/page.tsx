@@ -57,7 +57,9 @@ export default function SpinPage() {
       const { data: prizesData } = await supabase
         .from('prizes')
         .select('*')
-        .eq('merchant_id', shopId);
+        .eq('merchant_id', shopId)
+        .gt('probability', 0)
+        .gt('quantity', 0);
 
       setMerchant(merchantData);
       setPrizes(prizesData || []);
@@ -67,12 +69,7 @@ export default function SpinPage() {
     checkSpinEligibility();
   }, [shopId]);
 
-  const allSegments = prizes.flatMap(prize => [
-    { type: 'prize', ...prize },
-    { type: 'unlucky', id: `unlucky-${prize.id}`, name: 'UNLUCKY', probability: 0 }
-  ]);
-
-  const segmentAngle = allSegments.length > 0 ? 360 / allSegments.length : 0;
+  const segmentAngle = prizes.length > 0 ? 360 / prizes.length : 0;
   const skewAngle = 90 - segmentAngle;
 
   const selectWinningSegment = () => {
@@ -81,7 +78,7 @@ export default function SpinPage() {
     
     for (let i = 0; i < prizes.length; i++) {
       random -= (prizes[i].probability || 0);
-      if (random <= 0) return i * 2; // Return index in allSegments (prizes are at 0, 2, 4...)
+      if (random <= 0) return i;
     }
     return 0;
   };
@@ -109,7 +106,7 @@ export default function SpinPage() {
     }
 
     setTimeout(async () => {
-      await handleSpinComplete(prizes[winningIndex / 2]);
+      await handleSpinComplete(prizes[winningIndex]);
       setIsSpinning(false);
     }, 5000);
   };
@@ -335,7 +332,7 @@ export default function SpinPage() {
             <div className="w-full h-full rounded-full relative p-[3%]" style={{ background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 2px 15px rgba(255, 255, 255, 0.15)' }}>
               {/* Decorative Dots */}
               <div className="absolute inset-[3%] rounded-full">
-                {[...Array(allSegments.length)].map((_, i) => (
+                {[...Array(prizes.length)].map((_, i) => (
                   <div
                     key={i}
                     className="dot"
@@ -350,13 +347,16 @@ export default function SpinPage() {
                 className="wheel w-full h-full rounded-full relative overflow-hidden"
                 style={{ boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.5)' }}
               >
-                {allSegments.map((segment, index) => {
-                  const isHighValue = segment.type === 'prize' && (segment.probability || 0) <= 10;
-                  const segmentColor = segment.type === 'unlucky' ? 'black' : (isHighValue ? 'yellow' : 'green');
+                {prizes.map((prize, index) => {
+                  const isHighValue = (prize.probability || 0) <= 10;
+                  // Alternate colors: High value is yellow, others alternate green/black or green/dark-green
+                  // User asked to use existing segments, so we'll map prizes directly.
+                  // Let's use a simple alternation for standard prizes to give visual variety.
+                  const segmentColor = isHighValue ? 'yellow' : (index % 2 === 0 ? 'green' : 'black');
                   
                   return (
                     <div
-                      key={index}
+                      key={prize.id}
                       className="segment"
                       style={{ 
                         transform: `rotate(${index * segmentAngle}deg) skewY(${skewAngle}deg)`
@@ -369,7 +369,7 @@ export default function SpinPage() {
                         }}
                       >
                         <div className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}>
-                          {segment.name}
+                          {prize.name}
                         </div>
                       </div>
                     </div>
