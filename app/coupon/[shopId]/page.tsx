@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import QRCode from 'qrcode';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 
-export default function CouponPage() {
+function CouponContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const { t } = useTranslation();
@@ -30,22 +30,37 @@ export default function CouponPage() {
   useEffect(() => {
     if (!isClient) return;
 
-    if (!shopId || !code) {
-      setError(t('common.error'));
+    if (!shopId) {
+      setError("Identifiant boutique manquant");
+      setLoading(false);
+      return;
+    }
+    
+    if (!code) {
+      setError("Code coupon manquant");
       setLoading(false);
       return;
     }
 
     const fetchData = async () => {
       try {
+        console.log('Fetching coupon:', code, 'for shop:', shopId);
+        
         const { data: couponData, error: couponError } = await supabase
           .from('coupons')
           .select('*')
           .eq('code', code)
           .single();
 
-        if (couponError || !couponData) {
-          setError('Coupon invalide ou introuvable');
+        if (couponError) {
+          console.error('Coupon fetch error:', couponError);
+          setError('Erreur lors de la récupération du coupon');
+          setLoading(false);
+          return;
+        }
+
+        if (!couponData) {
+          setError('Coupon introuvable');
           setLoading(false);
           return;
         }
@@ -57,6 +72,7 @@ export default function CouponPage() {
           .single();
 
         if (merchantError || !merchantData) {
+          console.error('Merchant fetch error:', merchantError);
           setError('Commerçant introuvable');
           setLoading(false);
           return;
@@ -93,9 +109,9 @@ export default function CouponPage() {
             console.error('Error generating QR code:', e);
           }
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error fetching data:', err);
-        setError('Une erreur est survenue');
+        setError(err.message || 'Une erreur est survenue');
       } finally {
         setLoading(false);
       }
@@ -148,6 +164,7 @@ export default function CouponPage() {
           <div className="text-4xl mb-4">⚠️</div>
           <h2 className="text-xl font-bold text-white mb-2">{t('common.error')}</h2>
           <p className="text-gray-300">{error || 'Impossible de charger le coupon'}</p>
+          <p className="text-xs text-gray-500 mt-4">ID: {shopId} | Code: {code}</p>
         </div>
       </div>
     );
@@ -216,5 +233,19 @@ export default function CouponPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function CouponPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
+        <div className="bg-black/40 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-[#ffd700]/30">
+          <div className="w-12 h-12 border-4 border-[#ffd700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        </div>
+      </div>
+    }>
+      <CouponContent />
+    </Suspense>
   );
 }
