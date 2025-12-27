@@ -260,14 +260,13 @@ export default function AdminDashboard() {
       <div className="w-64 bg-slate-900/50 border-r border-slate-700/50 backdrop-blur-xl flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b border-slate-700/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-              <Store className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold text-white">StarSpin</h1>
-              <p className="text-xs text-slate-400">Admin</p>
-            </div>
+          <div className="flex flex-col gap-2">
+            <img 
+              src="/LOGO-STARSPIN-WHITE_web.png" 
+              alt="StarSpin Logo" 
+              className="h-8 w-auto"
+            />
+            <p className="text-xs text-slate-400">Admin Dashboard</p>
           </div>
         </div>
 

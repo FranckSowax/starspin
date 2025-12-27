@@ -68,10 +68,11 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-slate-800">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
-              </div>
-              <span className="text-xl font-bold text-white">StarSpin</span>
+              <img 
+                src="/LOGO-STARSPIN-WHITE_web.png" 
+                alt="StarSpin Logo" 
+                className="h-8 w-auto"
+              />
             </Link>
             <button 
               onClick={() => setSidebarOpen(false)}
