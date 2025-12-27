@@ -18,6 +18,11 @@ export default function CouponPage() {
   const [merchant, setMerchant] = useState<any>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,10 +76,12 @@ export default function CouponPage() {
     return () => clearInterval(interval);
   }, [coupon, t]);
 
-  if (!coupon || !merchant) {
+  if (!isClient || !coupon || !merchant) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">{t('common.loading')}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#38A169] to-[#2F855A]">
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <p className="text-lg text-gray-900">Loading...</p>
+        </div>
       </div>
     );
   }

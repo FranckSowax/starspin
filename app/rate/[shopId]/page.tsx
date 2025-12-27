@@ -19,6 +19,11 @@ export default function RatingPage() {
   const [feedback, setFeedback] = useState('');
   const [loading, setLoading] = useState(false);
   const [merchant, setMerchant] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -27,6 +32,11 @@ export default function RatingPage() {
         .select('*')
         .eq('id', shopId)
         .single();
+
+      if (error) {
+        console.error('Error fetching merchant:', error);
+        return;
+      }
 
       if (data) {
         setMerchant(data);
@@ -69,10 +79,12 @@ export default function RatingPage() {
     }
   };
 
-  if (!merchant) {
+  if (!isClient || !merchant) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">{t('common.loading')}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#FF6F61] to-[#FFC107]">
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <p className="text-lg text-gray-900">Loading...</p>
+        </div>
       </div>
     );
   }

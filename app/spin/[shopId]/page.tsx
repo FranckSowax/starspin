@@ -18,6 +18,11 @@ export default function SpinPage() {
   const [merchant, setMerchant] = useState<any>(null);
   const [hasSpun, setHasSpun] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const checkSpinEligibility = async () => {
@@ -90,10 +95,12 @@ export default function SpinPage() {
     }
   };
 
-  if (loading) {
+  if (!isClient || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">{t('common.loading')}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#9C27B0] to-[#E91E63]">
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <p className="text-lg text-gray-900">Loading...</p>
+        </div>
       </div>
     );
   }

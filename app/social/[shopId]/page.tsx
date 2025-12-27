@@ -14,6 +14,11 @@ export default function SocialPage() {
   const shopId = params.shopId as string;
 
   const [merchant, setMerchant] = useState<any>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -35,10 +40,12 @@ export default function SocialPage() {
     router.push(`/spin/${shopId}`);
   };
 
-  if (!merchant) {
+  if (!isClient || !merchant) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">{t('common.loading')}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#4CAF50] to-[#2196F3]">
+        <div className="bg-white rounded-3xl shadow-2xl p-8">
+          <p className="text-lg text-gray-900">Loading...</p>
+        </div>
       </div>
     );
   }
