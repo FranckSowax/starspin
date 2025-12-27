@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ChartAreaInteractive } from '@/components/dashboard/ChartAreaInteractive';
 import { TrendingUp, TrendingDown, Copy, ArrowUpRight } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -145,6 +146,9 @@ export default function DashboardPage() {
             </div>
           </Card>
         </div>
+
+        {/* Analytics Chart */}
+        <ChartAreaInteractive />
 
         {/* Quick Actions & QR Code */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
