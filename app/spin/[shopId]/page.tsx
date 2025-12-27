@@ -67,13 +67,21 @@ export default function SpinPage() {
     checkSpinEligibility();
   }, [shopId]);
 
+  const allSegments = prizes.flatMap(prize => [
+    { type: 'prize', ...prize },
+    { type: 'unlucky', id: `unlucky-${prize.id}`, name: 'UNLUCKY', probability: 0 }
+  ]);
+
+  const segmentAngle = allSegments.length > 0 ? 360 / allSegments.length : 0;
+  const skewAngle = 90 - segmentAngle;
+
   const selectWinningSegment = () => {
     const totalProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 0), 0);
     let random = Math.random() * totalProbability;
     
     for (let i = 0; i < prizes.length; i++) {
       random -= (prizes[i].probability || 0);
-      if (random <= 0) return i;
+      if (random <= 0) return i * 2; // Return index in allSegments (prizes are at 0, 2, 4...)
     }
     return 0;
   };
@@ -85,11 +93,15 @@ export default function SpinPage() {
     setResult('');
 
     const winningIndex = selectWinningSegment();
-    const segmentAngle = 360 / prizes.length;
-    const randomOffset = Math.random() * (segmentAngle * 0.7) + (segmentAngle * 0.15);
+    const randomOffset = Math.random() * (segmentAngle * 0.8) + (segmentAngle * 0.1); // Keep within segment
     
-    const targetRotation = (winningIndex * segmentAngle) + randomOffset;
-    const totalRotation = currentRotationRef.current + 1800 + (360 - targetRotation);
+    // Calculate rotation to align the winning segment with the pointer (top center)
+    // The pointer is at -90deg (top). 
+    // We need to rotate the wheel so the winning segment's center hits -90deg.
+    const segmentCenter = (winningIndex * segmentAngle) + (segmentAngle / 2);
+    const targetRotation = 360 * 5 + (360 - segmentCenter) - 90; // Add 5 full spins + alignment - 90 for top offset
+
+    const totalRotation = currentRotationRef.current + targetRotation;
 
     if (wheelRef.current) {
       wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
@@ -97,7 +109,7 @@ export default function SpinPage() {
     }
 
     setTimeout(async () => {
-      await handleSpinComplete(prizes[winningIndex]);
+      await handleSpinComplete(prizes[winningIndex / 2]);
       setIsSpinning(false);
     }, 5000);
   };
@@ -182,8 +194,6 @@ export default function SpinPage() {
     );
   }
 
-  const segmentAngle = prizes.length > 0 ? 360 / prizes.length : 0;
-
   return (
     <>
       <style jsx global>{`
@@ -213,20 +223,23 @@ export default function SpinPage() {
 
         .segment {
           position: absolute;
+          top: 50%;
+          left: 50%;
           width: 50%;
           height: 50%;
-          transform-origin: 100% 100%;
-          clip-path: polygon(0 0, 100% 0, 100% 100%);
+          transform-origin: 0% 0%;
+          border: 1px solid rgba(0,0,0,0.1);
         }
 
         .segment-content {
-          width: 100%;
-          height: 100%;
+          position: absolute;
+          left: -100%;
+          width: 200%;
+          height: 200%;
+          transform-origin: 50% 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: relative;
-          box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
         }
 
         .segment-content.green {
@@ -244,23 +257,19 @@ export default function SpinPage() {
 
         .segment-text {
           position: absolute;
-          left: 100%;
-          top: 100%;
-          width: 100%;
-          height: auto;
-          transform-origin: 0% 0%;
+          top: 25%;
+          left: 0;
+          right: 0;
+          text-align: center;
           color: #ffd700;
           font-family: 'Arial Black', Arial, sans-serif;
-          font-size: clamp(1.4rem, 4.4vw, 2.4rem);
+          font-size: clamp(1rem, 3vw, 1.8rem);
           font-weight: 900;
-          text-align: center;
           text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.5);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          padding-left: 32%;
-          padding-right: 5%;
-          transform: rotate(calc(-135deg + ${segmentAngle / 2}deg)) translate(0, -50%);
+          padding: 0 10%;
         }
 
         .segment-text.yellow-text {
@@ -326,11 +335,11 @@ export default function SpinPage() {
             <div className="w-full h-full rounded-full relative p-[3%]" style={{ background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 2px 15px rgba(255, 255, 255, 0.15)' }}>
               {/* Decorative Dots */}
               <div className="absolute inset-[3%] rounded-full">
-                {[...Array(10)].map((_, i) => (
+                {[...Array(allSegments.length)].map((_, i) => (
                   <div
                     key={i}
                     className="dot"
-                    style={{ transform: `rotate(${i * 36}deg) translateX(-50%)` }}
+                    style={{ transform: `rotate(${i * segmentAngle + segmentAngle / 2}deg) translateX(-50%)` }}
                   />
                 ))}
               </div>
@@ -341,21 +350,26 @@ export default function SpinPage() {
                 className="wheel w-full h-full rounded-full relative overflow-hidden"
                 style={{ boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.5)' }}
               >
-                {prizes.map((prize, index) => {
-                  const isHighValue = (prize.probability || 0) <= 10;
-                  const isBlack = !isHighValue && index % 2 !== 0;
-                  const segmentColor = isHighValue ? 'yellow' : (isBlack ? 'black' : 'green');
-                  const displayText = isBlack ? 'UNLUCKY' : prize.name;
+                {allSegments.map((segment, index) => {
+                  const isHighValue = segment.type === 'prize' && (segment.probability || 0) <= 10;
+                  const segmentColor = segment.type === 'unlucky' ? 'black' : (isHighValue ? 'yellow' : 'green');
                   
                   return (
                     <div
-                      key={prize.id}
+                      key={index}
                       className="segment"
-                      style={{ transform: `rotate(${index * segmentAngle}deg)` }}
+                      style={{ 
+                        transform: `rotate(${index * segmentAngle}deg) skewY(${skewAngle}deg)`
+                      }}
                     >
-                      <div className={`segment-content ${segmentColor}`}>
+                      <div 
+                        className={`segment-content ${segmentColor}`}
+                        style={{
+                          transform: `skewY(-${skewAngle}deg) rotate(${segmentAngle / 2}deg)`
+                        }}
+                      >
                         <div className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}>
-                          {displayText}
+                          {segment.name}
                         </div>
                       </div>
                     </div>
