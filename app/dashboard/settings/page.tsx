@@ -83,13 +83,19 @@ export default function SettingsPage() {
   const uploadImage = async (file: File, path: string) => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
+    const filePath = `${fileName}`;
 
     const { error: uploadError, data } = await supabase.storage
       .from('merchant-assets')
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file, { 
+        cacheControl: '3600',
+        upsert: true 
+      });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw new Error(uploadError.message || 'Failed to upload image');
+    }
 
     const { data: { publicUrl } } = supabase.storage
       .from('merchant-assets')
