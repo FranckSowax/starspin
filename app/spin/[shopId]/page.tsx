@@ -266,7 +266,7 @@ export default function SpinPage() {
         .segment-text {
           color: #ffd700;
           font-family: 'Arial Black', Arial, sans-serif;
-          font-size: clamp(0.55rem, 2.2vw, 1rem);
+          font-size: clamp(0.7rem, 2.8vw, 1.2rem);
           font-weight: 900;
           text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.8);
           white-space: nowrap;
@@ -367,7 +367,13 @@ export default function SpinPage() {
                     segmentColor = 'yellow';
                   }
                   
-                  const segmentText = isUnlucky ? 'Réessayez' : (prize?.name || '');
+                  // Alternate unlucky segment text: 1/3 Réessayez, 2/3 UNLUCKY
+                  let segmentText = '';
+                  if (isUnlucky) {
+                    segmentText = segment.index % 3 === 0 ? 'Réessayez' : 'UNLUCKY';
+                  } else {
+                    segmentText = prize?.name || '';
+                  }
                   
                   // Calculate clip-path for pie slice
                   // Each segment is a triangle from center to edge
@@ -401,7 +407,7 @@ export default function SpinPage() {
                   const clipPath = `polygon(${points.join(', ')})`;
                   
                   // Text position: start from near center, extend toward edge
-                  // Calculate position along the midline of the segment
+                  // Text should be readable from center outward (vertical orientation)
                   const textDistance = 18; // % from center where text starts
                   const textX = cx + textDistance * Math.cos(midRad);
                   const textY = cy + textDistance * Math.sin(midRad);
@@ -423,7 +429,7 @@ export default function SpinPage() {
                             position: 'absolute',
                             top: `${textY}%`,
                             left: `${textX}%`,
-                            transform: `rotate(${midAngle + 90}deg)`,
+                            transform: `rotate(${midAngle}deg)`,
                             transformOrigin: 'left center'
                           }}
                         >
