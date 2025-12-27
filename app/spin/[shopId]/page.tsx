@@ -22,6 +22,8 @@ export default function SpinPage() {
   const [result, setResult] = useState<string>('');
   const [resultType, setResultType] = useState<'win' | 'retry' | 'lost' | null>(null);
   const [couponCode, setCouponCode] = useState<string>('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(false);
   const wheelRef = useRef<HTMLDivElement>(null);
   const currentRotationRef = useRef(0);
 
@@ -169,6 +171,8 @@ export default function SpinPage() {
     setResultType(type);
     
     if (type === 'win' && prize) {
+      setIsSaving(true);
+      setSaveError(false);
       setResult(prize.name);
       
       // Confetti effect
@@ -181,33 +185,44 @@ export default function SpinPage() {
         });
       }
 
-      const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
-      localStorage.setItem('user_token', userToken);
+      try {
+        const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
+        localStorage.setItem('user_token', userToken);
 
-      const { data: spinData } = await supabase
-        .from('spins')
-        .insert({
-          merchant_id: shopId,
-          prize_id: prize.id,
-          user_token: userToken,
-        })
-        .select()
-        .single();
+        const { data: spinData, error: spinError } = await supabase
+          .from('spins')
+          .insert({
+            merchant_id: shopId,
+            prize_id: prize.id,
+            user_token: userToken,
+          })
+          .select()
+          .single();
 
-      if (spinData) {
-        const couponCode = `${merchant.business_name?.substring(0, 3).toUpperCase()}-${crypto.randomUUID().substring(0, 8).toUpperCase()}`;
-        const expiresAt = new Date();
-        expiresAt.setHours(expiresAt.getHours() + 24);
+        if (spinError) throw spinError;
 
-        await supabase.from('coupons').insert({
-          spin_id: spinData.id,
-          merchant_id: shopId,
-          code: couponCode,
-          prize_name: prize.name,
-          expires_at: expiresAt.toISOString(),
-        });
+        if (spinData) {
+          const generatedCode = `${merchant.business_name?.substring(0, 3).toUpperCase()}-${crypto.randomUUID().substring(0, 8).toUpperCase()}`;
+          const expiresAt = new Date();
+          expiresAt.setHours(expiresAt.getHours() + 24);
 
-        setCouponCode(couponCode);
+          const { error: couponError } = await supabase.from('coupons').insert({
+            spin_id: spinData.id,
+            merchant_id: shopId,
+            code: generatedCode,
+            prize_name: prize.name,
+            expires_at: expiresAt.toISOString(),
+          });
+
+          if (couponError) throw couponError;
+
+          setCouponCode(generatedCode);
+        }
+      } catch (err) {
+        console.error('Error saving spin/coupon:', err);
+        setSaveError(true);
+      } finally {
+        setIsSaving(false);
       }
     } else if (type === 'retry') {
       setResult('Réessayez !');
@@ -514,12 +529,20 @@ export default function SpinPage() {
                     <div className="text-xl text-[#ffd700] mb-3">🎊 FÉLICITATIONS ! 🎊</div>
                     <div className="text-2xl text-white font-bold mb-4">{result}</div>
                     <button
+                      disabled={isSaving || !couponCode}
                       onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}`)}
-                      className="w-full py-3 px-6 bg-[#ffd700] text-black font-bold rounded-xl hover:bg-[#ffb700] transition-colors text-lg"
-                      style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' }}
+                      className={`w-full py-3 px-6 font-bold rounded-xl transition-colors text-lg ${
+                        isSaving || !couponCode 
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
+                          : 'bg-[#ffd700] text-black hover:bg-[#ffb700]'
+                      }`}
+                      style={!(isSaving || !couponCode) ? { boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' } : {}}
                     >
-                      Récupérer mon prix →
+                      {isSaving ? 'Génération du coupon...' : 'Récupérer mon prix →'}
                     </button>
+                    {saveError && (
+                      <p className="text-red-500 mt-2 text-sm font-bold">Erreur de connexion. Veuillez contacter le support.</p>
+                    )}
                   </>
                 ) : resultType === 'retry' ? (
                   <>
