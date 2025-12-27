@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { SpinningWheel } from '@/components/animations/SpinningWheel';
+import { FloatingParticles } from '@/components/animations/FloatingParticles';
+import { GradientText } from '@/components/animations/GradientText';
+import { ShineBorder } from '@/components/animations/ShineBorder';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -43,19 +46,24 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="relative min-h-screen bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] overflow-hidden">
-        {/* Snowflakes/Stars floating animation */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-10 text-white/20 text-2xl animate-pulse">❄️</div>
-          <div className="absolute top-40 right-20 text-white/20 text-3xl animate-pulse" style={{ animationDelay: '1s' }}>❄️</div>
-          <div className="absolute bottom-40 left-1/4 text-white/20 text-2xl animate-pulse" style={{ animationDelay: '2s' }}>❄️</div>
-          <div className="absolute top-1/3 right-1/3 text-white/20 text-3xl animate-pulse" style={{ animationDelay: '1.5s' }}>❄️</div>
-        </div>
+        {/* Floating particles animation */}
+        <FloatingParticles 
+          count={40}
+          color="#ffffff"
+          opacity={0.2}
+          minSize={2}
+          maxSize={8}
+          speed={0.3}
+        />
 
         <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
           <div className="text-center mb-16">
             {/* Main Title */}
-            <h1 className="text-8xl md:text-9xl font-black text-white mb-8 tracking-tight">
-              REVIEW<span className="text-[#FF6B6B]">WISH</span>
+            <h1 className="text-8xl md:text-9xl font-black mb-8 tracking-tight">
+              <GradientText colors={['#ffffff', '#74C69D', '#ffffff']} animate={true}>
+                REVIEW
+              </GradientText>
+              <span className="text-[#FF6B6B]">WISH</span>
             </h1>
 
             {/* Interactive elements */}
@@ -109,9 +117,11 @@ export default function LandingPage() {
                   reward for reviews and<br />
                   boost your reputation
                 </h2>
-                <Button size="lg" className="mt-8 bg-[#1B4332] text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-[#2D6A4F] transition shadow-lg">
-                  START FREE TRIAL
-                </Button>
+                <ShineBorder color="#FF6B6B" borderRadius={9999} borderWidth={3} duration={2}>
+                  <Button size="lg" className="mt-8 bg-[#1B4332] text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-[#2D6A4F] transition shadow-lg">
+                    START FREE TRIAL
+                  </Button>
+                </ShineBorder>
               </div>
 
               {/* Decorative envelope */}
