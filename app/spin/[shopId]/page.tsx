@@ -234,56 +234,49 @@ export default function SpinPage() {
 
         .segment {
           position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 50%;
-          height: 50%;
-          transform-origin: 0% 0%;
-          border: 1px solid rgba(0,0,0,0.1);
+          width: 100%;
+          height: 100%;
+          top: 0;
+          left: 0;
+          overflow: hidden;
         }
 
         .segment-content {
           position: absolute;
-          left: -100%;
-          width: 200%;
-          height: 200%;
-          transform-origin: 50% 50%;
+          width: 100%;
+          height: 100%;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
+          padding-top: 8%;
         }
 
         .segment-content.green {
-          background: linear-gradient(135deg, #2d8a3e 0%, #1e6b2f 50%, #2d8a3e 100%);
+          background: linear-gradient(180deg, #2d8a3e 0%, #1e6b2f 100%);
         }
 
         .segment-content.black {
-          background: linear-gradient(135deg, #1a1a1a 0%, #000000 50%, #1a1a1a 100%);
+          background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
         }
 
         .segment-content.yellow {
-          background: linear-gradient(135deg, #ffd700 0%, #ffb700 50%, #ffa500 100%);
-          box-shadow: inset 0 0 30px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.4);
+          background: linear-gradient(180deg, #ffd700 0%, #e6a800 100%);
         }
 
         .segment-text {
-          position: absolute;
-          top: 15%;
-          left: 50%;
           color: #ffd700;
           font-family: 'Arial Black', Arial, sans-serif;
-          font-size: clamp(0.6rem, 2vw, 1rem);
+          font-size: clamp(0.5rem, 1.8vw, 0.85rem);
           font-weight: 900;
-          text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.5);
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
           white-space: nowrap;
-          transform-origin: left center;
-          transform: rotate(90deg);
           text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .segment-text.yellow-text {
-          color: #8b4513;
-          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5), 0 0 4px rgba(255, 215, 0, 0.3);
+          color: #1a1a1a;
+          text-shadow: none;
         }
 
         .dot {
@@ -373,22 +366,62 @@ export default function SpinPage() {
                   }
                   
                   const segmentText = isUnlucky ? 'Réessayez' : (prize?.name || '');
+                  
+                  // Calculate clip-path for pie slice
+                  // Each segment is a triangle from center to edge
+                  const startAngle = index * segmentAngle - 90; // -90 to start from top
+                  const endAngle = startAngle + segmentAngle;
+                  const midAngle = startAngle + segmentAngle / 2;
+                  
+                  // Convert angles to radians for calculation
+                  const startRad = (startAngle * Math.PI) / 180;
+                  const endRad = (endAngle * Math.PI) / 180;
+                  const midRad = (midAngle * Math.PI) / 180;
+                  
+                  // Calculate points for clip-path polygon (center + arc approximation)
+                  const r = 50; // radius percentage
+                  const cx = 50; // center x
+                  const cy = 50; // center y
+                  
+                  // For small angles, we can use a simple triangle
+                  // For larger angles, add intermediate points
+                  const points = [`${cx}% ${cy}%`]; // center point
+                  
+                  // Add points along the arc
+                  const numArcPoints = Math.max(2, Math.ceil(segmentAngle / 30));
+                  for (let i = 0; i <= numArcPoints; i++) {
+                    const angle = startRad + (endRad - startRad) * (i / numArcPoints);
+                    const x = cx + r * Math.cos(angle);
+                    const y = cy + r * Math.sin(angle);
+                    points.push(`${x}% ${y}%`);
+                  }
+                  
+                  const clipPath = `polygon(${points.join(', ')})`;
+                  
+                  // Text rotation to point outward from center
+                  const textRotation = midAngle + 90; // +90 to make text radial
 
                   return (
                     <div
                       key={`${segment.type}-${index}`}
                       className="segment"
                       style={{ 
-                        transform: `rotate(${index * segmentAngle}deg) skewY(${skewAngle}deg)`
+                        clipPath: clipPath
                       }}
                     >
                       <div 
                         className={`segment-content ${segmentColor}`}
-                        style={{
-                          transform: `skewY(-${skewAngle}deg) rotate(${segmentAngle / 2}deg)`
-                        }}
                       >
-                        <div className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}>
+                        <div 
+                          className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: `rotate(${midAngle + 90}deg) translateX(15%)`,
+                            transformOrigin: 'left center'
+                          }}
+                        >
                           {segmentText}
                         </div>
                       </div>
