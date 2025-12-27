@@ -135,16 +135,16 @@ export default function SpinPage() {
     const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.6;
 
     // Target rotation
-    // We subtract 2 * segmentAngle to correct the systematic offset observed
     const currentRot = currentRotationRef.current;
-    const targetAngle = -90 - segmentVisualCenter - randomOffset - (2 * segmentAngle);
+    const targetAngle = -90 - segmentVisualCenter - randomOffset;
     
     // Normalize to find the delta needed
     const currentNormalized = currentRot % 360;
     const distToTarget = ((targetAngle - currentNormalized) % 360 + 360) % 360;
     
-    // Add 4-6 full spins for variety
-    const extraSpins = 1440 + Math.random() * 720; // 4-6 spins
+    // Add 5-7 full spins for variety
+    const minSpins = 5;
+    const extraSpins = 360 * minSpins + Math.floor(Math.random() * 3) * 360; // 5 to 7 full spins
     const totalRotation = currentRot + extraSpins + distToTarget;
 
     if (wheelRef.current) {
