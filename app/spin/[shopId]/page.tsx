@@ -240,18 +240,23 @@ export default function SpinPage() {
 
         .segment-text {
           position: absolute;
-          top: 25%;
-          left: 42%;
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
+          left: 100%;
+          top: 100%;
+          width: 100%;
+          height: auto;
+          transform-origin: 0% 0%;
           color: #ffd700;
-          font-size: clamp(0.7rem, 2vw, 1.1rem);
+          font-family: 'Arial Black', Arial, sans-serif;
+          font-size: clamp(0.7rem, 2.2vw, 1.2rem);
           font-weight: 900;
-          text-align: center;
+          text-align: left;
           text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.5);
-          letter-spacing: 0.05em;
-          line-height: 1.1;
-          transform: rotate(${segmentAngle / 2}deg);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          padding-left: 30%;
+          padding-right: 5%;
+          transform: rotate(calc(-135deg + ${segmentAngle / 2}deg)) translate(0, -50%);
         }
 
         .segment-text.yellow-text {
