@@ -266,17 +266,19 @@ export default function SpinPage() {
         .segment-text {
           color: #ffd700;
           font-family: 'Arial Black', Arial, sans-serif;
-          font-size: clamp(0.5rem, 1.8vw, 0.85rem);
+          font-size: clamp(0.55rem, 2.2vw, 1rem);
           font-weight: 900;
-          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.8);
           white-space: nowrap;
           text-transform: uppercase;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
+          -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.5);
         }
 
         .segment-text.yellow-text {
           color: #1a1a1a;
-          text-shadow: none;
+          text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+          -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.3);
         }
 
         .dot {
@@ -398,8 +400,11 @@ export default function SpinPage() {
                   
                   const clipPath = `polygon(${points.join(', ')})`;
                   
-                  // Text rotation to point outward from center
-                  const textRotation = midAngle + 90; // +90 to make text radial
+                  // Text position: start from near center, extend toward edge
+                  // Calculate position along the midline of the segment
+                  const textDistance = 18; // % from center where text starts
+                  const textX = cx + textDistance * Math.cos(midRad);
+                  const textY = cy + textDistance * Math.sin(midRad);
 
                   return (
                     <div
@@ -416,9 +421,9 @@ export default function SpinPage() {
                           className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}
                           style={{
                             position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: `rotate(${midAngle + 90}deg) translateX(15%)`,
+                            top: `${textY}%`,
+                            left: `${textX}%`,
+                            transform: `rotate(${midAngle + 90}deg)`,
                             transformOrigin: 'left center'
                           }}
                         >
