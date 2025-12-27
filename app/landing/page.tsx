@@ -778,127 +778,243 @@ export default function LandingPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto max-w-6xl">
+      <section className="py-24 px-4 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
+          {/* Section header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">FAQ</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+              Questions Fréquentes
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Tout ce que vous devez savoir sur StarSpin
+            </p>
+          </div>
+
           <div className="grid md:grid-cols-2 gap-8">
-            {/* FAQ */}
-            <div>
-              <h2 className="text-4xl font-bold text-white mb-8" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
-                ❓ Questions Fréquentes
-              </h2>
-              
-              <div className="space-y-4">
-                {[
-                  {
-                    q: "Comment ça marche concrètement ?",
-                    a: "Vous imprimez un QR code, le client le scanne, note son expérience. Si c'est positif (4-5★), il accède à la roue pour gagner un cadeau instantané."
-                  },
-                  {
-                    q: "Que deviennent les avis négatifs ?",
-                    a: "Ils arrivent dans votre dashboard privé. Vous pouvez les traiter en interne sans qu'ils n'affectent votre réputation publique."
-                  },
-                  {
-                    q: "C'est compatible avec mon système de caisse ?",
-                    a: "StarSpin fonctionne de manière autonome via QR code. Aucune intégration technique nécessaire."
-                  },
-                  {
-                    q: "Combien coûtent les cadeaux ?",
-                    a: "Vous décidez ! Café offert, -10%, dessert gratuit... Vous contrôlez les lots et leur valeur."
-                  }
-                ].map((faq, index) => (
-                  <div key={index} className="bg-[#1a3a6e] rounded-2xl overflow-hidden border border-cyan-500/30">
-                    <button
-                      onClick={() => toggleFaq(index)}
-                      className="w-full p-6 text-left flex items-center justify-between hover:bg-[#0A1F44] transition"
-                    >
-                      <span className="text-white font-bold text-lg">{faq.q}</span>
-                      <span className="text-cyan-400 text-2xl">{openFaq === index ? '−' : '+'}</span>
-                    </button>
-                    {openFaq === index && (
-                      <div className="px-6 pb-6 text-cyan-100">
-                        {faq.a}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+            {/* FAQ Accordion */}
+            <div className="space-y-4">
+              {[
+                {
+                  q: "Comment ça marche concrètement ?",
+                  a: "Vous imprimez un QR code, le client le scanne, note son expérience. Si c'est positif (4-5★), il accède à la roue pour gagner un cadeau instantané."
+                },
+                {
+                  q: "Que deviennent les avis négatifs ?",
+                  a: "Ils arrivent dans votre dashboard privé. Vous pouvez les traiter en interne sans qu'ils n'affectent votre réputation publique."
+                },
+                {
+                  q: "C'est compatible avec mon système de caisse ?",
+                  a: "StarSpin fonctionne de manière autonome via QR code. Aucune intégration technique nécessaire."
+                },
+                {
+                  q: "Combien coûtent les cadeaux ?",
+                  a: "Vous décidez ! Café offert, -10%, dessert gratuit... Vous contrôlez les lots et leur valeur."
+                }
+              ].map((faq, index) => (
+                <Card key={index} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition"
+                  >
+                    <span className="text-gray-900 font-bold text-lg pr-4">{faq.q}</span>
+                    <div className={`w-8 h-8 rounded-full bg-[#2D6A4F]/10 flex items-center justify-center flex-shrink-0 transition-transform ${openFaq === index ? 'rotate-180' : ''}`}>
+                      <svg className="w-5 h-5 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </button>
+                  {openFaq === index && (
+                    <div className="px-6 pb-6 text-gray-600 leading-relaxed">
+                      {faq.a}
+                    </div>
+                  )}
+                </Card>
+              ))}
             </div>
 
-            {/* Contact Form */}
-            <div className="bg-white rounded-3xl p-8">
-              <h3 className="text-3xl font-bold text-[#0A1F44] mb-6">📧 Contactez-nous</h3>
+            {/* Contact Card */}
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 h-fit">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-[#2D6A4F] rounded-xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Contactez-nous</h3>
+                  <p className="text-gray-600 text-sm">Une question ? Nous sommes là</p>
+                </div>
+              </div>
               <form className="space-y-4">
-                <input
-                  type="text"
-                  placeholder="Votre nom"
-                  className="w-full p-4 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:outline-none"
-                />
-                <input
-                  type="email"
-                  placeholder="Votre email"
-                  className="w-full p-4 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:outline-none"
-                />
-                <textarea
-                  placeholder="Votre message"
-                  rows={4}
-                  className="w-full p-4 border-2 border-gray-300 rounded-xl focus:border-cyan-500 focus:outline-none"
-                />
-                <button className="w-full bg-gradient-to-r from-[#FF1B8D] to-[#FF6B35] text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform">
-                  Envoyer
-                </button>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Votre nom"
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#2D6A4F] focus:outline-none transition"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="email"
+                    placeholder="Votre email"
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#2D6A4F] focus:outline-none transition"
+                  />
+                </div>
+                <div>
+                  <textarea
+                    placeholder="Votre message"
+                    rows={4}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#2D6A4F] focus:outline-none transition resize-none"
+                  />
+                </div>
+                <Button className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-6 text-lg font-bold">
+                  Envoyer le message
+                </Button>
               </form>
-            </div>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 px-4 bg-gradient-to-r from-[#FF1B8D] to-[#9D4EDD]">
-        <div className="container mx-auto text-center">
-          <h2 className="text-5xl font-bold text-white mb-8" style={{ fontFamily: 'Comic Sans MS, cursive' }}>
-            ✨ Prêt à faire briller votre établissement ?
-          </h2>
-          <button className="bg-white text-[#FF1B8D] text-3xl font-bold py-6 px-16 rounded-full hover:scale-110 transition-transform shadow-2xl">
-            Essayer gratuitement
-          </button>
+      <section className="py-24 px-4 bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-96 h-96 bg-[#52B788] rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto max-w-5xl relative z-10">
+          <Card className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-12 md:p-16 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full mb-8">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+              <span className="text-sm font-semibold text-white uppercase tracking-wide">Commencez maintenant</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
+              Prêt à transformer votre réputation en ligne ?
+            </h2>
+            
+            <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto">
+              Rejoignez les milliers de commerces qui boostent leurs avis Google avec StarSpin
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-7 text-xl font-bold rounded-full shadow-2xl">
+                Essayer gratuitement 14 jours
+              </Button>
+              <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-12 py-7 text-xl font-bold rounded-full">
+                Voir une démo
+              </Button>
+            </div>
+            
+            <div className="mt-10 flex items-center justify-center gap-8 text-white/80">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Sans engagement</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Installation en 5 min</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>Support 7j/7</span>
+              </div>
+            </div>
+          </Card>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0A1F44] py-12 px-4 border-t border-cyan-500/20">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h4 className="text-white font-bold text-xl mb-4">StarSpin</h4>
-              <p className="text-cyan-100">La gamification au service de votre e-réputation</p>
+      <footer className="bg-[#1B4332] py-16 px-4">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid md:grid-cols-5 gap-12 mb-12">
+            {/* Brand column */}
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
+                <span className="text-2xl font-bold text-white">starspin</span>
+              </div>
+              <p className="text-white/70 mb-6 leading-relaxed">
+                La solution gamifiée qui transforme vos clients satisfaits en ambassadeurs et booste votre réputation en ligne.
+              </p>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+                  </svg>
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  </svg>
+                </a>
+              </div>
             </div>
+
+            {/* Product column */}
             <div>
               <h4 className="text-white font-bold mb-4">Produit</h4>
-              <ul className="text-cyan-100 space-y-2">
-                <li><a href="#" className="hover:text-cyan-400">Fonctionnalités</a></li>
-                <li><a href="#" className="hover:text-cyan-400">Tarifs</a></li>
-                <li><a href="#" className="hover:text-cyan-400">Démo</a></li>
+              <ul className="text-white/70 space-y-3">
+                <li><a href="#features" className="hover:text-white transition">Fonctionnalités</a></li>
+                <li><a href="#pricing" className="hover:text-white transition">Tarifs</a></li>
+                <li><a href="#testimonials" className="hover:text-white transition">Témoignages</a></li>
+                <li><a href="#" className="hover:text-white transition">Démo</a></li>
               </ul>
             </div>
+
+            {/* Company column */}
             <div>
               <h4 className="text-white font-bold mb-4">Entreprise</h4>
-              <ul className="text-cyan-100 space-y-2">
-                <li><a href="#" className="hover:text-cyan-400">À propos</a></li>
-                <li><a href="#" className="hover:text-cyan-400">Blog</a></li>
-                <li><a href="#" className="hover:text-cyan-400">Carrières</a></li>
+              <ul className="text-white/70 space-y-3">
+                <li><a href="#" className="hover:text-white transition">À propos</a></li>
+                <li><a href="#" className="hover:text-white transition">Blog</a></li>
+                <li><a href="#" className="hover:text-white transition">Carrières</a></li>
+                <li><a href="#" className="hover:text-white transition">Contact</a></li>
               </ul>
             </div>
+
+            {/* Legal column */}
             <div>
               <h4 className="text-white font-bold mb-4">Légal</h4>
-              <ul className="text-cyan-100 space-y-2">
-                <li><a href="#" className="hover:text-cyan-400">CGU</a></li>
-                <li><a href="#" className="hover:text-cyan-400">Confidentialité</a></li>
-                <li><a href="#" className="hover:text-cyan-400">Mentions légales</a></li>
+              <ul className="text-white/70 space-y-3">
+                <li><a href="#" className="hover:text-white transition">CGU</a></li>
+                <li><a href="#" className="hover:text-white transition">Confidentialité</a></li>
+                <li><a href="#" className="hover:text-white transition">Mentions légales</a></li>
+                <li><a href="#" className="hover:text-white transition">Cookies</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-cyan-500/20 pt-8 text-center text-cyan-100">
-            <p>© 2025 StarSpin. Tous droits réservés.</p>
+
+          {/* Bottom bar */}
+          <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-white/60 text-sm">
+              © 2025 StarSpin. Tous droits réservés.
+            </p>
+            <div className="flex items-center gap-6 text-white/60 text-sm">
+              <span>Made with ❤️ for Thai businesses</span>
+              <div className="flex items-center gap-2">
+                <span>🇹🇭</span>
+                <span>🇫🇷</span>
+                <span>🇬🇧</span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
