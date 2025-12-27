@@ -512,104 +512,269 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonial Section */}
-      <section id="testimonials" className="py-20 px-4">
-        <div className="container mx-auto max-w-4xl">
-          <div className="bg-gradient-to-br from-[#FF1B8D] to-[#9D4EDD] rounded-3xl p-12 text-center transform hover:scale-105 transition-transform">
-            <div className="text-8xl mb-6">👨‍🍳</div>
-            <p className="text-2xl text-white mb-6 italic">
-              "En 3 mois, on est passé de 3.8 à 4.6 sur Google. Nos clients adorent la roue et reviennent plus vite pour utiliser leur coupon !"
-            </p>
-            <p className="text-xl text-white font-bold">— Marc A., Restaurant Le Gourmet</p>
+      <section id="testimonials" className="py-24 px-4 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
+          {/* Section header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Témoignages</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+              Ils ont boosté leur réputation avec StarSpin
+            </h2>
+          </div>
+
+          {/* Testimonials grid */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Testimonial 1 */}
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-full flex items-center justify-center text-2xl text-white font-bold">
+                  MA
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Marc Alonso</h4>
+                  <p className="text-sm text-gray-600">Le Gourmet, Paris</p>
+                </div>
+              </div>
+              <div className="flex gap-1 mb-4">
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-gray-700 leading-relaxed italic">
+                "En 3 mois, on est passé de 3.8 à 4.6 sur Google. Nos clients adorent la roue et reviennent plus vite !"
+              </p>
+            </Card>
+
+            {/* Testimonial 2 */}
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-full flex items-center justify-center text-2xl text-white font-bold">
+                  SP
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Somchai Patel</h4>
+                  <p className="text-sm text-gray-600">Thai Paradise, Phuket</p>
+                </div>
+              </div>
+              <div className="flex gap-1 mb-4">
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-gray-700 leading-relaxed italic">
+                "Les touristes adorent ! Notre note TripAdvisor a augmenté de 0.8 point en 2 mois."
+              </p>
+            </Card>
+
+            {/* Testimonial 3 */}
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-shadow">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-full flex items-center justify-center text-2xl text-white font-bold">
+                  CL
+                </div>
+                <div>
+                  <h4 className="font-bold text-gray-900">Claire Dubois</h4>
+                  <p className="text-sm text-gray-600">Bistrot Moderne, Lyon</p>
+                </div>
+              </div>
+              <div className="flex gap-1 mb-4">
+                {[1,2,3,4,5].map(i => (
+                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <p className="text-gray-700 leading-relaxed italic">
+                "Simple à mettre en place, résultats immédiats. Le ROI est impressionnant !"
+              </p>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 px-4 bg-gradient-to-r from-[#1a3a6e] to-[#0A1F44] relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-1/2 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 right-0 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"></div>
-        </div>
-        <div className="container mx-auto relative z-10">
+      <section id="pricing" className="py-24 px-4 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          {/* Section header */}
           <div className="text-center mb-16">
-            <span className="inline-block px-6 py-2 bg-yellow-500/20 backdrop-blur-sm rounded-full text-yellow-300 font-bold mb-4">Tarification simple</span>
-            <h2 className="text-6xl font-black text-white mb-4">
-              💎 <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400">Nos Tarifs</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Tarification</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+              Choisissez votre plan
             </h2>
-            <p className="text-xl text-cyan-200">Choisissez le plan qui correspond à vos besoins</p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Tarification simple et transparente pour tous les types de restaurants
+            </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {/* Free Plan */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#00D9FF]/20 to-[#0099CC]/20 backdrop-blur-xl rounded-3xl p-8 transform hover:scale-105 hover:-translate-y-2 transition-all border-2 border-cyan-400/30 shadow-2xl">
-                <div className="text-center">
-                  <h3 className="text-3xl font-black text-white mb-4">Découverte</h3>
-                  <div className="text-6xl font-black text-white mb-2">0€</div>
-                  <p className="text-cyan-200 font-semibold mb-6">Pour tester</p>
+          {/* Pricing cards */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Starter Plan */}
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Découverte</h3>
+                <div className="mb-2">
+                  <span className="text-5xl font-black text-gray-900">0€</span>
                 </div>
-                <ul className="text-white space-y-3 mb-8">
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">50 scans/mois</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">1 établissement</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">Roue basique</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">Stats essentielles</span></li>
-                </ul>
-                <button className="w-full bg-white text-[#00D9FF] font-black py-4 rounded-full hover:scale-105 transition-all shadow-lg text-lg">
-                  Commencer Gratuitement
-                </button>
+                <p className="text-gray-600">Pour tester gratuitement</p>
               </div>
-            </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">50 scans/mois</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">1 établissement</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Roue basique</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Statistiques essentielles</span>
+                </li>
+              </ul>
+              <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
+                Commencer gratuitement
+              </Button>
+            </Card>
 
-            {/* Pro Plan */}
-            <div className="group relative md:scale-110">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-purple-600 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition-opacity animate-pulse"></div>
-              <div className="relative bg-gradient-to-br from-[#FF1B8D]/30 to-[#9D4EDD]/30 backdrop-blur-xl rounded-3xl p-8 transform hover:scale-105 hover:-translate-y-2 transition-all border-4 border-yellow-400 shadow-2xl">
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-2 px-6 rounded-full shadow-lg text-sm">
-                    ⭐ POPULAIRE ⭐
-                  </div>
-                </div>
-                <div className="text-center mt-4">
-                  <h3 className="text-4xl font-black text-white mb-4">Pro</h3>
-                  <div className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-pink-400 mb-2">49€</div>
-                  <p className="text-pink-200 font-bold mb-6">/mois</p>
-                </div>
-                <ul className="text-white space-y-3 mb-8">
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-bold">Scans illimités</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-bold">1 établissement</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-bold">Roue personnalisée</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-bold">Dashboard complet</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-bold">Support prioritaire</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-bold">Multilingue (6 langues)</span></li>
-                </ul>
-                <button className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-4 rounded-full hover:scale-105 transition-all shadow-2xl text-lg">
-                  🚀 Essayer 14 jours
-                </button>
+            {/* Pro Plan - Featured */}
+            <Card className="bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-8 shadow-2xl relative transform md:scale-105">
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <Badge className="bg-[#FFB703] text-gray-900 border-0 px-4 py-1 font-bold shadow-lg">
+                  POPULAIRE
+                </Badge>
               </div>
-            </div>
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-white mb-4">Pro</h3>
+                <div className="mb-2">
+                  <span className="text-5xl font-black text-white">1,490฿</span>
+                </div>
+                <p className="text-white/80">par mois (~40€)</p>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">Scans illimités</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">1 établissement</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">Roue personnalisée</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">Dashboard complet</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">Support prioritaire</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">Multilingue (6 langues)</span>
+                </li>
+              </ul>
+              <Button className="w-full bg-white text-[#2D6A4F] hover:bg-gray-100 font-bold">
+                Essayer 14 jours gratuits
+              </Button>
+            </Card>
 
-            {/* Multi Plan */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#FFB703]/20 to-[#FB8500]/20 backdrop-blur-xl rounded-3xl p-8 transform hover:scale-105 hover:-translate-y-2 transition-all border-2 border-yellow-400/30 shadow-2xl">
-                <div className="text-center">
-                  <h3 className="text-3xl font-black text-white mb-4">Multi-établissements</h3>
-                  <div className="text-5xl font-black text-white mb-2">Sur devis</div>
-                  <p className="text-yellow-200 font-semibold mb-6">Pour les chaînes</p>
+            {/* Enterprise Plan */}
+            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Entreprise</h3>
+                <div className="mb-2">
+                  <span className="text-5xl font-black text-gray-900">Sur devis</span>
                 </div>
-                <ul className="text-white space-y-3 mb-8">
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">Tout du plan Pro</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">Plusieurs établissements</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">Dashboard centralisé</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">API personnalisée</span></li>
-                  <li className="flex items-center gap-2"><span className="text-2xl">✅</span> <span className="font-semibold">Account manager dédié</span></li>
-                </ul>
-                <button className="w-full bg-white text-[#FFB703] font-black py-4 rounded-full hover:scale-105 transition-all shadow-lg text-lg">
-                  💼 Nous Contacter
-                </button>
+                <p className="text-gray-600">Pour les chaînes</p>
               </div>
-            </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Tout du plan Pro</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Plusieurs établissements</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Dashboard centralisé</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">API personnalisée</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">Account manager dédié</span>
+                </li>
+              </ul>
+              <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
+                Nous contacter
+              </Button>
+            </Card>
+          </div>
+
+          {/* Money back guarantee */}
+          <div className="mt-16 text-center">
+            <Card className="max-w-3xl mx-auto bg-gray-50 border-2 border-gray-200 rounded-2xl p-8">
+              <div className="flex items-center justify-center gap-4">
+                <svg className="w-12 h-12 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <div className="text-left">
+                  <h4 className="text-xl font-bold text-gray-900 mb-1">Garantie satisfait ou remboursé</h4>
+                  <p className="text-gray-600">14 jours d'essai gratuit, sans engagement. Annulez à tout moment.</p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
