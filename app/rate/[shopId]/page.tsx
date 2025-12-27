@@ -177,9 +177,11 @@ export default function RatingPage() {
         {/* Logo */}
         {merchant.logo_url && (
           <div className="flex justify-center mb-8">
-            <div className="bg-white rounded-2xl p-4 shadow-2xl">
-              <img src={merchant.logo_url} alt={merchant.business_name} className="h-20 object-contain" />
-            </div>
+            <img 
+              src={merchant.logo_url} 
+              alt={merchant.business_name} 
+              className="h-40 object-contain drop-shadow-lg" 
+            />
           </div>
         )}
 
@@ -231,19 +233,6 @@ export default function RatingPage() {
                     {emailError}
                   </p>
                 )}
-              </div>
-
-              {/* Feedback Textarea */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Votre commentaire (optionnel)
-                </label>
-                <textarea
-                  value={feedback}
-                  onChange={(e) => setFeedback(e.target.value)}
-                  placeholder={t('feedback.placeholder')}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[100px] transition-all"
-                />
               </div>
 
               <Button
