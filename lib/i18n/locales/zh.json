@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "欢迎",
+    "submit": "提交",
+    "cancel": "取消",
+    "done": "完成",
+    "loading": "加载中...",
+    "error": "发生错误"
+  },
+  "rating": {
+    "title": "您的体验如何？",
+    "subtitle": "评价您的访问",
+    "stars": "星"
+  },
+  "feedback": {
+    "title": "告诉我们哪里出了问题",
+    "placeholder": "您的反馈帮助我们改进...",
+    "thankYou": "感谢您的反馈！",
+    "submitted": "您的反馈已提交"
+  },
+  "social": {
+    "title": "分享您的体验",
+    "googleReview": "在Google上留下评论",
+    "followInstagram": "在Instagram上关注我们",
+    "followTikTok": "在TikTok上关注我们"
+  },
+  "wheel": {
+    "title": "转动赢奖！",
+    "spin": "转动转盘",
+    "congratulations": "恭喜！",
+    "youWon": "您赢得了",
+    "alreadySpun": "您今天已经转过转盘了",
+    "tryAgainTomorrow": "明天再来试试吧！"
+  },
+  "coupon": {
+    "title": "您的奖励",
+    "code": "优惠券代码",
+    "expiresIn": "过期时间",
+    "expired": "此优惠券已过期",
+    "redeemed": "此优惠券已使用",
+    "terms": "适用条款和条件"
+  },
+  "dashboard": {
+    "title": "仪表板",
+    "stats": "统计",
+    "scans": "总扫描次数",
+    "avgRating": "平均评分",
+    "conversion": "转化率",
+    "rewards": "已分发奖励"
+  }
+}

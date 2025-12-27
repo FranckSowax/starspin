@@ -1,0 +1,332 @@
+[
+  {
+    "id": 1,
+    "title": "Setup Project Infrastructure and Core PWA Foundation",
+    "status": "pending",
+    "details": "Create a new Next.js project with PWA configuration using next-pwa. Set up Supabase client with environment variables for database, auth, and storage. Configure i18next for multi-language support (FR, EN, ES, AR, TH, ZH) with automatic browser language detection. Implement responsive design system with mobile-first approach, ensuring WCAG 2.1 AA compliance. Set up TypeScript configuration, ESLint, and basic folder structure. Configure Supabase database schema for shops, ratings, feedback, and coupons. Implement basic routing structure and PWA manifest for offline capabilities.",
+    "priority": "high",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Initialize Next.js Project with PWA Configuration",
+        "status": "pending",
+        "details": "Use create-next-app to initialize project. Install and configure next-pwa package for service worker generation. Set up PWA manifest.json with app icons, theme colors, and display modes. Configure next.config.js for PWA settings including offline fallbacks. Set up TypeScript configuration and ESLint rules. Create basic folder structure (components, pages, styles, utils, types).",
+        "description": "Create a new Next.js project and configure it as a Progressive Web App with offline capabilities and mobile optimization",
+        "dependencies": [],
+        "testStrategy": "Test PWA installation on mobile devices, verify service worker registration, test offline functionality with network throttling"
+      },
+      {
+        "id": 2,
+        "title": "Configure Supabase Backend Integration",
+        "status": "pending",
+        "details": "Create Supabase project and obtain API keys. Install @supabase/supabase-js client library. Configure environment variables for Supabase URL and anon key. Create database tables for shops, ratings, feedback, and coupons with proper relationships and RLS policies. Set up Supabase client initialization with TypeScript types. Configure authentication settings and storage buckets for shop images.",
+        "description": "Set up Supabase client configuration and establish database schema for the application's core entities",
+        "dependencies": [
+          1
+        ],
+        "testStrategy": "Validate Supabase connection, test basic CRUD operations on all tables, verify RLS policies work correctly, test file upload to storage"
+      },
+      {
+        "id": 3,
+        "title": "Implement Internationalization System",
+        "status": "pending",
+        "details": "Install react-i18next and i18next packages. Configure i18next with language detection plugin for automatic browser language detection. Create translation files for FR, EN, ES, AR, TH, ZH languages. Set up namespace organization for different app sections. Implement RTL support for Arabic. Create translation helper functions and hooks. Configure fallback languages and loading states.",
+        "description": "Set up i18next for multi-language support with automatic browser language detection and translation management",
+        "dependencies": [
+          1
+        ],
+        "testStrategy": "Test language detection works correctly across different browsers, verify all translations load properly, test RTL layout for Arabic, validate language switching functionality"
+      },
+      {
+        "id": 4,
+        "title": "Establish Mobile-First Responsive Design System",
+        "status": "pending",
+        "details": "Set up CSS-in-JS solution (styled-components or emotion) or Tailwind CSS. Define mobile-first breakpoints and responsive grid system. Create design tokens for colors, typography, spacing, and shadows. Implement accessibility features including focus management, ARIA labels, and keyboard navigation. Set up color contrast ratios meeting WCAG 2.1 AA standards. Create reusable component library with consistent styling patterns.",
+        "description": "Create a comprehensive design system with mobile-first responsive breakpoints and WCAG 2.1 AA accessibility compliance",
+        "dependencies": [
+          1
+        ],
+        "testStrategy": "Test responsive design across different screen sizes and devices, validate WCAG 2.1 AA compliance using accessibility tools, test keyboard navigation and screen reader compatibility"
+      },
+      {
+        "id": 5,
+        "title": "Implement Core Routing and Application Structure",
+        "status": "pending",
+        "details": "Create page structure using Next.js App Router or Pages Router. Implement main navigation components with internationalization support. Create layout components with responsive header, navigation, and footer. Set up protected routes for authenticated features. Implement error boundaries and loading states. Create initial pages for shop listing, shop details, and user dashboard. Configure SEO meta tags and Open Graph data.",
+        "description": "Set up Next.js routing structure and create the foundational pages and components for the PWA application",
+        "dependencies": [
+          2,
+          3,
+          4
+        ],
+        "testStrategy": "Test all routes work correctly, verify navigation functions properly on mobile and desktop, test protected route access, validate SEO meta tags and social sharing"
+      }
+    ],
+    "description": "Initialize the Next.js PWA project with Supabase backend integration, configure internationalization, and establish the basic project structure with mobile-first responsive design.",
+    "dependencies": [],
+    "testStrategy": "Test PWA installation on mobile devices, verify language detection works correctly, ensure responsive design across different screen sizes, validate Supabase connection and basic CRUD operations, test offline functionality."
+  },
+  {
+    "id": 2,
+    "title": "Implement Customer-Facing Rating and Feedback Flow",
+    "status": "pending",
+    "details": "Create dynamic landing page that accepts shop ID from QR code URL parameters. Implement 5-star rating component with smooth animations. Build conditional rendering: 1-3 stars show private feedback form that submits to Supabase, 4-5 stars proceed to social engagement screen. Create social engagement component with Google review link and Instagram/TikTok follow buttons, plus 'Done' button to proceed. Implement form validation and error handling. Add loading states and success/error toasts. Ensure all text is internationalized and page loads under 2 seconds on 3G networks.",
+    "priority": "high",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Create QR Code Landing Page Foundation",
+        "status": "pending",
+        "details": "Create a new React component for the landing page with URL parameter parsing to extract shop ID. Set up routing configuration to handle QR code redirects. Implement shop data fetching from Supabase using the shop ID parameter. Add basic page structure with loading states and error handling for invalid shop IDs. Ensure the page is responsive and follows the design system.",
+        "description": "Build the base landing page component that accepts shop ID from QR code URL parameters and sets up the routing structure for the customer-facing rating flow.",
+        "dependencies": [],
+        "testStrategy": "Test with valid and invalid shop IDs, verify URL parameter parsing works correctly, test page loading on different devices"
+      },
+      {
+        "id": 2,
+        "title": "Implement 5-Star Rating Component",
+        "status": "pending",
+        "details": "Create a reusable star rating component with hover effects and click animations. Implement smooth transitions using CSS animations or Framer Motion. Add visual feedback for selected rating with color changes and scaling effects. Ensure the component is accessible with keyboard navigation and screen reader support. Make it touch-friendly for mobile devices with appropriate touch targets.",
+        "description": "Build an interactive star rating component with smooth animations and visual feedback that captures customer ratings from 1 to 5 stars.",
+        "dependencies": [
+          1
+        ],
+        "testStrategy": "Test rating selection on desktop and mobile, verify animations work smoothly, test accessibility with keyboard navigation and screen readers"
+      },
+      {
+        "id": 3,
+        "title": "Build Conditional Rendering Logic and Feedback Form",
+        "status": "pending",
+        "details": "Create conditional rendering based on star rating value. Build a feedback form component with text area for comments and optional fields for contact information. Implement form validation with real-time feedback. Set up Supabase integration to store feedback data with shop ID, rating, timestamp, and comments. Add form submission handling with loading states and success/error feedback. Ensure form data is properly sanitized before submission.",
+        "description": "Implement branching logic that shows private feedback form for 1-3 star ratings and creates the feedback submission system to Supabase.",
+        "dependencies": [
+          2
+        ],
+        "testStrategy": "Test form appears only for 1-3 star ratings, verify form validation works correctly, test feedback submission reaches Supabase database, test error handling for network failures"
+      },
+      {
+        "id": 4,
+        "title": "Create Social Engagement Screen for High Ratings",
+        "status": "pending",
+        "details": "Create social engagement screen component that renders for 4-5 star ratings. Implement Google review link generation using the shop's Google Business Profile. Add Instagram and TikTok follow buttons with proper deep linking to social media apps. Create 'Done' button to complete the flow. Implement tracking for social engagement actions. Add smooth transitions between rating and social engagement screens. Ensure all external links open correctly in new tabs or native apps.",
+        "description": "Build the social engagement component that appears for 4-5 star ratings, featuring Google review links, social media follow buttons, and completion flow.",
+        "dependencies": [
+          2
+        ],
+        "testStrategy": "Test social engagement screen appears for 4-5 star ratings, verify Google review links work correctly, test social media buttons open correct profiles, test completion flow"
+      },
+      {
+        "id": 5,
+        "title": "Implement Internationalization and Performance Optimization",
+        "status": "pending",
+        "details": "Set up i18n framework (react-i18next) and create translation files for multiple languages. Implement language detection and switching functionality. Optimize bundle size with code splitting and lazy loading. Implement image optimization and compression. Add service worker for caching static assets. Optimize database queries and implement proper loading states. Add performance monitoring and ensure 3G network compatibility. Implement proper error boundaries and fallback states.",
+        "description": "Add internationalization support for all text content and optimize the entire flow for performance, ensuring sub-2-second load times on 3G networks.",
+        "dependencies": [
+          3,
+          4
+        ],
+        "testStrategy": "Test page loads under 2 seconds on 3G networks, verify all text is properly internationalized, test language switching functionality, validate performance metrics with Lighthouse"
+      }
+    ],
+    "description": "Build the QR code landing page with star rating system, branching logic for feedback forms vs reward flow, and social engagement prompts.",
+    "dependencies": [
+      1
+    ],
+    "testStrategy": "Test rating submission for all star values, verify feedback form data reaches merchant dashboard, test social links open correctly, validate performance on 3G networks, test across different languages and devices."
+  },
+  {
+    "id": 3,
+    "title": "Develop Spin Wheel Game and Digital Coupon System",
+    "status": "pending",
+    "details": "Build animated spin wheel component using CSS animations or Canvas API with smooth rotation and realistic physics. Implement prize selection algorithm based on merchant-configured probabilities stored in Supabase. Create fraud prevention system using IP tracking and localStorage to limit one spin per device per day. Generate unique coupon codes using crypto.randomUUID() and store in database with expiration timestamps. Build coupon display component with QR code generation using qrcode library and countdown timer (24h/48h). Implement Supabase Edge Functions for coupon expiration cleanup. Add prize images support via Supabase Storage.",
+    "priority": "medium",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Build Animated Spin Wheel Component",
+        "status": "pending",
+        "details": "Implement wheel component using CSS transforms for rotation with easing functions (cubic-bezier) for realistic deceleration. Create wheel segments dynamically based on prize configuration. Add visual indicators like pointer/arrow. Ensure 60fps animation performance across devices. Include sound effects for spinning and stopping. Make wheel responsive for mobile and desktop.",
+        "description": "Create the core spin wheel component with smooth CSS animations or Canvas API implementation, including realistic physics for spinning motion and visual feedback",
+        "dependencies": [],
+        "testStrategy": "Test animation smoothness on various devices and browsers, verify consistent frame rates, test responsiveness across screen sizes"
+      },
+      {
+        "id": 2,
+        "title": "Implement Prize Selection Algorithm and Database Schema",
+        "status": "pending",
+        "details": "Create Supabase tables for prizes (id, name, probability, image_url, merchant_id) and spin_results (id, user_id, prize_id, timestamp). Implement weighted random selection algorithm using cumulative probability distribution. Add prize image upload functionality via Supabase Storage. Create admin interface for merchants to configure prizes and probabilities. Ensure probabilities sum to 100%.",
+        "description": "Develop the probability-based prize selection system with merchant-configurable prizes and their probabilities, including Supabase database schema for storing prize data",
+        "dependencies": [
+          1
+        ],
+        "testStrategy": "Verify prize probability distribution over 1000+ test spins, test prize configuration interface, validate database constraints"
+      },
+      {
+        "id": 3,
+        "title": "Build Fraud Prevention System",
+        "status": "pending",
+        "details": "Create device fingerprinting using screen resolution, user agent, timezone, and canvas fingerprinting. Store spin attempts in localStorage with timestamp and IP address tracking in Supabase. Implement rate limiting with Redis or Supabase for IP-based restrictions. Add CAPTCHA integration for suspicious activity. Create admin dashboard to monitor and manage fraud attempts.",
+        "description": "Implement comprehensive fraud prevention using IP tracking, device fingerprinting, and localStorage to enforce one spin per device per day limit",
+        "dependencies": [],
+        "testStrategy": "Test multiple spin attempts from same device/IP, verify localStorage persistence, test with VPN and incognito mode, validate CAPTCHA integration"
+      },
+      {
+        "id": 4,
+        "title": "Generate and Manage Digital Coupons",
+        "status": "pending",
+        "details": "Implement coupon generation using crypto.randomUUID() with additional entropy for uniqueness. Create coupons table (id, code, prize_id, user_id, created_at, expires_at, redeemed_at). Build Supabase Edge Function for automatic coupon expiration cleanup (runs daily). Add coupon validation API endpoints. Implement redemption tracking and prevent double-use. Support 24h/48h expiration periods based on prize type.",
+        "description": "Create unique coupon code generation system with database storage, expiration management, and Supabase Edge Functions for cleanup",
+        "dependencies": [
+          2
+        ],
+        "testStrategy": "Validate coupon code uniqueness across millions of generations, test expiration cleanup function, verify redemption prevention logic"
+      },
+      {
+        "id": 5,
+        "title": "Build Coupon Display with QR Code and Countdown Timer",
+        "status": "pending",
+        "details": "Implement QR code generation using qrcode library containing coupon validation URL. Build countdown timer component showing remaining time until expiration with real-time updates. Create responsive coupon display with prize details, terms & conditions, and redemption instructions. Add share functionality for social media. Implement coupon history view for users. Include offline-capable QR codes for in-store redemption.",
+        "description": "Create the coupon display interface with QR code generation, countdown timer, and redemption instructions for users",
+        "dependencies": [
+          4
+        ],
+        "testStrategy": "Test QR code scanning with various mobile devices and apps, verify countdown timer accuracy across timezones, test offline QR code functionality"
+      }
+    ],
+    "description": "Create the animated spin wheel with configurable prizes and probabilities, implement fraud prevention, and build the digital coupon display with countdown timer.",
+    "dependencies": [
+      2
+    ],
+    "testStrategy": "Test wheel animation smoothness across devices, verify prize probability distribution over multiple spins, test fraud prevention with multiple attempts, validate coupon code uniqueness and expiration, test QR code generation and scanning."
+  },
+  {
+    "id": 4,
+    "title": "Build Merchant Dashboard with Authentication and Shop Management",
+    "status": "pending",
+    "details": "Implement Supabase Auth with magic link and email/password options. Create protected dashboard routes with authentication middleware. Build shop profile management allowing merchants to upload logos, set business details, and configure branding. Implement QR code generation with shop-specific URLs and create print-ready assets (PDF, PNG) using jsPDF and canvas. Build statistics dashboard showing scan counts, average ratings, conversion rates, and distributed rewards using charts (Chart.js or Recharts). Create basic shop settings page for business information and contact details. Implement responsive dashboard layout optimized for desktop and tablet use.",
+    "priority": "medium",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Implement Supabase Authentication System",
+        "status": "pending",
+        "details": "Configure Supabase client with authentication settings. Create login/register forms with email/password and magic link options. Implement authentication context/provider for state management. Set up protected route middleware to check authentication status. Handle authentication errors and loading states. Create logout functionality and session persistence.",
+        "description": "Set up Supabase authentication with magic link and email/password login options, including user registration, login, logout, and session management for merchants.",
+        "dependencies": [],
+        "testStrategy": "Test both magic link and password authentication flows, verify session persistence across browser refreshes, test logout functionality, and validate error handling for invalid credentials."
+      },
+      {
+        "id": 2,
+        "title": "Create Protected Dashboard Layout and Navigation",
+        "status": "pending",
+        "details": "Create dashboard layout component with sidebar navigation and header. Implement authentication middleware/guards for protected routes. Build responsive design optimized for desktop and tablet. Create navigation menu with links to shop management, QR codes, statistics, and settings. Add user profile dropdown with logout option. Implement loading states and error boundaries.",
+        "description": "Build the main dashboard layout with responsive design, navigation menu, and authentication middleware to protect all dashboard routes from unauthorized access.",
+        "dependencies": [
+          1
+        ],
+        "testStrategy": "Test dashboard accessibility without authentication, verify responsive design on different screen sizes, test navigation between dashboard sections, and validate authentication middleware protection."
+      },
+      {
+        "id": 3,
+        "title": "Build Shop Profile Management System",
+        "status": "pending",
+        "details": "Create shop profile form with fields for business name, description, address, contact details, and branding colors. Implement file upload for shop logos with image validation and resizing. Set up Supabase storage for logo files. Create profile preview component. Implement form validation and error handling. Add save/update functionality with optimistic updates and loading states.",
+        "description": "Create comprehensive shop profile management allowing merchants to upload logos, set business details, configure branding, and manage contact information.",
+        "dependencies": [
+          2
+        ],
+        "testStrategy": "Test logo upload with various file formats and sizes, verify form validation for required fields, test profile updates persistence, and validate image storage and retrieval from Supabase."
+      },
+      {
+        "id": 4,
+        "title": "Implement QR Code Generation and Print Assets",
+        "status": "pending",
+        "details": "Implement QR code generation using qrcode library with shop-specific URLs. Create canvas-based QR code rendering with customizable size and branding. Build PDF generation using jsPDF with shop logo and branding. Create PNG export functionality with high resolution for printing. Add download functionality for both formats. Implement QR code preview with shop branding integration.",
+        "description": "Build QR code generation system with shop-specific URLs and create print-ready assets in PDF and PNG formats using jsPDF and canvas for merchant use.",
+        "dependencies": [
+          3
+        ],
+        "testStrategy": "Test QR code generation with different shop URLs, verify PDF and PNG downloads work correctly, test print quality of generated assets, and validate QR codes scan properly with mobile devices."
+      },
+      {
+        "id": 5,
+        "title": "Create Statistics Dashboard with Charts",
+        "status": "pending",
+        "details": "Create statistics data models and API endpoints for metrics. Implement Chart.js or Recharts for data visualization. Build dashboard widgets for scan counts, ratings, conversions, and rewards. Create date range filters and real-time data updates. Implement responsive chart layouts. Add export functionality for statistics reports. Create sample data for testing and demonstration.",
+        "description": "Build comprehensive statistics dashboard displaying scan counts, average ratings, conversion rates, and distributed rewards using interactive charts and data visualization.",
+        "dependencies": [
+          2
+        ],
+        "testStrategy": "Test statistics accuracy with sample data, verify chart responsiveness and interactivity, test date range filtering, validate real-time updates, and test statistics export functionality."
+      }
+    ],
+    "description": "Create the merchant dashboard with Supabase authentication, shop profile management, QR code generation, and basic statistics display.",
+    "dependencies": [
+      1
+    ],
+    "testStrategy": "Test authentication flows including magic link and password login, verify shop profile updates persist correctly, test QR code generation and print assets, validate statistics accuracy with sample data, test dashboard responsiveness."
+  },
+  {
+    "id": 5,
+    "title": "Implement Prize Management, Subscription System, and Email Integration",
+    "status": "pending",
+    "details": "Create prize management interface allowing merchants to add/edit/delete prizes, upload prize images to Supabase Storage, and configure win probabilities with validation ensuring total equals 100%. Integrate Stripe for subscription management with three tiers (Starter €15, Pro €59, Multi-shop €99) including webhook handling for subscription events. Implement SendGrid integration for email verification, welcome emails, and notification alerts. Build negative feedback viewer in dashboard with filtering and search capabilities. Add email templates for various notifications (welcome, subscription changes, feedback alerts). Implement subscription-based feature gating (e.g., number of shops, advanced analytics). Create admin interface for subscription management and billing history.",
+    "priority": "medium",
+    "subtasks": [
+      {
+        "id": 1,
+        "title": "Implement Prize Management Interface with Image Upload",
+        "status": "pending",
+        "details": "Build React components for prize CRUD operations including form validation, image upload to Supabase Storage with proper error handling, and probability validation ensuring total equals 100%. Create database schema for prizes table with fields for name, description, image_url, probability, and merchant_id. Implement API endpoints for prize operations with proper authentication and authorization.",
+        "description": "Create a comprehensive prize management interface that allows merchants to add, edit, and delete prizes with image upload capabilities and win probability configuration.",
+        "dependencies": [],
+        "testStrategy": "Test prize creation, editing, deletion, image upload functionality, and probability validation with edge cases including invalid totals and file upload errors"
+      },
+      {
+        "id": 2,
+        "title": "Integrate Stripe Subscription System with Webhook Handling",
+        "status": "pending",
+        "details": "Set up Stripe products and prices for Starter (€15), Pro (€59), and Multi-shop (€99) tiers. Create subscription management API endpoints, implement Stripe checkout flow, and build webhook handlers for subscription.created, subscription.updated, subscription.deleted, and payment events. Store subscription data in database with proper status tracking and billing history.",
+        "description": "Implement Stripe integration for subscription management with three pricing tiers and comprehensive webhook handling for subscription lifecycle events.",
+        "dependencies": [],
+        "testStrategy": "Test subscription creation, upgrades, downgrades, cancellations, and webhook processing with Stripe test events and verify billing history accuracy"
+      },
+      {
+        "id": 3,
+        "title": "Implement SendGrid Email Integration with Templates",
+        "status": "pending",
+        "details": "Configure SendGrid API integration, create email templates for verification, welcome, subscription changes, and feedback alerts. Implement email service layer with template rendering, error handling, and delivery tracking. Build email queue system for reliable delivery and create admin interface for managing email templates and monitoring delivery status.",
+        "description": "Set up SendGrid integration for automated email notifications including verification, welcome emails, and various notification alerts with customizable templates.",
+        "dependencies": [],
+        "testStrategy": "Test email delivery for all notification types, verify template rendering with dynamic data, and validate email queue processing and error handling"
+      },
+      {
+        "id": 4,
+        "title": "Build Negative Feedback Viewer with Search and Filtering",
+        "status": "pending",
+        "details": "Design and implement feedback viewer interface with pagination, search by customer name/email, date range filtering, and severity level filtering. Create database queries for efficient feedback retrieval with proper indexing. Implement role-based access control ensuring merchants only see their own feedback and add export functionality for feedback reports.",
+        "description": "Create a comprehensive dashboard component for viewing and managing negative feedback with advanced filtering, search capabilities, and merchant-specific access controls.",
+        "dependencies": [],
+        "testStrategy": "Test filtering and search functionality with large datasets, verify access control restrictions, and validate export functionality with various data formats"
+      },
+      {
+        "id": 5,
+        "title": "Implement Subscription-Based Feature Gating and Admin Interface",
+        "status": "pending",
+        "details": "Implement feature gating middleware that restricts functionality based on subscription tier (shop limits, analytics access, etc.). Build admin dashboard for subscription management, billing history viewing, and user account management. Create monitoring tools for subscription metrics, email delivery rates, and system health. Add subscription upgrade/downgrade flows with prorated billing.",
+        "description": "Create subscription-based feature restrictions and comprehensive admin interface for subscription management, billing history, and system monitoring.",
+        "dependencies": [
+          2,
+          3
+        ],
+        "testStrategy": "Test feature restrictions for each subscription tier, verify admin interface functionality, validate subscription change flows, and test monitoring dashboard accuracy"
+      }
+    ],
+    "description": "Build prize management interface, integrate Stripe for subscription billing, implement SendGrid for email notifications, and add negative feedback viewer.",
+    "dependencies": [
+      3,
+      4
+    ],
+    "testStrategy": "Test prize CRUD operations and probability validation, verify Stripe subscription flows and webhook processing, test email delivery for all notification types, validate feedback viewer functionality, test subscription feature restrictions."
+  }
+]

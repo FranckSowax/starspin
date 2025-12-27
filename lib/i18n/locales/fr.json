@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "Bienvenue",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "done": "Terminé",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite"
+  },
+  "rating": {
+    "title": "Comment était votre expérience?",
+    "subtitle": "Évaluez votre visite",
+    "stars": "étoiles"
+  },
+  "feedback": {
+    "title": "Dites-nous ce qui n'a pas fonctionné",
+    "placeholder": "Vos commentaires nous aident à nous améliorer...",
+    "thankYou": "Merci pour vos commentaires!",
+    "submitted": "Vos commentaires ont été soumis"
+  },
+  "social": {
+    "title": "Partagez votre expérience",
+    "googleReview": "Laisser un avis Google",
+    "followInstagram": "Suivez-nous sur Instagram",
+    "followTikTok": "Suivez-nous sur TikTok"
+  },
+  "wheel": {
+    "title": "Tournez pour gagner!",
+    "spin": "Tourner la roue",
+    "congratulations": "Félicitations!",
+    "youWon": "Vous avez gagné",
+    "alreadySpun": "Vous avez déjà tourné la roue aujourd'hui",
+    "tryAgainTomorrow": "Revenez demain pour une autre chance!"
+  },
+  "coupon": {
+    "title": "Votre récompense",
+    "code": "Code promo",
+    "expiresIn": "Expire dans",
+    "expired": "Ce coupon a expiré",
+    "redeemed": "Ce coupon a été utilisé",
+    "terms": "Conditions générales applicables"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "stats": "Statistiques",
+    "scans": "Scans totaux",
+    "avgRating": "Note moyenne",
+    "conversion": "Taux de conversion",
+    "rewards": "Récompenses distribuées"
+  }
+}

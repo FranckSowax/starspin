@@ -1,0 +1,50 @@
+{
+  "supabase": {
+    "url": "https://egemjezgejptazoucwci.supabase.co",
+    "anonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZW1qZXpnZWpwdGF6b3Vjd2NpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3ODYwNTksImV4cCI6MjA4MjM2MjA1OX0.3n7ZUhCAIC7DESmheRPUZCG7uTvd7HLRUMK0HTchj9M",
+    "serviceRoleKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVnZW1qZXpnZWpwdGF6b3Vjd2NpIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2Njc4NjA1OSwiZXhwIjoyMDgyMzYyMDU5fQ.HJJStxiUl5BoGF6VFqWsDC6uFHKemB27A4fTVKCfgcI",
+    "projectRef": "egemjezgejptazoucwci"
+  },
+  "tables": {
+    "merchants": {
+      "primaryKey": "id",
+      "rls": true,
+      "description": "Merchant accounts and business information"
+    },
+    "prizes": {
+      "primaryKey": "id",
+      "foreignKeys": ["merchant_id"],
+      "rls": true,
+      "description": "Configurable prizes for the spin wheel"
+    },
+    "feedback": {
+      "primaryKey": "id",
+      "foreignKeys": ["merchant_id"],
+      "rls": true,
+      "description": "Customer ratings and feedback"
+    },
+    "spins": {
+      "primaryKey": "id",
+      "foreignKeys": ["merchant_id", "prize_id"],
+      "rls": true,
+      "description": "Spin wheel history and results"
+    },
+    "coupons": {
+      "primaryKey": "id",
+      "foreignKeys": ["merchant_id", "spin_id"],
+      "rls": true,
+      "description": "Generated coupons with expiration"
+    },
+    "qr_codes": {
+      "primaryKey": "id",
+      "foreignKeys": ["merchant_id"],
+      "rls": true,
+      "description": "Generated QR codes for merchants"
+    },
+    "subscription_tiers": {
+      "primaryKey": "tier_name",
+      "rls": false,
+      "description": "Subscription plans configuration"
+    }
+  }
+}

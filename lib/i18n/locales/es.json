@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "Bienvenido",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "done": "Hecho",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error"
+  },
+  "rating": {
+    "title": "¿Cómo fue tu experiencia?",
+    "subtitle": "Califica tu visita",
+    "stars": "estrellas"
+  },
+  "feedback": {
+    "title": "Cuéntanos qué salió mal",
+    "placeholder": "Tus comentarios nos ayudan a mejorar...",
+    "thankYou": "¡Gracias por tus comentarios!",
+    "submitted": "Tus comentarios han sido enviados"
+  },
+  "social": {
+    "title": "Comparte tu experiencia",
+    "googleReview": "Dejar una reseña en Google",
+    "followInstagram": "Síguenos en Instagram",
+    "followTikTok": "Síguenos en TikTok"
+  },
+  "wheel": {
+    "title": "¡Gira para ganar!",
+    "spin": "Girar la rueda",
+    "congratulations": "¡Felicidades!",
+    "youWon": "Ganaste",
+    "alreadySpun": "Ya has girado la rueda hoy",
+    "tryAgainTomorrow": "¡Vuelve mañana para otra oportunidad!"
+  },
+  "coupon": {
+    "title": "Tu recompensa",
+    "code": "Código de cupón",
+    "expiresIn": "Expira en",
+    "expired": "Este cupón ha expirado",
+    "redeemed": "Este cupón ha sido canjeado",
+    "terms": "Se aplican términos y condiciones"
+  },
+  "dashboard": {
+    "title": "Panel de control",
+    "stats": "Estadísticas",
+    "scans": "Escaneos totales",
+    "avgRating": "Calificación promedio",
+    "conversion": "Tasa de conversión",
+    "rewards": "Recompensas distribuidas"
+  }
+}

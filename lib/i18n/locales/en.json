@@ -1,0 +1,51 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "rating": {
+    "title": "How was your experience?",
+    "subtitle": "Rate your visit",
+    "stars": "stars"
+  },
+  "feedback": {
+    "title": "Tell us what went wrong",
+    "placeholder": "Your feedback helps us improve...",
+    "thankYou": "Thank you for your feedback!",
+    "submitted": "Your feedback has been submitted"
+  },
+  "social": {
+    "title": "Share your experience",
+    "googleReview": "Leave a Google Review",
+    "followInstagram": "Follow us on Instagram",
+    "followTikTok": "Follow us on TikTok"
+  },
+  "wheel": {
+    "title": "Spin to Win!",
+    "spin": "Spin the Wheel",
+    "congratulations": "Congratulations!",
+    "youWon": "You won",
+    "alreadySpun": "You've already spun the wheel today",
+    "tryAgainTomorrow": "Come back tomorrow for another chance!"
+  },
+  "coupon": {
+    "title": "Your Reward",
+    "code": "Coupon Code",
+    "expiresIn": "Expires in",
+    "expired": "This coupon has expired",
+    "redeemed": "This coupon has been redeemed",
+    "terms": "Terms and conditions apply"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "stats": "Statistics",
+    "scans": "Total Scans",
+    "avgRating": "Average Rating",
+    "conversion": "Conversion Rate",
+    "rewards": "Rewards Distributed"
+  }
+}
