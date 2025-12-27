@@ -58,8 +58,7 @@ export default function SpinPage() {
         .from('prizes')
         .select('*')
         .eq('merchant_id', shopId)
-        .gt('probability', 0)
-        .gt('quantity', 0);
+        .gt('probability', 0);
 
       setMerchant(merchantData);
       setPrizes(prizesData || []);
@@ -71,6 +70,8 @@ export default function SpinPage() {
 
   const segmentAngle = prizes.length > 0 ? 360 / prizes.length : 0;
   const skewAngle = 90 - segmentAngle;
+  // Offset to align the wedge so it ends at 90deg (South)
+  const segmentOffset = 90 - segmentAngle;
 
   const selectWinningSegment = () => {
     const totalProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 0), 0);
@@ -90,14 +91,29 @@ export default function SpinPage() {
     setResult('');
 
     const winningIndex = selectWinningSegment();
-    const randomOffset = Math.random() * (segmentAngle * 0.8) + (segmentAngle * 0.1); // Keep within segment
     
-    // Calculate rotation to align the winning segment with the pointer (top center)
-    // The pointer is at -90deg (top). 
-    // We need to rotate the wheel so the winning segment's center hits -90deg.
-    const segmentCenter = (winningIndex * segmentAngle) + (segmentAngle / 2);
-    const targetRotation = 360 * 5 + (360 - segmentCenter) - 90; // Add 5 full spins + alignment - 90 for top offset
+    // Calculate target rotation
+    // Visual center of the winning segment
+    // For n>=3: Center = index * angle + 90 - angle/2
+    // For n=2: Index 0 center is 90. Index 1 center is 270.
+    // Formula check: n=2 (angle 180). i=0. 0*180 + 90 - 90 = 0. Incorrect. Center is 90.
+    // So n=2 needs specific logic or different offset.
+    
+    let segmentCenter;
+    if (prizes.length === 2) {
+      segmentCenter = 90 + (winningIndex * 180);
+    } else if (prizes.length === 1) {
+      segmentCenter = 0;
+    } else {
+      segmentCenter = (winningIndex * segmentAngle) + (90 - segmentAngle/2);
+    }
 
+    // We want segmentCenter to move to -90 (270)
+    // current + delta = 270 - center
+    // delta = 270 - center - current
+    // Add spins: 360 * 5
+    
+    const targetRotation = (360 * 5) + (270 - segmentCenter);
     const totalRotation = currentRotationRef.current + targetRotation;
 
     if (wheelRef.current) {
@@ -349,11 +365,86 @@ export default function SpinPage() {
               >
                 {prizes.map((prize, index) => {
                   const isHighValue = (prize.probability || 0) <= 10;
-                  // Alternate colors: High value is yellow, others alternate green/black or green/dark-green
-                  // User asked to use existing segments, so we'll map prizes directly.
-                  // Let's use a simple alternation for standard prizes to give visual variety.
                   const segmentColor = isHighValue ? 'yellow' : (index % 2 === 0 ? 'green' : 'black');
                   
+                  // Special handling for 2 segments to avoid infinite skew
+                  if (prizes.length === 2) {
+                    return (
+                      <div
+                        key={prize.id}
+                        className="segment"
+                        style={{ 
+                          width: '100%',
+                          height: '50%',
+                          top: '50%',
+                          left: '0',
+                          transformOrigin: '50% 0%',
+                          transform: `rotate(${index * 180}deg)`,
+                          clipPath: 'none',
+                          border: 'none'
+                        }}
+                      >
+                        <div 
+                          className={`segment-content ${segmentColor}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            left: '0',
+                            transform: 'none',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          <div 
+                            className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}
+                            style={{ 
+                              transform: 'rotate(180deg)', 
+                              top: '40%' 
+                            }}
+                          >
+                            {prize.name}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Special handling for 1 segment (full circle)
+                  if (prizes.length === 1) {
+                    return (
+                      <div
+                        key={prize.id}
+                        className="segment"
+                        style={{ 
+                          width: '100%',
+                          height: '100%',
+                          top: '0',
+                          left: '0',
+                          transform: 'none',
+                          clipPath: 'none',
+                          border: 'none',
+                          borderRadius: '50%'
+                        }}
+                      >
+                        <div 
+                          className={`segment-content ${segmentColor}`}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            left: '0',
+                            transform: 'none',
+                            borderRadius: '50%'
+                          }}
+                        >
+                          <div className={`segment-text ${isHighValue ? 'yellow-text' : ''}`} style={{ transform: 'none', top: '20%' }}>
+                            {prize.name}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }
+
                   return (
                     <div
                       key={prize.id}
