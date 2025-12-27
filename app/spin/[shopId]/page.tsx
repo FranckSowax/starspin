@@ -20,6 +20,7 @@ export default function SpinPage() {
   const [isClient, setIsClient] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [result, setResult] = useState<string>('');
+  const [couponCode, setCouponCode] = useState<string>('');
   const wheelRef = useRef<HTMLDivElement>(null);
   const currentRotationRef = useRef(0);
 
@@ -170,9 +171,7 @@ export default function SpinPage() {
         expires_at: expiresAt.toISOString(),
       });
 
-      setTimeout(() => {
-        router.push(`/coupon/${shopId}?code=${couponCode}`);
-      }, 3000);
+      setCouponCode(couponCode);
     }
   };
 
@@ -213,6 +212,8 @@ export default function SpinPage() {
   return (
     <>
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+
         @keyframes slideUp {
           from {
             opacity: 0;
@@ -270,13 +271,13 @@ export default function SpinPage() {
 
         .segment-text {
           color: #ffd700;
-          font-family: 'Arial Black', Arial, sans-serif;
-          font-size: clamp(0.7rem, 2.8vw, 1.2rem);
+          font-family: 'Russo One', 'Arial Black', Arial, sans-serif;
+          font-size: clamp(0.8rem, 3.2vw, 1.4rem);
           font-weight: 900;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.8);
+          text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), 0 0 10px rgba(0, 0, 0, 0.9);
           white-space: nowrap;
           text-transform: uppercase;
-          letter-spacing: 1px;
+          letter-spacing: 1.5px;
           -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.5);
         }
 
@@ -466,9 +467,16 @@ export default function SpinPage() {
           {/* Result */}
           {result && (
             <div className="mt-8" style={{ animation: 'fadeIn 0.5s ease' }}>
-              <div className="inline-block bg-black/80 px-8 py-5 rounded-2xl backdrop-blur-lg border-2 border-[#ffd700]/50" style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)' }}>
-                <div className="text-xl text-[#ffd700] mb-2">🎊 FÉLICITATIONS ! 🎊</div>
-                <div className="text-2xl text-white font-bold">{result}</div>
+              <div className="inline-block bg-black/90 px-8 py-6 rounded-2xl backdrop-blur-lg border-2 border-[#ffd700]" style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)' }}>
+                <div className="text-xl text-[#ffd700] mb-3">🎊 FÉLICITATIONS ! 🎊</div>
+                <div className="text-2xl text-white font-bold mb-4">{result}</div>
+                <button
+                  onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}`)}
+                  className="w-full py-3 px-6 bg-[#ffd700] text-black font-bold rounded-xl hover:bg-[#ffb700] transition-colors text-lg"
+                  style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' }}
+                >
+                  Récupérer mon prix →
+                </button>
               </div>
             </div>
           )}
