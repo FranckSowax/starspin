@@ -72,6 +72,10 @@ export function SpinningWheel({
           width={size}
           height={size}
           className="w-full h-full object-contain drop-shadow-2xl"
+          style={{
+            mixBlendMode: 'multiply',
+            filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.5))'
+          }}
           priority
         />
       </div>
