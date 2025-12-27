@@ -63,6 +63,14 @@ export default function AdminDashboard() {
     totalReviews: 0,
     totalRevenue: 0,
   });
+
+  // Estimated monthly revenue per tier
+  const TIER_PRICING = {
+    'free': 0,
+    'starter': 29, // Example price, adjust as needed
+    'premium': 99, // Example price, adjust as needed
+  };
+
   const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
   const [merchantStats, setMerchantStats] = useState<Record<string, MerchantStats>>({});
   const [activeSection, setActiveSection] = useState<'dashboard' | 'merchants'>('dashboard');
@@ -163,11 +171,22 @@ export default function AdminDashboard() {
 
       // Calculate global stats
       const totalReviews = Object.values(statsMap).reduce((sum, s) => sum + s.totalReviews, 0);
+      
+      const totalRevenue = merchantsData.reduce((sum, m) => {
+        // Only count active merchants for MRR if desired, otherwise all
+        if (m.is_active === false) return sum;
+        
+        const tier = m.subscription_tier?.toLowerCase() || 'free';
+        // @ts-ignore
+        const price = TIER_PRICING[tier] || 0;
+        return sum + price;
+      }, 0);
+
       setStats({
         totalMerchants: merchantsData.length,
         activeMerchants: merchantsData.filter(m => m.is_active !== false).length,
         totalReviews,
-        totalRevenue: totalReviews * 2.5, // Example calculation
+        totalRevenue,
       });
     }
   };
@@ -419,9 +438,9 @@ export default function AdminDashboard() {
                   <span className="font-semibold">+15%</span>
                 </div>
               </div>
-              <p className="text-slate-400 text-sm mb-2">Revenue Estimé</p>
+              <p className="text-slate-400 text-sm mb-2">Revenue Estimé (MRR)</p>
               <p className="text-4xl font-bold text-white mb-1">${stats.totalRevenue.toFixed(0)}</p>
-              <p className="text-xs text-slate-500">Basé sur reviews</p>
+              <p className="text-xs text-slate-500">Basé sur abonnements</p>
             </div>
           </div>
 
