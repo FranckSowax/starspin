@@ -60,23 +60,31 @@ export default function SettingsPage() {
   const handleBackgroundChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check aspect ratio (9:16 for vertical)
+      // Set file immediately to enable Save button
+      setBackgroundFile(file);
+      
+      // Check aspect ratio (9:16 for vertical) - warning only, not blocking
       const img = new Image();
       img.onload = () => {
         const aspectRatio = img.width / img.height;
         const target = 9 / 16;
-        if (Math.abs(aspectRatio - target) > 0.1) {
-          setMessage({ type: 'error', text: 'Please upload an image with 9:16 aspect ratio (vertical format)' });
-          return;
+        if (Math.abs(aspectRatio - target) > 0.15) {
+          setMessage({ 
+            type: 'error', 
+            text: `Image ratio is ${(aspectRatio * 16 / 9).toFixed(2)}:16. Recommended: 9:16 (vertical format)` 
+          });
+        } else {
+          setMessage(null);
         }
-        setBackgroundFile(file);
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setBackgroundPreview(reader.result as string);
-        };
-        reader.readAsDataURL(file);
       };
       img.src = URL.createObjectURL(file);
+      
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBackgroundPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
