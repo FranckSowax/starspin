@@ -135,7 +135,7 @@ export interface ImageItem {
 }
 
 interface PhoneCarouselProps {
-  images: ImageItem[];
+  images?: ImageItem[];
   className?: string;
   featureMode?: boolean;
   featuresData?: { images: ImageItem[] }[];
@@ -143,7 +143,7 @@ interface PhoneCarouselProps {
 }
 
 export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
-  images,
+  images = [],
   className,
   featureMode,
   featuresData,
@@ -161,7 +161,7 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
   }, []);
 
   useEffect(() => {
-    if (featureMode) return;
+    if (featureMode || images.length === 0) return;
 
     let interval: NodeJS.Timeout;
     if (!isPaused && !isHovering) {
