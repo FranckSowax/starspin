@@ -143,8 +143,8 @@ export default function LandingPage() {
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👨‍🍳</div>
                   <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👩‍💼</div>
                 </div>
-              </div>
-            </div>
+              </Card>
+            </Card>
           </div>
         </div>
       </section>
