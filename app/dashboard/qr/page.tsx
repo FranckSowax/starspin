@@ -35,17 +35,23 @@ export default function QRCodePage() {
 
       setMerchant(merchantData);
 
-      const url = `${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`;
-      const qr = await QRCode.toDataURL(url, {
-        width: 400,
-        margin: 2,
-        color: {
-          dark: '#1A202C',
-          light: '#FFFFFF',
-        },
-      });
+      // Check if QR code already exists in storage
+      if (merchantData?.qr_code_url) {
+        setQrCodeUrl(merchantData.qr_code_url);
+      } else {
+        // Generate new QR code
+        const url = `${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`;
+        const qr = await QRCode.toDataURL(url, {
+          width: 400,
+          margin: 2,
+          color: {
+            dark: '#2D6A4F',
+            light: '#FFFFFF',
+          },
+        });
 
-      setQrCodeUrl(qr);
+        setQrCodeUrl(qr);
+      }
     };
 
     checkAuth();
@@ -87,7 +93,17 @@ export default function QRCodePage() {
         </div>
 
         <Card className="p-8">
-          <div className="flex justify-center mb-8">
+          <div className="flex flex-col items-center mb-8">
+            {merchant?.qr_code_url && (
+              <div className="mb-4 text-center">
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-medium">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  QR Code généré par l'admin
+                </span>
+              </div>
+            )}
             <div className="bg-white p-8 rounded-lg border-4 border-[#2D6A4F] shadow-lg">
               {qrCodeUrl && (
                 <img src={qrCodeUrl} alt="QR Code" className="w-80 h-80" />
