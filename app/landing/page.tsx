@@ -45,107 +45,105 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen bg-gradient-to-br from-[#1B4332] via-[#2D6A4F] to-[#40916C] overflow-hidden">
-        {/* Floating particles animation */}
-        <FloatingParticles 
-          count={40}
-          color="#ffffff"
-          opacity={0.2}
-          minSize={2}
-          maxSize={8}
-          speed={0.3}
-        />
+      <section className="relative min-h-screen overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: 'url(/BANNER-SPIN-HERO-.png)',
+            backgroundPosition: 'center left'
+          }}
+        >
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-transparent"></div>
+        </div>
 
         <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
-          <div className="text-center mb-16">
-            {/* Main Title */}
-            <h1 className="text-8xl md:text-9xl font-black mb-8 tracking-tight">
-              <GradientText colors={['#ffffff', '#74C69D', '#ffffff']} animate={true}>
-                REVIEW
-              </GradientText>
-              <span className="text-[#FF6B6B]">WISH</span>
-            </h1>
+          <div className="grid md:grid-cols-2 gap-12 items-center min-h-[calc(100vh-8rem)]">
+            {/* Left column - Empty/Image space */}
+            <div className="hidden md:block">
+              {/* This space is for the background image to show through */}
+            </div>
 
-            {/* Interactive elements */}
-            <div className="flex items-center justify-center gap-32 mb-12">
-              <div className="text-left">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
-                  <div className="h-px w-32 bg-white/30"></div>
-                </div>
-                <p className="text-white/80 text-sm">Write a review</p>
-                <p className="text-white/60 text-xs">Get a reward</p>
+            {/* Right column - Content */}
+            <div className="text-left space-y-8">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+                <div className="w-2 h-2 bg-[#52B788] rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-white uppercase tracking-wide">Boostez votre réputation</span>
               </div>
 
-              {/* Center 3D Element - Spinning Wheel */}
-              <div className="relative">
-                <SpinningWheel 
-                  imageSrc="/spin-2.png"
-                  size={450}
-                  autoSpin={true}
-                  spinDuration={8000}
-                />
+              {/* Main Title */}
+              <h1 className="text-5xl md:text-7xl font-black text-white leading-tight">
+                Transformez vos clients satisfaits en
+                <span className="block mt-2 text-[#52B788]">ambassadeurs</span>
+              </h1>
+
+              {/* Subtitle */}
+              <p className="text-xl md:text-2xl text-white/90 leading-relaxed max-w-xl">
+                La roue gamifiée qui booste vos avis Google et fidélise vos clients dans les zones touristiques de Thaïlande
+              </p>
+
+              {/* Features list */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-[#52B788] rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-white/90 text-lg">Interface multilingue (6 langues)</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-[#52B788] rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-white/90 text-lg">+1 point Google = +5 à 9% de CA</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-[#52B788] rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-white/90 text-lg">Filtrage intelligent des avis négatifs</span>
+                </div>
               </div>
 
-              <div className="text-right">
-                <div className="flex items-center gap-3 mb-2 justify-end">
-                  <div className="h-px w-32 bg-white/30"></div>
-                  <div className="w-3 h-3 bg-white rounded-full"></div>
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button size="lg" className="bg-[#52B788] hover:bg-[#40916C] text-white px-10 py-6 text-lg font-bold rounded-full shadow-2xl">
+                  Essayer gratuitement
+                </Button>
+                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-gray-900 px-10 py-6 text-lg font-bold rounded-full backdrop-blur-sm">
+                  Voir la démo
+                </Button>
+              </div>
+
+              {/* Social proof */}
+              <div className="flex items-center gap-6 pt-4">
+                <div className="flex -space-x-3">
+                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
+                    MA
+                  </div>
+                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
+                    SP
+                  </div>
+                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
+                    CL
+                  </div>
+                  <div className="w-12 h-12 bg-[#2D6A4F] rounded-full border-2 border-white flex items-center justify-center text-white font-bold">
+                    +100K
+                  </div>
                 </div>
-                <p className="text-white/80 text-sm">Make a wish</p>
-                <p className="text-white/60 text-xs">Get instant rewards</p>
+                <div className="text-white/80">
+                  <p className="font-semibold">100K+ restaurants</p>
+                  <p className="text-sm">utilisent StarSpin</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Bottom CTA Section */}
-          <div className="max-w-4xl mx-auto">
-            <Card className="bg-white rounded-3xl p-12 shadow-2xl relative border-0">
-              {/* Toggle button */}
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                <Badge className="bg-[#FF6B6B] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-[#FF5252] transition">
-                  Review Mode
-                  <div className="w-12 h-6 bg-white/30 rounded-full relative">
-                    <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
-                  </div>
-                </Badge>
-              </div>
-
-              <div className="text-center pt-8">
-                <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                  Get a personalized<br />
-                  reward for reviews and<br />
-                  boost your reputation
-                </h2>
-                <ShineBorder color="#FF6B6B" borderRadius={9999} borderWidth={3} duration={2}>
-                  <Button size="lg" className="mt-8 bg-[#1B4332] text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-[#2D6A4F] transition shadow-lg">
-                    START FREE TRIAL
-                  </Button>
-                </ShineBorder>
-              </div>
-
-              {/* Decorative envelope */}
-              <div className="absolute -left-12 bottom-12">
-                <div className="relative">
-                  <div className="text-8xl">📧</div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                    <p className="text-xs font-bold text-[#FF6B6B] whitespace-nowrap">WRITE TO</p>
-                    <p className="text-xs font-bold text-[#1B4332]">STARSPIN</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats card */}
-              <Card className="absolute -right-12 bottom-12 bg-[#2D6A4F] text-white rounded-2xl p-6 shadow-xl border-0">
-                <div className="text-5xl font-black mb-2">100K</div>
-                <p className="text-sm opacity-80">Businesses received</p>
-                <p className="text-sm opacity-80">positive reviews</p>
-                <div className="flex gap-2 mt-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👨‍🍳</div>
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👩‍💼</div>
-                </div>
-              </Card>
-            </Card>
           </div>
         </div>
       </section>
