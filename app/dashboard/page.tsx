@@ -432,9 +432,14 @@ export default function DashboardPage() {
               Share this link with your customers to collect reviews
             </p>
             <div className="bg-gray-50 rounded-lg p-4 mb-4 border-2 border-gray-200">
-              <code className="text-sm break-all text-gray-700">
+              <a 
+                href={`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm break-all text-teal-600 hover:text-teal-700 font-medium underline"
+              >
                 {`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`}
-              </code>
+              </a>
             </div>
             <div className="flex gap-3">
               <Button

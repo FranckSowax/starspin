@@ -115,9 +115,14 @@ export default function QRCodePage() {
           <div className="space-y-6">
             <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
               <p className="text-sm font-medium text-gray-700 mb-3">Your Review Link:</p>
-              <code className="text-sm break-all text-gray-900 font-mono bg-white px-4 py-3 rounded border border-gray-300 block">
+              <a 
+                href={`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm break-all text-teal-600 hover:text-teal-700 font-mono bg-white px-4 py-3 rounded border border-gray-300 block hover:border-teal-500 transition-colors underline"
+              >
                 {`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`}
-              </code>
+              </a>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
