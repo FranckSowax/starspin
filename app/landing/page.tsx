@@ -58,14 +58,14 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-[#0A2F23]/95 via-[#1B4332]/90 to-[#2D6A4F]/85"></div>
         </div>
 
-        <div className="container mx-auto px-6 pt-32 pb-20 relative z-10">
+        <div className="container mx-auto px-6 pt-24 pb-12 relative z-10">
           <div className="grid md:grid-cols-3 gap-8 items-center min-h-[calc(100vh-8rem)]">
             {/* Left column - Text Content */}
             <div className="text-left space-y-6">
               {/* Main Title */}
               <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'Arco, sans-serif' }}>
                 Transformez vos clients satisfaits en
-                <span className="block mt-3 text-transparent bg-clip-text bg-gradient-to-r from-[#52B788] to-[#95D5B2]">
+                <span className="block mt-3 text-white">
                   Étoiles
                 </span>
               </h1>
@@ -146,17 +146,6 @@ export default function LandingPage() {
                   
                   {/* Notch */}
                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-7 bg-gray-900 rounded-b-3xl"></div>
-                </div>
-
-                {/* Floating badge */}
-                <div className="absolute -top-4 -right-4 bg-white rounded-full px-4 py-2 shadow-xl">
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">📱</span>
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-gray-900">Mobile App</p>
-                      <p className="text-xs text-gray-600">Available</p>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Decorative elements */}
