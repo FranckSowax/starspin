@@ -386,7 +386,7 @@ export default function SpinPage() {
               >
                 {prizes.map((prize, index) => {
                   const isHighValue = (prize.probability || 0) <= 10;
-                  const segmentColor = isHighValue ? 'yellow' : (index % 2 === 0 ? 'green' : 'black');
+                  const segmentColor = isHighValue ? 'yellow' : 'green';
                   
                   // Special handling for 2 segments to avoid infinite skew
                   if (prizes.length === 2) {
