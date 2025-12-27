@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalReviews: 0,
     avgRating: 0,
@@ -94,6 +95,33 @@ export default function DashboardPage() {
       })) || [];
       
       setRecentActivity(activity);
+
+      // Process chart data (last 90 days)
+      const chartMap = new Map<string, { date: string; positive: number; negative: number }>();
+      const today = new Date();
+      const ninetyDaysAgo = new Date();
+      ninetyDaysAgo.setDate(today.getDate() - 90);
+
+      // Initialize map with 0 values for last 90 days
+      for (let d = new Date(ninetyDaysAgo); d <= today; d.setDate(d.getDate() + 1)) {
+        const dateStr = d.toISOString().split('T')[0];
+        chartMap.set(dateStr, { date: dateStr, positive: 0, negative: 0 });
+      }
+
+      // Fill with actual data
+      feedbackData?.forEach((f: any) => {
+        const dateStr = new Date(f.created_at).toISOString().split('T')[0];
+        if (chartMap.has(dateStr)) {
+          const entry = chartMap.get(dateStr)!;
+          if (f.is_positive) {
+            entry.positive += 1;
+          } else {
+            entry.negative += 1;
+          }
+        }
+      });
+
+      setChartData(Array.from(chartMap.values()));
     };
 
     checkAuth();
@@ -209,7 +237,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-slate-500">Évolution sur les 30 derniers jours</p>
               </div>
             </div>
-            <ChartAreaInteractive />
+            <ChartAreaInteractive data={chartData} />
           </Card>
 
           {/* Recent Activity Feed */}
