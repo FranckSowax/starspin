@@ -1,0 +1,31 @@
+<svg width="390" height="844" viewBox="0 0 390 844" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <rect width="390" height="844" fill="url(#gradient4)"/>
+  <defs>
+    <linearGradient id="gradient4" x1="0" y1="0" x2="0" y2="844" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D6A4F"/>
+      <stop offset="1" stop-color="#1B4332"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Content -->
+  <text x="195" y="100" text-anchor="middle" fill="white" font-size="32" font-weight="bold">Étape 4</text>
+  <text x="195" y="140" text-anchor="middle" fill="white" font-size="20" opacity="0.9">Félicitations !</text>
+  
+  <!-- Trophy/Gift icon -->
+  <circle cx="195" cy="320" r="80" fill="#52B788"/>
+  <text x="195" y="345" text-anchor="middle" fill="white" font-size="60">🎁</text>
+  
+  <!-- Reward card -->
+  <rect x="45" y="450" width="300" height="140" fill="white" rx="20"/>
+  <text x="195" y="490" text-anchor="middle" fill="#2D6A4F" font-size="22" font-weight="bold">Votre récompense</text>
+  <text x="195" y="525" text-anchor="middle" fill="#1B4332" font-size="28" font-weight="bold">-20% sur votre</text>
+  <text x="195" y="555" text-anchor="middle" fill="#1B4332" font-size="28" font-weight="bold">prochaine visite</text>
+  
+  <!-- Timer -->
+  <rect x="95" y="620" width="200" height="50" fill="white" opacity="0.2" rx="25"/>
+  <text x="195" y="652" text-anchor="middle" fill="white" font-size="18" opacity="0.9">⏱️ Valable 7 jours</text>
+  
+  <!-- Text -->
+  <text x="195" y="740" text-anchor="middle" fill="white" font-size="18" opacity="0.8">Revenez vite nous voir !</text>
+</svg>

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { PhoneCarousel } from '@/components/ui/phone-carousel';
 import { SpinningWheel } from '@/components/animations/SpinningWheel';
 import { FloatingParticles } from '@/components/animations/FloatingParticles';
 import { GradientText } from '@/components/animations/GradientText';
@@ -12,6 +13,7 @@ import { ShineBorder } from '@/components/animations/ShineBorder';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [activeStep, setActiveStep] = useState<number>(0);
   const [language, setLanguage] = useState('FR');
 
   const toggleFaq = (index: number) => {
@@ -303,10 +305,35 @@ export default function LandingPage() {
             </p>
           </div>
 
+          {/* Phone Carousel with 4 steps */}
+          <div className="mb-16">
+            <PhoneCarousel
+              featureMode={true}
+              activeFeatureIndex={activeStep}
+              featuresData={[
+                {
+                  images: [{ src: '/workflow-step1.svg', alt: 'Étape 1: Scan QR Code' }]
+                },
+                {
+                  images: [{ src: '/workflow-step2.svg', alt: 'Étape 2: Notez votre expérience' }]
+                },
+                {
+                  images: [{ src: '/workflow-step3.svg', alt: 'Étape 3: Tournez la roue' }]
+                },
+                {
+                  images: [{ src: '/workflow-step4.svg', alt: 'Étape 4: Recevez votre récompense' }]
+                }
+              ]}
+            />
+          </div>
+
           {/* Workflow steps */}
           <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {/* Step 1 */}
-            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+            <Card 
+              className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveStep(0)}
+            >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -322,7 +349,10 @@ export default function LandingPage() {
             </Card>
 
             {/* Step 2 */}
-            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+            <Card 
+              className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveStep(1)}
+            >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -338,7 +368,10 @@ export default function LandingPage() {
             </Card>
 
             {/* Step 3 */}
-            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+            <Card 
+              className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveStep(2)}
+            >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all">
                   <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -354,7 +387,10 @@ export default function LandingPage() {
             </Card>
 
             {/* Step 4 */}
-            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+            <Card 
+              className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300 cursor-pointer"
+              onClick={() => setActiveStep(3)}
+            >
               <div className="flex flex-col items-center text-center">
                 <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

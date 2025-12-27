@@ -1,0 +1,38 @@
+<svg width="390" height="844" viewBox="0 0 390 844" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <rect width="390" height="844" fill="url(#gradient2)"/>
+  <defs>
+    <linearGradient id="gradient2" x1="0" y1="0" x2="0" y2="844" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D6A4F"/>
+      <stop offset="1" stop-color="#1B4332"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Content -->
+  <text x="195" y="100" text-anchor="middle" fill="white" font-size="32" font-weight="bold">Étape 2</text>
+  <text x="195" y="140" text-anchor="middle" fill="white" font-size="20" opacity="0.9">Notez votre expérience</text>
+  
+  <!-- Star rating -->
+  <g transform="translate(55, 280)">
+    <circle cx="30" cy="30" r="30" fill="#52B788"/>
+    <circle cx="90" cy="30" r="30" fill="#52B788"/>
+    <circle cx="150" cy="30" r="30" fill="#52B788"/>
+    <circle cx="210" cy="30" r="30" fill="#52B788"/>
+    <circle cx="270" cy="30" r="30" fill="#52B788"/>
+    <text x="30" y="42" text-anchor="middle" fill="white" font-size="28">★</text>
+    <text x="90" y="42" text-anchor="middle" fill="white" font-size="28">★</text>
+    <text x="150" y="42" text-anchor="middle" fill="white" font-size="28">★</text>
+    <text x="210" y="42" text-anchor="middle" fill="white" font-size="28">★</text>
+    <text x="270" y="42" text-anchor="middle" fill="white" font-size="28">★</text>
+  </g>
+  
+  <!-- Feedback buttons -->
+  <rect x="45" y="450" width="300" height="60" fill="white" opacity="0.2" rx="30"/>
+  <text x="195" y="488" text-anchor="middle" fill="white" font-size="20" font-weight="bold">Excellent service !</text>
+  
+  <rect x="45" y="530" width="300" height="60" fill="white" opacity="0.1" rx="30"/>
+  <text x="195" y="568" text-anchor="middle" fill="white" font-size="18" opacity="0.7">Peut mieux faire</text>
+  
+  <!-- Text -->
+  <text x="195" y="680" text-anchor="middle" fill="white" font-size="18" opacity="0.8">Donnez votre avis</text>
+</svg>
