@@ -58,15 +58,15 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 z-50 h-full w-64 bg-gray-50 border-r border-gray-200 transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
       `}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+          <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <div className="w-2 h-2 bg-teal-600 rounded-full"></div>
               <span className="text-xl font-bold text-gray-900">StarSpin</span>
             </Link>
             <button 
@@ -79,9 +79,9 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
 
           {/* Merchant Info */}
           {merchant && (
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#2D6A4F] to-[#52B788] rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-gradient-to-br from-teal-600 to-teal-700 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-lg">
                     {merchant.business_name?.[0] || merchant.name?.[0] || 'M'}
                   </span>
@@ -90,7 +90,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                   <p className="text-sm font-semibold text-gray-900 truncate">
                     {merchant.business_name || merchant.name}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">
+                  <p className="text-xs text-gray-600 capitalize">
                     {merchant.subscription_tier || 'Free'} Plan
                   </p>
                 </div>
@@ -110,10 +110,10 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all relative
                     ${isActive 
-                      ? 'bg-[#2D6A4F] text-white' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-white text-gray-900 shadow-sm before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-8 before:bg-teal-600 before:rounded-r' 
+                      : 'text-gray-700 hover:bg-white/50 hover:text-gray-900'
                     }
                   `}
                 >
@@ -125,11 +125,11 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
           </nav>
 
           {/* Sign Out */}
-          <div className="p-3 border-t border-gray-200">
+          <div className="p-3 border-t border-gray-200 bg-white">
             <Button
               onClick={handleSignOut}
               variant="outline"
-              className="w-full justify-start gap-3 text-gray-700 hover:text-red-600 hover:border-red-600"
+              className="w-full justify-start gap-3 text-gray-700 hover:text-red-600 hover:border-red-600 hover:bg-red-50"
             >
               <LogOut className="w-5 h-5" />
               Sign Out
