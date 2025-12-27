@@ -3,7 +3,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Button } from '@/components/atoms/Button';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Download, Copy, Share2 } from 'lucide-react';
 import QRCode from 'qrcode';
 
 export default function QRCodePage() {
@@ -66,33 +69,26 @@ export default function QRCodePage() {
 
   if (!user || !merchant) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">QR Code Generator</h1>
-            <Button onClick={() => router.push('/dashboard')} variant="outline" size="sm">
-              Back to Dashboard
-            </Button>
-          </div>
+    <DashboardLayout merchant={merchant}>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">QR Code Generator</h1>
+          <p className="text-gray-600">Download and share your QR code to collect customer reviews</p>
         </div>
-      </nav>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Your QR Code
-          </h2>
-
+        <Card className="p-8">
           <div className="flex justify-center mb-8">
-            <div className="bg-white p-8 rounded-lg border-4 border-[#FF6F61]">
+            <div className="bg-white p-8 rounded-lg border-4 border-[#2D6A4F] shadow-lg">
               {qrCodeUrl && (
                 <img src={qrCodeUrl} alt="QR Code" className="w-80 h-80" />
               )}
@@ -100,36 +96,65 @@ export default function QRCodePage() {
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-2">Your Rating Link:</h3>
-            <code className="text-sm text-gray-700 break-all">
-              {process.env.NEXT_PUBLIC_APP_URL}/rate/{user.id}
-            </code>
-          </div>
+          <div className="space-y-6">
+            <div className="bg-gray-50 rounded-lg p-6 border-2 border-gray-200">
+              <p className="text-sm font-medium text-gray-700 mb-3">Your Review Link:</p>
+              <code className="text-sm break-all text-gray-900 font-mono bg-white px-4 py-3 rounded border border-gray-300 block">
+                {`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`}
+              </code>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button onClick={() => downloadQR('png')} className="w-full">
-              Download PNG
-            </Button>
-            <Button onClick={() => downloadQR('svg')} variant="secondary" className="w-full">
-              Download SVG
-            </Button>
-            <Button onClick={copyLink} variant="outline" className="w-full">
-              Copy Link
-            </Button>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button onClick={copyLink} variant="outline" className="w-full gap-2">
+                <Copy className="w-4 h-4" />
+                Copy Link
+              </Button>
+              <Button onClick={() => downloadQR('png')} className="w-full gap-2 bg-[#2D6A4F] hover:bg-[#1B4332]">
+                <Download className="w-4 h-4" />
+                Download PNG
+              </Button>
+              <Button onClick={() => downloadQR('svg')} variant="outline" className="w-full gap-2">
+                <Share2 className="w-4 h-4" />
+                Share
+              </Button>
+            </div>
           </div>
+        </Card>
 
-          <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-            <h3 className="font-semibold text-gray-900 mb-2">💡 Tips:</h3>
-            <ul className="list-disc list-inside text-gray-700 space-y-1">
-              <li>Print this QR code and display it at your checkout counter</li>
-              <li>Add it to table tents or receipts</li>
-              <li>Share the link on social media</li>
-              <li>Include it in email signatures</li>
-            </ul>
+        <Card className="p-6 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <h3 className="font-bold text-gray-900 mb-4 text-lg">💡 How to use your QR Code</h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+              <div>
+                <p className="font-semibold text-gray-900">Print & Display</p>
+                <p className="text-sm text-gray-700">Place the QR code at your checkout or tables</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+              <div>
+                <p className="font-semibold text-gray-900">Customers Scan</p>
+                <p className="text-sm text-gray-700">They scan and rate their experience</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+              <div>
+                <p className="font-semibold text-gray-900">Smart Routing</p>
+                <p className="text-sm text-gray-700">Positive reviews go to Google automatically</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
+              <div>
+                <p className="font-semibold text-gray-900">Private Feedback</p>
+                <p className="text-sm text-gray-700">Negative feedback stays private for improvement</p>
+              </div>
+            </div>
           </div>
-        </div>
-      </main>
-    </div>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }

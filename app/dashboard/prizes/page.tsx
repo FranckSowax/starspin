@@ -3,13 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Button } from '@/components/atoms/Button';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
+import { Plus, Trash2, AlertCircle } from 'lucide-react';
 
 export default function PrizesPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [merchant, setMerchant] = useState<any>(null);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,6 +33,14 @@ export default function PrizesPage() {
       }
 
       setUser(user);
+      
+      const { data: merchantData } = await supabase
+        .from('merchants')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      setMerchant(merchantData);
       fetchPrizes(user.id);
     };
 
@@ -74,37 +86,51 @@ export default function PrizesPage() {
 
   const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0);
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Prize Management</h1>
-            <Button onClick={() => router.push('/dashboard')} variant="outline" size="sm">
-              Back to Dashboard
-            </Button>
-          </div>
+  if (!user || !merchant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
         </div>
-      </nav>
+      </div>
+    );
+  }
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6 flex justify-between items-center">
+  return (
+    <DashboardLayout merchant={merchant}>
+      <div className="space-y-6">
+        <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Your Prizes</h2>
-            <p className="text-gray-600">
-              Total Probability: {totalProbability}% 
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Prize Management</h1>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-600">
+                Total Probability: <span className="font-semibold">{totalProbability}%</span>
+              </p>
               {totalProbability !== 100 && (
-                <span className="text-red-500 ml-2">(Must equal 100%)</span>
+                <div className="flex items-center gap-1 text-red-600 text-sm">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Must equal 100%</span>
+                </div>
               )}
-            </p>
+            </div>
           </div>
-          <Button onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'Add Prize'}
+          <Button onClick={() => setShowForm(!showForm)} className="gap-2">
+            {showForm ? (
+              <>
+                <span>Cancel</span>
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" />
+                <span>Add Prize</span>
+              </>
+            )}
           </Button>
         </div>
 
         {showForm && (
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <Card className="p-6">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Add New Prize</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
@@ -144,38 +170,49 @@ export default function PrizesPage() {
                 {loading ? 'Adding...' : 'Add Prize'}
               </Button>
             </form>
-          </div>
+          </Card>
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {prizes.map((prize) => (
-            <div key={prize.id} className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{prize.name}</h3>
-              {prize.description && (
-                <p className="text-gray-600 mb-4">{prize.description}</p>
-              )}
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-gray-600">Probability:</span>
-                <span className="text-lg font-bold text-[#FF6F61]">{prize.probability}%</span>
+            <Card key={prize.id} className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-xl font-bold text-gray-900">{prize.name}</h3>
+                <div className="px-3 py-1 bg-[#2D6A4F]/10 rounded-full">
+                  <span className="text-sm font-bold text-[#2D6A4F]">{prize.probability}%</span>
+                </div>
               </div>
+              {prize.description && (
+                <p className="text-gray-600 mb-4 text-sm">{prize.description}</p>
+              )}
               <Button
                 onClick={() => handleDelete(prize.id)}
                 variant="outline"
-                size="sm"
-                className="w-full text-red-600 border-red-600 hover:bg-red-50"
+                className="w-full text-red-600 border-red-600 hover:bg-red-50 gap-2"
               >
-                Delete
+                <Trash2 className="w-4 h-4" />
+                Delete Prize
               </Button>
-            </div>
+            </Card>
           ))}
         </div>
 
         {prizes.length === 0 && !showForm && (
-          <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No prizes yet. Add your first prize to get started!</p>
-          </div>
+          <Card className="p-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">🎁</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">No prizes yet</h3>
+              <p className="text-gray-600 mb-6">Add your first prize to get started with the reward wheel!</p>
+              <Button onClick={() => setShowForm(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Add Your First Prize
+              </Button>
+            </div>
+          </Card>
         )}
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }
