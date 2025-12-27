@@ -105,8 +105,8 @@ export default function SpinPage() {
       // Index 1 (top/North): Center is 270deg.
       segmentCenter = 90 + (winningIndex * 180);
     } else if (prizes.length === 1) {
-      // For n=1: Full circle. Center is visually everywhere, but let's treat it as 0.
-      segmentCenter = 0;
+      // For n=1: Full circle. Text is at Top (North/270deg).
+      segmentCenter = 270;
     } else {
       // For n>=3: Standard logic
       // Segment starts at index * angle.
