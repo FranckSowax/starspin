@@ -32,7 +32,7 @@ const chartConfig = {
   },
   positive: {
     label: "Positive",
-    color: "hsl(142, 76%, 36%)",
+    color: "hsl(173, 58%, 39%)",
   },
   negative: {
     label: "Negative",
