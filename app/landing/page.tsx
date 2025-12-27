@@ -399,55 +399,114 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-[#1a3a6e] to-[#0A1F44] relative overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        </div>
-        <div className="container mx-auto relative z-10">
+      <section className="py-24 px-4 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          {/* Section header */}
           <div className="text-center mb-16">
-            <span className="inline-block px-6 py-2 bg-pink-500/20 backdrop-blur-sm rounded-full text-pink-300 font-bold mb-4">Pourquoi StarSpin ?</span>
-            <h2 className="text-6xl font-black text-white mb-4">
-              🎁 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-yellow-400">Bénéfices</span> Clés
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Pourquoi StarSpin</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+              Adapté aux Zones Touristiques de Thaïlande
             </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Une solution pensée pour les restaurants accueillant des touristes internationaux
+            </p>
           </div>
 
+          {/* Benefits grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#00D9FF]/20 to-[#0099CC]/20 backdrop-blur-xl rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all border-2 border-cyan-400/30 shadow-2xl">
-                <div className="text-8xl mb-4 group-hover:scale-125 transition-transform">🌍</div>
-                <h3 className="text-2xl font-black text-white mb-3">Zone Touristique</h3>
-                <p className="text-cyan-100 font-semibold">Multilingue automatique en 6 langues</p>
+            {/* Benefit 1 - Multilingual */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Multilingue</h3>
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  Interface automatique en 6 langues pour vos clients internationaux
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇬🇧 EN</Badge>
+                  <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇹🇭 TH</Badge>
+                  <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇫🇷 FR</Badge>
+                  <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇨🇳 ZH</Badge>
+                  <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇯🇵 JP</Badge>
+                  <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇩🇪 DE</Badge>
+                </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#9D4EDD]/20 to-[#7209B7]/20 backdrop-blur-xl rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all border-2 border-purple-400/30 shadow-2xl">
-                <div className="text-8xl mb-4 group-hover:scale-125 transition-transform">🎮</div>
-                <h3 className="text-2xl font-black text-white mb-3">Contrôle Total</h3>
-                <p className="text-purple-100 font-semibold">Gérez lots et probabilités à volonté</p>
+            {/* Benefit 2 - Control */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Contrôle Total</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Gérez vos lots, probabilités et récompenses selon votre budget
+                </p>
               </div>
-            </div>
+            </Card>
 
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-red-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#FF1B8D]/20 to-[#C9184A]/20 backdrop-blur-xl rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all border-2 border-pink-400/30 shadow-2xl">
-                <div className="text-8xl mb-4 group-hover:scale-125 transition-transform">📊</div>
-                <h3 className="text-2xl font-black text-white mb-3">Dashboard Pro</h3>
-                <p className="text-pink-100 font-semibold">Stats et analytics en temps réel</p>
+            {/* Benefit 3 - Analytics */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Dashboard Pro</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Statistiques et analytics en temps réel de vos performances
+                </p>
               </div>
-            </div>
+            </Card>
 
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#FFB703]/20 to-[#FB8500]/20 backdrop-blur-xl rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all border-2 border-yellow-400/30 shadow-2xl">
-                <div className="text-8xl mb-4 group-hover:scale-125 transition-transform">🛡️</div>
-                <h3 className="text-2xl font-black text-white mb-3">Protection</h3>
-                <p className="text-yellow-100 font-semibold">Filtrez les avis négatifs</p>
+            {/* Benefit 4 - Protection */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Protection</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Filtrez les avis négatifs avant qu'ils n'impactent votre réputation
+                </p>
               </div>
-            </div>
+            </Card>
+          </div>
+
+          {/* Thailand specific features */}
+          <div className="mt-16 max-w-5xl mx-auto">
+            <Card className="bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-10">
+              <div className="grid md:grid-cols-3 gap-8 text-center">
+                <div>
+                  <div className="text-4xl font-black text-white mb-2">🇹🇭</div>
+                  <h4 className="text-lg font-bold text-white mb-2">Adapté à la Thaïlande</h4>
+                  <p className="text-white/80 text-sm">Interface en thaï et monnaie locale (THB)</p>
+                </div>
+                <div>
+                  <div className="text-4xl font-black text-white mb-2">🏖️</div>
+                  <h4 className="text-lg font-bold text-white mb-2">Zones Touristiques</h4>
+                  <p className="text-white/80 text-sm">Parfait pour Phuket, Bangkok, Pattaya, Koh Samui</p>
+                </div>
+                <div>
+                  <div className="text-4xl font-black text-white mb-2">⭐</div>
+                  <h4 className="text-lg font-bold text-white mb-2">TripAdvisor & Google</h4>
+                  <p className="text-white/80 text-sm">Boostez vos avis sur les plateformes clés</p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
