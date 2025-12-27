@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@/components/atoms/Button';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -31,9 +33,9 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button className="px-6 py-2 border-2 border-white rounded-full text-white text-sm font-medium hover:bg-white hover:text-[#1B4332] transition">
+            <Button variant="outline" className="border-2 border-white rounded-full text-white hover:bg-white hover:text-[#1B4332]">
               Get Started
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -99,15 +101,15 @@ export default function LandingPage() {
 
           {/* Bottom CTA Section */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-3xl p-12 shadow-2xl relative">
+            <Card className="bg-white rounded-3xl p-12 shadow-2xl relative border-0">
               {/* Toggle button */}
               <div className="absolute -top-6 left-1/2 -translate-x-1/2">
-                <button className="bg-[#FF6B6B] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-[#FF5252] transition">
+                <Badge className="bg-[#FF6B6B] text-white px-6 py-3 rounded-full font-bold text-sm flex items-center gap-2 shadow-lg hover:bg-[#FF5252] transition">
                   Review Mode
                   <div className="w-12 h-6 bg-white/30 rounded-full relative">
                     <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
                   </div>
-                </button>
+                </Badge>
               </div>
 
               <div className="text-center pt-8">
@@ -116,9 +118,9 @@ export default function LandingPage() {
                   reward for reviews and<br />
                   boost your reputation
                 </h2>
-                <button className="mt-8 bg-[#1B4332] text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-[#2D6A4F] transition shadow-lg">
+                <Button size="lg" className="mt-8 bg-[#1B4332] text-white px-12 py-4 rounded-full font-bold text-lg hover:bg-[#2D6A4F] transition shadow-lg">
                   START FREE TRIAL
-                </button>
+                </Button>
               </div>
 
               {/* Decorative envelope */}
@@ -133,7 +135,7 @@ export default function LandingPage() {
               </div>
 
               {/* Stats card */}
-              <div className="absolute -right-12 bottom-12 bg-[#2D6A4F] text-white rounded-2xl p-6 shadow-xl">
+              <Card className="absolute -right-12 bottom-12 bg-[#2D6A4F] text-white rounded-2xl p-6 shadow-xl border-0">
                 <div className="text-5xl font-black mb-2">100K</div>
                 <p className="text-sm opacity-80">Businesses received</p>
                 <p className="text-sm opacity-80">positive reviews</p>
