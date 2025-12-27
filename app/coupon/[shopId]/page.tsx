@@ -20,56 +20,89 @@ export default function CouponPage() {
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
   const [isClient, setIsClient] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+
+    if (!shopId || !code) {
+      setError(t('common.error'));
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
-      const { data: couponData } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', code)
-        .single();
-
-      const { data: merchantData } = await supabase
-        .from('merchants')
-        .select('*')
-        .eq('id', shopId)
-        .single();
-
-      setCoupon(couponData);
-      setMerchant(merchantData);
-
-      if (couponData?.spin_id) {
-        const { data: spinData } = await supabase
-          .from('spins')
-          .select('prize_id')
-          .eq('id', couponData.spin_id)
+      try {
+        const { data: couponData, error: couponError } = await supabase
+          .from('coupons')
+          .select('*')
+          .eq('code', code)
           .single();
-        
-        if (spinData?.prize_id) {
-          const { data: prizeData } = await supabase
-            .from('prizes')
-            .select('image_url')
-            .eq('id', spinData.prize_id)
+
+        if (couponError || !couponData) {
+          setError('Coupon invalide ou introuvable');
+          setLoading(false);
+          return;
+        }
+
+        const { data: merchantData, error: merchantError } = await supabase
+          .from('merchants')
+          .select('*')
+          .eq('id', shopId)
+          .single();
+
+        if (merchantError || !merchantData) {
+          setError('Commerçant introuvable');
+          setLoading(false);
+          return;
+        }
+
+        setCoupon(couponData);
+        setMerchant(merchantData);
+
+        if (couponData?.spin_id) {
+          const { data: spinData } = await supabase
+            .from('spins')
+            .select('prize_id')
+            .eq('id', couponData.spin_id)
             .single();
-            
-          if (prizeData?.image_url) {
-            setPrizeImage(prizeData.image_url);
+          
+          if (spinData?.prize_id) {
+            const { data: prizeData } = await supabase
+              .from('prizes')
+              .select('image_url')
+              .eq('id', spinData.prize_id)
+              .single();
+              
+            if (prizeData?.image_url) {
+              setPrizeImage(prizeData.image_url);
+            }
           }
         }
-      }
 
-      if (code) {
-        const qr = await QRCode.toDataURL(code);
-        setQrCodeUrl(qr);
+        if (code) {
+          try {
+            const qr = await QRCode.toDataURL(code);
+            setQrCodeUrl(qr);
+          } catch (e) {
+            console.error('Error generating QR code:', e);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setError('Une erreur est survenue');
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [shopId, code]);
+  }, [shopId, code, isClient]);
 
   useEffect(() => {
     if (!coupon) return;
@@ -97,11 +130,24 @@ export default function CouponPage() {
     return () => clearInterval(interval);
   }, [coupon, t]);
 
-  if (!isClient || !coupon || !merchant) {
+  if (!isClient || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#38A169] to-[#2F855A]">
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          <p className="text-lg text-gray-900">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
+        <div className="bg-black/40 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-[#ffd700]/30">
+          <div className="w-12 h-12 border-4 border-[#ffd700] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-[#ffd700] font-bold text-center">{t('common.loading')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !coupon || !merchant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}>
+        <div className="bg-black/40 backdrop-blur-xl rounded-3xl shadow-2xl p-8 max-w-md w-full border border-red-500/30 text-center">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-white mb-2">{t('common.error')}</h2>
+          <p className="text-gray-300">{error || 'Impossible de charger le coupon'}</p>
         </div>
       </div>
     );
