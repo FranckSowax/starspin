@@ -247,14 +247,14 @@ export default function SpinPage() {
           transform-origin: 0% 0%;
           color: #ffd700;
           font-family: 'Arial Black', Arial, sans-serif;
-          font-size: clamp(0.7rem, 2.2vw, 1.2rem);
+          font-size: clamp(1.4rem, 4.4vw, 2.4rem);
           font-weight: 900;
           text-align: left;
           text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.5);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          padding-left: 30%;
+          padding-left: 32%;
           padding-right: 5%;
           transform: rotate(calc(-135deg + ${segmentAngle / 2}deg)) translate(0, -50%);
         }
@@ -293,17 +293,29 @@ export default function SpinPage() {
 
         {/* Game Container */}
         <div className="game-container relative z-10 text-center w-full max-w-[500px]">
-          <h1 className="text-white mb-8 text-3xl md:text-4xl font-black" style={{ textShadow: '2px 2px 8px rgba(0, 0, 0, 0.8)' }}>
-            🎰 ROUE DE LA FORTUNE
-          </h1>
-
+          
           {/* Wheel Wrapper */}
           <div className="relative w-full aspect-square max-w-[450px] mx-auto">
             {/* Pointer */}
-            <div className="absolute top-[-15px] left-1/2 -translate-x-1/2 z-[100]" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
-              <div className="absolute top-[-25px] left-1/2 -translate-x-1/2 w-[18px] h-[18px] bg-[#1a1a1a] rounded-full" style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}></div>
-              <div className="absolute top-[-55px] left-[-18px] w-[36px] h-[22px] rounded-t-[18px]" style={{ background: 'linear-gradient(180deg, #ffb84d 0%, #ffa500 100%)', boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3)' }}></div>
-              <div className="w-0 h-0 border-l-[22px] border-l-transparent border-r-[22px] border-r-transparent border-t-[45px] border-t-[#ffa500] relative" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}></div>
+            <div className="absolute top-[-75px] left-1/2 -translate-x-1/2 z-[100]" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
+              {merchant?.logo_url ? (
+                <div className="relative">
+                  <div className="w-20 h-20 bg-white rounded-full p-1 shadow-xl flex items-center justify-center border-4 border-[#ffd700]">
+                    <img 
+                      src={merchant.logo_url} 
+                      alt="Merchant Logo" 
+                      className="w-full h-full object-contain rounded-full"
+                    />
+                  </div>
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[20px] border-t-[#ffd700]"></div>
+                </div>
+              ) : (
+                <>
+                  <div className="absolute top-[-25px] left-1/2 -translate-x-1/2 w-[18px] h-[18px] bg-[#1a1a1a] rounded-full" style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}></div>
+                  <div className="absolute top-[-55px] left-[-18px] w-[36px] h-[22px] rounded-t-[18px]" style={{ background: 'linear-gradient(180deg, #ffb84d 0%, #ffa500 100%)', boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3)' }}></div>
+                  <div className="w-0 h-0 border-l-[22px] border-l-transparent border-r-[22px] border-r-transparent border-t-[45px] border-t-[#ffa500] relative" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}></div>
+                </>
+              )}
             </div>
 
             {/* Wheel Container */}
