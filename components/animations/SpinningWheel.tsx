@@ -12,7 +12,7 @@ interface SpinningWheelProps {
 }
 
 export function SpinningWheel({ 
-  imageSrc = '/roue2.png',
+  imageSrc = '/spin-2.png',
   size = 400,
   autoSpin = true,
   spinDuration = 8000,
@@ -65,27 +65,15 @@ export function SpinningWheel({
           transitionDuration: isSpinning ? `${spinDuration}ms` : '0ms'
         }}
       >
-        {/* Placeholder wheel - replace with actual image */}
-        <div className="w-full h-full rounded-full bg-gradient-to-br from-[#52B788] to-[#2D6A4F] shadow-2xl flex items-center justify-center">
-          <div className="absolute inset-8 bg-gradient-to-br from-[#74C69D] to-[#40916C] rounded-full flex items-center justify-center">
-            <span className="text-9xl">🎡</span>
-          </div>
-          
-          {/* Decorative segments */}
-          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
-            <div
-              key={i}
-              className="absolute w-2 h-2 rounded-full"
-              style={{
-                background: i % 2 === 0 ? '#FF6B6B' : '#ffffff',
-                top: '50%',
-                left: '50%',
-                transform: `rotate(${angle}deg) translateY(-${size / 2 - 20}px)`,
-                boxShadow: '0 0 10px rgba(0,0,0,0.3)'
-              }}
-            />
-          ))}
-        </div>
+        {/* Actual wheel image */}
+        <Image
+          src={imageSrc}
+          alt="Spinning Wheel"
+          width={size}
+          height={size}
+          className="w-full h-full object-contain drop-shadow-2xl"
+          priority
+        />
       </div>
 
       {/* Center pin */}

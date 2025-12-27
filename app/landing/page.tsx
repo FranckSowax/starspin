@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SpinningWheel } from '@/components/animations/SpinningWheel';
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -70,22 +71,12 @@ export default function LandingPage() {
 
               {/* Center 3D Element - Spinning Wheel */}
               <div className="relative">
-                <div className="w-96 h-96 relative">
-                  {/* Wheel base */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#52B788] to-[#2D6A4F] rounded-full shadow-2xl">
-                    {/* Wheel segments */}
-                    <div className="absolute inset-8 bg-gradient-to-br from-[#74C69D] to-[#40916C] rounded-full flex items-center justify-center">
-                      <div className="text-9xl">🎡</div>
-                    </div>
-                    {/* Decorative balls */}
-                    <div className="absolute top-8 left-1/2 -translate-x-1/2 w-8 h-8 bg-[#FF6B6B] rounded-full shadow-lg"></div>
-                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-8 h-8 bg-white rounded-full shadow-lg"></div>
-                    <div className="absolute left-8 top-1/2 -translate-y-1/2 w-8 h-8 bg-[#FF6B6B] rounded-full shadow-lg"></div>
-                    <div className="absolute right-8 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg"></div>
-                  </div>
-                  {/* Santa hat on top */}
-                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-7xl">🎅</div>
-                </div>
+                <SpinningWheel 
+                  imageSrc="/spin-2.png"
+                  size={450}
+                  autoSpin={true}
+                  spinDuration={8000}
+                />
               </div>
 
               <div className="text-right">
