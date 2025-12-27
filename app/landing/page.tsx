@@ -298,69 +298,102 @@ export default function LandingPage() {
       </section>
 
       {/* Workflow Section */}
-      <section className="py-20 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent"></div>
-        <div className="container mx-auto relative z-10">
+      <section className="py-24 px-4 bg-gray-50">
+        <div className="container mx-auto max-w-7xl">
+          {/* Section header */}
           <div className="text-center mb-16">
-            <span className="inline-block px-6 py-2 bg-cyan-500/20 backdrop-blur-sm rounded-full text-cyan-300 font-bold mb-4">Comment ça marche ?</span>
-            <h2 className="text-6xl font-black text-white mb-4">
-              🎮 Le Workflow <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">StarSpin</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Comment ça marche</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+              Le Workflow StarSpin
             </h2>
-            <p className="text-xl text-cyan-200">4 étapes simples pour transformer vos clients en ambassadeurs</p>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              4 étapes simples pour transformer vos clients en ambassadeurs
+            </p>
           </div>
 
+          {/* Workflow steps */}
           <div className="grid md:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {/* Step 1 */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#00D9FF]/90 to-[#0099CC]/90 backdrop-blur-sm rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all shadow-2xl border border-cyan-400/30">
-                <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl font-black text-[#00D9FF] shadow-lg">
-                  01
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                  </svg>
                 </div>
-                <div className="text-7xl mb-4 group-hover:scale-110 transition-transform">📱</div>
-                <h3 className="text-2xl font-black text-white mb-3">Le Scan</h3>
-                <p className="text-white font-semibold">Accès instantané via QR sur table</p>
+                <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 1</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Scan QR Code</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Le client scanne le QR code sur sa table pour accéder instantanément à l'expérience
+                </p>
               </div>
-            </div>
+            </Card>
 
             {/* Step 2 */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#9D4EDD]/90 to-[#7209B7]/90 backdrop-blur-sm rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all shadow-2xl border border-purple-400/30">
-                <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl font-black text-[#9D4EDD] shadow-lg">
-                  02
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
                 </div>
-                <div className="text-7xl mb-4 group-hover:scale-110 transition-transform">🔀</div>
-                <h3 className="text-2xl font-black text-white mb-3">Le Filtre</h3>
-                <p className="text-white font-semibold">Les avis négatifs restent privés</p>
+                <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 2</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Filtrage Intelligent</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Les avis négatifs sont capturés en privé pour amélioration interne
+                </p>
               </div>
-            </div>
+            </Card>
 
             {/* Step 3 */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500 to-red-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#FF1B8D]/90 to-[#C9184A]/90 backdrop-blur-sm rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all shadow-2xl border border-pink-400/30">
-                <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl font-black text-[#FF1B8D] shadow-lg">
-                  03
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <div className="text-7xl mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all">🎡</div>
-                <h3 className="text-2xl font-black text-white mb-3">Le Jeu</h3>
-                <p className="text-white font-semibold">Tournez la roue pour un cadeau</p>
+                <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 3</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Roue de Récompense</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Les clients satisfaits tournent la roue pour gagner un cadeau instantané
+                </p>
               </div>
-            </div>
+            </Card>
 
             {/* Step 4 */}
-            <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-              <div className="relative bg-gradient-to-br from-[#FFB703]/90 to-[#FB8500]/90 backdrop-blur-sm rounded-3xl p-8 text-center transform hover:scale-105 hover:-translate-y-2 transition-all shadow-2xl border border-yellow-400/30">
-                <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4 text-4xl font-black text-[#FFB703] shadow-lg">
-                  04
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-[#2D6A4F] hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-[#2D6A4F] rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
-                <div className="text-7xl mb-4 group-hover:scale-110 transition-transform">⏰</div>
-                <h3 className="text-2xl font-black text-white mb-3">Fidélisation</h3>
-                <p className="text-white font-semibold">Le lot expire vite, retour rapide!</p>
+                <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 4</Badge>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">Fidélisation</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Le cadeau expire rapidement, incitant le client à revenir vite
+                </p>
               </div>
-            </div>
+            </Card>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-16 text-center">
+            <Card className="max-w-3xl mx-auto bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-10">
+              <h3 className="text-3xl font-bold text-white mb-4">
+                Prêt à booster votre réputation ?
+              </h3>
+              <p className="text-xl text-white/90 mb-8">
+                Rejoignez les 100K+ restaurants qui utilisent StarSpin
+              </p>
+              <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-6 text-lg font-bold">
+                Démarrer l'essai gratuit
+              </Button>
+            </Card>
           </div>
         </div>
       </section>
