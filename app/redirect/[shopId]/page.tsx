@@ -101,7 +101,7 @@ export default function RedirectPage() {
         return {
           icon: '🗺️',
           name: 'Google Maps',
-          message: 'Avant de lancer la roue, donnez-nous de la force sur Google puis revenez tourner la roue !',
+          message: 'Déposez votre avis pendant que nous chargeons votre roue pour gagner des cadeaux et promos !',
           bg: 'bg-red-50',
           border: 'border-red-200',
           text_color: 'text-red-800',
@@ -112,7 +112,7 @@ export default function RedirectPage() {
         return {
           icon: '⭐',
           name: 'TripAdvisor',
-          message: 'Avant de lancer la roue, donnez-nous de la force sur TripAdvisor puis revenez tourner la roue !',
+          message: 'Déposez votre avis pendant que nous chargeons votre roue pour gagner des cadeaux et promos !',
           bg: 'bg-green-50',
           border: 'border-green-200',
           text_color: 'text-green-800',
@@ -123,7 +123,7 @@ export default function RedirectPage() {
         return {
           icon: '🎵',
           name: 'TikTok',
-          message: 'Abonnez-vous avant de tourner la roue !',
+          message: 'Abonnez-vous pendant que nous chargeons votre roue pour gagner des cadeaux et promos !',
           bg: 'bg-gray-50',
           border: 'border-gray-300',
           text_color: 'text-gray-800',
@@ -134,7 +134,7 @@ export default function RedirectPage() {
         return {
           icon: '📸',
           name: 'Instagram',
-          message: 'Abonnez-vous avant de tourner la roue !',
+          message: 'Abonnez-vous pendant que nous chargeons votre roue pour gagner des cadeaux et promos !',
           bg: 'bg-pink-50',
           border: 'border-pink-200',
           text_color: 'text-pink-800',
