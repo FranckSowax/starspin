@@ -100,21 +100,24 @@ export default function SpinPage() {
     const winningPrizeIndex = Math.floor(winningSegmentIndex / 2);
     
     // Calculate segment center for alignment
-    // Each segment spans segmentAngle degrees
-    // Segment i starts at i * segmentAngle
-    // Center is at i * segmentAngle + segmentAngle / 2
-    const segmentCenter = (winningSegmentIndex * segmentAngle) + (segmentAngle / 2);
+    // Segments are rendered with -90 offset (starting from top)
+    // Segment i visual center is at: (i * segmentAngle) - 90 + (segmentAngle / 2)
+    // Which simplifies to: i * segmentAngle + segmentAngle/2 - 90
+    const segmentVisualCenter = (winningSegmentIndex * segmentAngle) + (segmentAngle / 2) - 90;
     
     // Add random offset within the segment to avoid always landing on center
-    // Range: -40% to +40% of segment angle (staying away from edges)
-    const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.8;
+    // Range: -30% to +30% of segment angle (staying away from edges)
+    const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.6;
 
-    // Target is Top (270 degrees)
+    // Pointer is at top (0 degrees in CSS, which is 12 o'clock position)
+    // We need to rotate the wheel so that segmentVisualCenter aligns with 0 (top)
+    // Target rotation = -segmentVisualCenter (to bring segment to top)
     const currentRot = currentRotationRef.current;
-    const baseTarget = 270 - segmentCenter - randomOffset;
+    const targetAngle = -segmentVisualCenter - randomOffset;
     
-    // Calculate smallest positive delta to reach target
-    const distToTarget = (baseTarget - (currentRot % 360) + 360) % 360;
+    // Normalize to find the delta needed
+    const currentNormalized = currentRot % 360;
+    const distToTarget = ((targetAngle - currentNormalized) % 360 + 360) % 360;
     
     // Add 4-6 full spins for variety
     const extraSpins = 1440 + Math.random() * 720; // 4-6 spins
