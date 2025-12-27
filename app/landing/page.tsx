@@ -139,7 +139,7 @@ export default function LandingPage() {
                   </div>
                 </div>
                 <div className="text-white/80">
-                  <p className="font-semibold">100K+ restaurants</p>
+                  <p className="font-semibold">100K+ commerces</p>
                   <p className="text-sm">utilisent StarSpin</p>
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default function LandingPage() {
               Pourquoi vos clients satisfaits ne laissent pas d'avis ?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Le paradoxe de la satisfaction client dans la restauration
+              Le paradoxe de la satisfaction client dans le tourisme et l'hôtellerie
             </p>
           </div>
           
@@ -325,7 +325,7 @@ export default function LandingPage() {
                 <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 1</Badge>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">Scan QR Code</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Le client scanne le QR code sur sa table pour accéder instantanément à l'expérience
+                  Le client scanne le QR code pour accéder instantanément à l'expérience
                 </p>
               </div>
             </Card>
@@ -386,7 +386,7 @@ export default function LandingPage() {
                 Prêt à booster votre réputation ?
               </h3>
               <p className="text-xl text-white/90 mb-8">
-                Rejoignez les 100K+ restaurants qui utilisent StarSpin
+                Rejoignez les 100K+ commerces qui utilisent StarSpin
               </p>
               <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-6 text-lg font-bold">
                 Démarrer l'essai gratuit
@@ -409,7 +409,7 @@ export default function LandingPage() {
               Adapté aux Zones Touristiques de Thaïlande
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Une solution pensée pour les restaurants accueillant des touristes internationaux
+              Une solution pensée pour tous les commerces accueillant des touristes internationaux
             </p>
           </div>
 
@@ -533,7 +533,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900">Marc Alonso</h4>
-                  <p className="text-sm text-gray-600">Le Gourmet, Paris</p>
+                  <p className="text-sm text-gray-600">Restaurant Le Gourmet, Paris</p>
                 </div>
               </div>
               <div className="flex gap-1 mb-4">
@@ -556,7 +556,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900">Somchai Patel</h4>
-                  <p className="text-sm text-gray-600">Thai Paradise, Phuket</p>
+                  <p className="text-sm text-gray-600">Spa Thai Paradise, Phuket</p>
                 </div>
               </div>
               <div className="flex gap-1 mb-4">
@@ -578,8 +578,8 @@ export default function LandingPage() {
                   CL
                 </div>
                 <div>
-                  <h4 className="font-bold text-gray-900">Claire Dubois</h4>
-                  <p className="text-sm text-gray-600">Bistrot Moderne, Lyon</p>
+                  <h4 className="font-bold text-gray-900">Niran Chai</h4>
+                  <p className="text-sm text-gray-600">Sunrise Hotel, Koh Samui</p>
                 </div>
               </div>
               <div className="flex gap-1 mb-4">
@@ -590,7 +590,7 @@ export default function LandingPage() {
                 ))}
               </div>
               <p className="text-gray-700 leading-relaxed italic">
-                "Simple à mettre en place, résultats immédiats. Le ROI est impressionnant !"
+                "Parfait pour notre hôtel. Les clients internationaux adorent la roue !"
               </p>
             </Card>
           </div>
@@ -610,7 +610,7 @@ export default function LandingPage() {
               Choisissez votre plan
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Tarification simple et transparente pour tous les types de restaurants
+              Tarification simple et transparente pour tous les types de commerces
             </p>
           </div>
 
