@@ -13,10 +13,11 @@ export default function RedirectPage() {
 
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
-  const [countdown, setCountdown] = useState(7);
+  const [countdown, setCountdown] = useState(25);
   const [canProceed, setCanProceed] = useState(false);
   const [redirectUrl, setRedirectUrl] = useState('');
   const [strategy, setStrategy] = useState('google_maps');
+  const [hasClickedSocial, setHasClickedSocial] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -83,17 +84,17 @@ export default function RedirectPage() {
     fetchMerchant();
   }, [shopId]);
 
-  // Countdown timer
+  // Countdown timer - only starts after social link is clicked
   useEffect(() => {
-    if (countdown > 0) {
+    if (hasClickedSocial && countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else {
+    } else if (hasClickedSocial && countdown === 0) {
       setCanProceed(true);
     }
-  }, [countdown]);
+  }, [countdown, hasClickedSocial]);
 
   const getStrategyInfo = () => {
     switch (strategy) {
@@ -155,10 +156,14 @@ export default function RedirectPage() {
     }
   };
 
-  const handleProceed = () => {
+  const handleOpenSocial = () => {
     if (redirectUrl) {
       window.open(redirectUrl, '_blank');
+      setHasClickedSocial(true);
     }
+  };
+
+  const handleLaunchWheel = () => {
     // Redirect to wheel/spin page (to be created)
     router.push(`/spin/${shopId}`);
   };
@@ -230,8 +235,21 @@ export default function RedirectPage() {
             </p>
           </div>
 
-          {/* Countdown or Button */}
-          {!canProceed ? (
+          {/* Button Flow */}
+          {!hasClickedSocial ? (
+            <div className="space-y-3">
+              <Button
+                onClick={handleOpenSocial}
+                className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+              >
+                <ExternalLink className="w-5 h-5" />
+                Déposer mon avis sur {strategyInfo.name}
+              </Button>
+              <p className="text-xs text-center text-gray-500">
+                Cliquez pour ouvrir {strategyInfo.name} et laisser votre avis
+              </p>
+            </div>
+          ) : !canProceed ? (
             <div className="text-center space-y-4">
               <div className="relative">
                 <Button
@@ -253,14 +271,14 @@ export default function RedirectPage() {
           ) : (
             <div className="space-y-3">
               <Button
-                onClick={handleProceed}
+                onClick={handleLaunchWheel}
                 className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
               >
                 <ExternalLink className="w-5 h-5" />
                 J'ai fait - Lancer la roue
               </Button>
               <p className="text-xs text-center text-gray-500">
-                Cliquez pour ouvrir {strategyInfo.name} et tourner la roue
+                Cliquez pour tourner la roue et gagner !
               </p>
             </div>
           )}
