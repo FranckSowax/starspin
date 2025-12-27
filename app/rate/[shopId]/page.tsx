@@ -7,7 +7,7 @@ import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
-import { Star } from 'lucide-react';
+import { Star, Mail } from 'lucide-react';
 
 export default function RatingPage() {
   const params = useParams();
@@ -17,9 +17,11 @@ export default function RatingPage() {
 
   const [rating, setRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   useEffect(() => {
     setIsClient(true);
@@ -50,9 +52,25 @@ export default function RatingPage() {
     setRating(selectedRating);
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleFeedbackSubmit = async () => {
     if (!rating) return;
 
+    // Validate email
+    if (!email.trim()) {
+      setEmailError('L\'email est obligatoire');
+      return;
+    }
+    if (!validateEmail(email)) {
+      setEmailError('Veuillez entrer un email valide');
+      return;
+    }
+
+    setEmailError('');
     setLoading(true);
 
     const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
@@ -62,6 +80,7 @@ export default function RatingPage() {
       merchant_id: shopId,
       rating,
       comment: feedback,
+      customer_email: email,
       is_positive: rating >= 4,
       user_token: userToken,
     });
@@ -121,6 +140,7 @@ export default function RatingPage() {
         alert(t('feedback.thankYou'));
         setRating(null);
         setFeedback('');
+        setEmail('');
       }
     }
   };
@@ -180,32 +200,101 @@ export default function RatingPage() {
               <StarRating onRate={handleRating} />
             </div>
           ) : rating < 4 ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <h2 className="text-xl font-semibold text-center text-gray-900">{t('feedback.title')}</h2>
-              <textarea
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-                placeholder={t('feedback.placeholder')}
-                className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[120px] transition-all"
-              />
+              
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <Mail className="w-4 h-4 text-teal-600" />
+                  Votre email <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError('');
+                    }}
+                    placeholder="exemple@email.com"
+                    className={`w-full p-4 pl-11 border-2 ${
+                      emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
+                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                    required
+                  />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                </div>
+                {emailError && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                    {emailError}
+                  </p>
+                )}
+              </div>
+
+              {/* Feedback Textarea */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Votre commentaire (optionnel)
+                </label>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder={t('feedback.placeholder')}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent min-h-[100px] transition-all"
+                />
+              </div>
+
               <Button
                 onClick={handleFeedbackSubmit}
                 disabled={loading}
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl font-semibold transition-all"
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
               >
                 {loading ? t('common.loading') : t('common.submit')}
               </Button>
             </div>
           ) : (
-            <div className="text-center">
-              <div className="mb-4 p-4 bg-teal-50 rounded-xl">
-                <p className="text-lg text-gray-900 font-semibold">{t('social.title')}</p>
+            <div className="space-y-5">
+              <h2 className="text-xl font-semibold text-center text-gray-900">{t('social.title')}</h2>
+              <p className="text-center text-gray-600">{t('social.subtitle')}</p>
+              
+              {/* Email Field for positive ratings */}
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <Mail className="w-4 h-4 text-teal-600" />
+                  Votre email <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError('');
+                    }}
+                    placeholder="exemple@email.com"
+                    className={`w-full p-4 pl-11 border-2 ${
+                      emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
+                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                    required
+                  />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                </div>
+                {emailError && (
+                  <p className="text-sm text-red-600 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                    {emailError}
+                  </p>
+                )}
               </div>
-              <Button 
-                onClick={handleFeedbackSubmit} 
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl font-semibold transition-all"
+
+              <Button
+                onClick={handleFeedbackSubmit}
+                disabled={loading}
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl"
               >
-                {t('common.done')}
+                {loading ? t('common.loading') : t('common.submit')}
               </Button>
             </div>
           )}
