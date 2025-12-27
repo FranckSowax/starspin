@@ -32,6 +32,7 @@ export interface Feedback {
   merchant_id: string;
   rating: number;
   comment: string | null;
+  customer_email?: string | null;
   is_positive: boolean;
   user_token: string | null;
   ip_hash: string | null;
