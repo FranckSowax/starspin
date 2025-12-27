@@ -20,7 +20,8 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
-  AlertCircle
+  AlertCircle,
+  ScanLine
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -66,17 +67,23 @@ export default function DashboardPage() {
         .select('*')
         .eq('merchant_id', user.id);
 
+      const { data: couponsData } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('merchant_id', user.id);
+
       const totalScans = feedbackData?.length || 0;
       const avgRating = feedbackData?.reduce((sum, f) => sum + f.rating, 0) / (totalScans || 1);
       const positiveReviews = feedbackData?.filter(f => f.is_positive).length || 0;
       const conversionRate = totalScans > 0 ? (positiveReviews / totalScans) * 100 : 0;
-      const rewardsDistributed = spinsData?.length || 0;
+      const totalCoupons = couponsData?.length || 0;
+      const redeemedCoupons = couponsData?.filter(c => c.used).length || 0;
 
       setStats({
         totalScans,
         avgRating: Math.round(avgRating * 10) / 10,
         conversionRate: Math.round(conversionRate),
-        rewardsDistributed,
+        rewardsDistributed: redeemedCoupons,
         totalRevenue: totalScans * 2.5,
         positiveReviews,
       });
@@ -163,13 +170,13 @@ export default function DashboardPage() {
             <p className="text-3xl font-bold text-gray-900">{stats.totalScans}</p>
           </Card>
 
-          {/* New Reviews */}
+          {/* Prizes Redeemed */}
           <Card className="p-5 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-blue-500 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-white" />
+                <Gift className="w-5 h-5 text-white" />
               </div>
-              <span className="text-sm text-gray-600">New review</span>
+              <span className="text-sm text-gray-600">Prizes Redeemed</span>
             </div>
             <p className="text-3xl font-bold text-gray-900">{stats.rewardsDistributed}</p>
           </Card>
@@ -400,12 +407,12 @@ export default function DashboardPage() {
                 <span className="text-sm font-medium">Prizes</span>
               </Button>
               <Button 
-                onClick={() => router.push('/dashboard/qr')} 
+                onClick={() => router.push('/dashboard/scan')} 
                 variant="outline"
                 className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-600 hover:text-teal-700"
               >
-                <BarChart3 className="w-5 h-5" />
-                <span className="text-sm font-medium">QR Code</span>
+                <ScanLine className="w-5 h-5" />
+                <span className="text-sm font-medium">Scan Coupon</span>
               </Button>
               <Button 
                 onClick={() => router.push('/dashboard/feedback')} 
