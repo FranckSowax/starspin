@@ -175,28 +175,33 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading admin dashboard...</p>
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-slate-300">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-slate-900/50 border-b border-slate-700/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Super Dashboard Admin</h1>
-              <p className="text-gray-600 mt-1">Gestion des marchands et QR codes</p>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+                <Store className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">StarSpin Admin</h1>
+                <p className="text-slate-400 text-sm mt-0.5">Gestion des marchands et QR codes</p>
+              </div>
             </div>
             <Button
               onClick={() => supabase.auth.signOut().then(() => router.push('/auth/login'))}
-              variant="outline"
+              className="bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
             >
               Sign Out
             </Button>
@@ -207,118 +212,150 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Global Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 border-l-4 border-l-teal-500">
-            <div className="flex items-center justify-between mb-2">
-              <Store className="w-8 h-8 text-teal-600" />
-              <TrendingUp className="w-5 h-5 text-teal-600" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2.5 bg-purple-500/20 rounded-xl">
+                  <Store className="w-6 h-6 text-purple-400" />
+                </div>
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="font-semibold">+12%</span>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm mb-2">Total Marchands</p>
+              <p className="text-4xl font-bold text-white mb-1">{stats.totalMerchants}</p>
+              <p className="text-xs text-slate-500">{stats.activeMerchants} actifs</p>
             </div>
-            <p className="text-sm text-gray-600 mb-1">Total Marchands</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.totalMerchants}</p>
-            <p className="text-xs text-teal-600 mt-2">{stats.activeMerchants} actifs</p>
-          </Card>
+          </div>
 
-          <Card className="p-6 border-l-4 border-l-blue-500">
-            <div className="flex items-center justify-between mb-2">
-              <Users className="w-8 h-8 text-blue-600" />
-              <TrendingUp className="w-5 h-5 text-blue-600" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2.5 bg-blue-500/20 rounded-xl">
+                  <Users className="w-6 h-6 text-blue-400" />
+                </div>
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="font-semibold">+8%</span>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm mb-2">Total Reviews</p>
+              <p className="text-4xl font-bold text-white mb-1">{stats.totalReviews}</p>
+              <p className="text-xs text-slate-500">Tous marchands</p>
             </div>
-            <p className="text-sm text-gray-600 mb-1">Total Reviews</p>
-            <p className="text-3xl font-bold text-gray-900">{stats.totalReviews}</p>
-            <p className="text-xs text-blue-600 mt-2">Tous marchands confondus</p>
-          </Card>
+          </div>
 
-          <Card className="p-6 border-l-4 border-l-emerald-500">
-            <div className="flex items-center justify-between mb-2">
-              <DollarSign className="w-8 h-8 text-emerald-600" />
-              <TrendingUp className="w-5 h-5 text-emerald-600" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2.5 bg-emerald-500/20 rounded-xl">
+                  <DollarSign className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="font-semibold">+15%</span>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm mb-2">Revenue Estimé</p>
+              <p className="text-4xl font-bold text-white mb-1">${stats.totalRevenue.toFixed(0)}</p>
+              <p className="text-xs text-slate-500">Basé sur reviews</p>
             </div>
-            <p className="text-sm text-gray-600 mb-1">Revenue Estimé</p>
-            <p className="text-3xl font-bold text-gray-900">${stats.totalRevenue.toFixed(0)}</p>
-            <p className="text-xs text-emerald-600 mt-2">Basé sur reviews</p>
-          </Card>
+          </div>
 
-          <Card className="p-6 border-l-4 border-l-purple-500">
-            <div className="flex items-center justify-between mb-2">
-              <BarChart3 className="w-8 h-8 text-purple-600" />
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 rounded-full blur-3xl"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between mb-4">
+                <div className="p-2.5 bg-pink-500/20 rounded-xl">
+                  <BarChart3 className="w-6 h-6 text-pink-400" />
+                </div>
+                <div className="flex items-center gap-1 text-green-400 text-sm">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="font-semibold">+5%</span>
+                </div>
+              </div>
+              <p className="text-slate-400 text-sm mb-2">Avg Reviews/Shop</p>
+              <p className="text-4xl font-bold text-white mb-1">
+                {stats.totalMerchants > 0 ? (stats.totalReviews / stats.totalMerchants).toFixed(1) : '0'}
+              </p>
+              <p className="text-xs text-slate-500">Performance moyenne</p>
             </div>
-            <p className="text-sm text-gray-600 mb-1">Avg Reviews/Shop</p>
-            <p className="text-3xl font-bold text-gray-900">
-              {stats.totalMerchants > 0 ? (stats.totalReviews / stats.totalMerchants).toFixed(1) : '0'}
-            </p>
-            <p className="text-xs text-purple-600 mt-2">Performance moyenne</p>
-          </Card>
+          </div>
         </div>
 
         {/* Search */}
-        <Card className="p-4 mb-6">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 mb-6 border border-slate-700/50">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
             <input
               type="text"
               placeholder="Rechercher par nom ou email..."
               value={searchQuery}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
           </div>
-        </Card>
+        </div>
 
         {/* Merchants List */}
-        <Card>
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-bold text-gray-900">Liste des Marchands</h2>
-            <p className="text-sm text-gray-600 mt-1">{filteredMerchants.length} marchands trouvés</p>
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden">
+          <div className="p-6 border-b border-slate-700/50">
+            <h2 className="text-xl font-bold text-white">Liste des Marchands</h2>
+            <p className="text-sm text-slate-400 mt-1">{filteredMerchants.length} marchands trouvés</p>
           </div>
-          <div className="divide-y">
+          <div className="divide-y divide-slate-700/50">
             {filteredMerchants.map((merchant) => {
               const stats = merchantStats[merchant.id] || { totalReviews: 0, positiveReviews: 0, avgRating: 0, totalSpins: 0 };
               const isExpanded = selectedMerchant === merchant.id;
 
               return (
-                <div key={merchant.id} className="p-6 hover:bg-gray-50 transition-colors">
+                <div key={merchant.id} className="p-6 hover:bg-slate-700/30 transition-all duration-200">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-br from-teal-600 to-teal-700 rounded-full flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-purple-500/20">
                         <span className="text-white font-bold text-lg">
                           {merchant.business_name?.[0]?.toUpperCase() || 'M'}
                         </span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{merchant.business_name}</h3>
-                          <Badge className="capitalize">{merchant.subscription_tier}</Badge>
+                          <h3 className="text-lg font-semibold text-white">{merchant.business_name}</h3>
+                          <Badge className="capitalize bg-slate-700 text-slate-300 border-slate-600">{merchant.subscription_tier}</Badge>
                           {merchant.is_active !== false ? (
-                            <Badge className="bg-teal-100 text-teal-700">
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                               <CheckCircle2 className="w-3 h-3 mr-1" />
                               Active
                             </Badge>
                           ) : (
-                            <Badge variant="outline" className="text-red-600">
+                            <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
                               <XCircle className="w-3 h-3 mr-1" />
                               Inactive
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-3">{merchant.email}</p>
+                        <p className="text-sm text-slate-400 mb-3">{merchant.email}</p>
                         
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-4 gap-4 mb-3">
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600">Reviews</p>
-                            <p className="text-lg font-bold text-gray-900">{stats.totalReviews}</p>
+                        <div className="grid grid-cols-4 gap-3 mb-4">
+                          <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
+                            <p className="text-xs text-slate-400">Reviews</p>
+                            <p className="text-lg font-bold text-white">{stats.totalReviews}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600">Positive</p>
-                            <p className="text-lg font-bold text-teal-600">{stats.positiveReviews}</p>
+                          <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
+                            <p className="text-xs text-slate-400">Positive</p>
+                            <p className="text-lg font-bold text-emerald-400">{stats.positiveReviews}</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600">Avg Rating</p>
-                            <p className="text-lg font-bold text-gray-900">{stats.avgRating} ⭐</p>
+                          <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
+                            <p className="text-xs text-slate-400">Avg Rating</p>
+                            <p className="text-lg font-bold text-white">{stats.avgRating} ⭐</p>
                           </div>
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <p className="text-xs text-gray-600">Spins</p>
-                            <p className="text-lg font-bold text-purple-600">{stats.totalSpins}</p>
+                          <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
+                            <p className="text-xs text-slate-400">Spins</p>
+                            <p className="text-lg font-bold text-purple-400">{stats.totalSpins}</p>
                           </div>
                         </div>
 
@@ -326,36 +363,32 @@ export default function AdminDashboard() {
                         <div className="flex flex-wrap gap-2">
                           <Button
                             size="sm"
-                            variant="outline"
                             onClick={() => copyRateLink(merchant.id)}
-                            className="gap-2"
+                            className="gap-2 bg-slate-700 hover:bg-slate-600 text-white border-slate-600"
                           >
                             <Copy className="w-4 h-4" />
                             Copy Link
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
                             onClick={() => downloadQRCode(merchant.id, merchant.business_name)}
-                            className="gap-2"
+                            className="gap-2 bg-slate-700 hover:bg-slate-600 text-white border-slate-600"
                           >
                             <Download className="w-4 h-4" />
                             Download QR
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
                             onClick={() => window.open(`/rate/${merchant.id}`, '_blank')}
-                            className="gap-2"
+                            className="gap-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border-purple-500/30"
                           >
                             <ExternalLink className="w-4 h-4" />
                             View Page
                           </Button>
                           <Button
                             size="sm"
-                            variant="outline"
                             onClick={() => setSelectedMerchant(isExpanded ? null : merchant.id)}
-                            className="gap-2"
+                            className="gap-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border-blue-500/30"
                           >
                             <Eye className="w-4 h-4" />
                             {isExpanded ? 'Hide' : 'Details'}
@@ -364,20 +397,20 @@ export default function AdminDashboard() {
 
                         {/* Expanded Details */}
                         {isExpanded && (
-                          <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-2">
+                          <div className="mt-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50 space-y-3">
                             <div>
-                              <p className="text-xs font-semibold text-gray-600">Merchant ID</p>
-                              <code className="text-xs text-gray-900 font-mono">{merchant.id}</code>
+                              <p className="text-xs font-semibold text-slate-400 mb-1">Merchant ID</p>
+                              <code className="text-xs text-slate-300 font-mono bg-slate-800 px-2 py-1 rounded">{merchant.id}</code>
                             </div>
                             <div>
-                              <p className="text-xs font-semibold text-gray-600">Rate Link</p>
-                              <code className="text-xs text-gray-900 font-mono break-all">
+                              <p className="text-xs font-semibold text-slate-400 mb-1">Rate Link</p>
+                              <code className="text-xs text-slate-300 font-mono break-all bg-slate-800 px-2 py-1 rounded block">
                                 {process.env.NEXT_PUBLIC_APP_URL}/rate/{merchant.id}
                               </code>
                             </div>
                             <div>
-                              <p className="text-xs font-semibold text-gray-600">Inscription</p>
-                              <p className="text-xs text-gray-900">
+                              <p className="text-xs font-semibold text-slate-400 mb-1">Inscription</p>
+                              <p className="text-xs text-slate-300">
                                 {new Date(merchant.created_at).toLocaleDateString('fr-FR', {
                                   year: 'numeric',
                                   month: 'long',
@@ -389,55 +422,57 @@ export default function AdminDashboard() {
                             </div>
                             {merchant.logo_url && (
                               <div>
-                                <p className="text-xs font-semibold text-gray-600 mb-2">Logo</p>
-                                <img src={merchant.logo_url} alt="Logo" className="h-16 object-contain" />
+                                <p className="text-xs font-semibold text-slate-400 mb-2">Logo</p>
+                                <div className="bg-slate-800 p-2 rounded-lg inline-block">
+                                  <img src={merchant.logo_url} alt="Logo" className="h-16 object-contain" />
+                                </div>
                               </div>
                             )}
                             {merchant.background_url && (
                               <div>
-                                <p className="text-xs font-semibold text-gray-600 mb-2">Background</p>
-                                <img src={merchant.background_url} alt="Background" className="h-24 w-auto object-cover rounded" />
+                                <p className="text-xs font-semibold text-slate-400 mb-2">Background</p>
+                                <img src={merchant.background_url} alt="Background" className="h-24 w-auto object-cover rounded-lg border border-slate-700" />
                               </div>
                             )}
                             
                             {/* Social Media Links */}
-                            <div className="border-t border-gray-200 pt-3 mt-3">
-                              <p className="text-xs font-semibold text-gray-600 mb-2">Liens de Redirection</p>
-                              <div className="space-y-1">
+                            <div className="border-t border-slate-700/50 pt-3 mt-3">
+                              <p className="text-xs font-semibold text-slate-400 mb-2">Liens de Redirection</p>
+                              <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-gray-600">Stratégie:</span>
-                                  <Badge variant="outline" className="text-xs capitalize">
+                                  <span className="text-xs text-slate-400">Stratégie:</span>
+                                  <Badge className="text-xs capitalize bg-purple-500/20 text-purple-400 border-purple-500/30">
                                     {merchant.redirect_strategy?.replace('_', ' ') || 'none'}
                                   </Badge>
                                 </div>
                                 {merchant.google_maps_url && (
-                                  <div>
-                                    <span className="text-xs text-gray-600">Google Maps:</span>
-                                    <a href={merchant.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                  <div className="bg-slate-800/50 p-2 rounded">
+                                    <span className="text-xs text-slate-400 block mb-1">Google Maps:</span>
+                                    <a href={merchant.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.google_maps_url}
                                     </a>
                                   </div>
                                 )}
                                 {merchant.tripadvisor_url && (
-                                  <div>
-                                    <span className="text-xs text-gray-600">TripAdvisor:</span>
-                                    <a href={merchant.tripadvisor_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                  <div className="bg-slate-800/50 p-2 rounded">
+                                    <span className="text-xs text-slate-400 block mb-1">TripAdvisor:</span>
+                                    <a href={merchant.tripadvisor_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.tripadvisor_url}
                                     </a>
                                   </div>
                                 )}
                                 {merchant.tiktok_url && (
-                                  <div>
-                                    <span className="text-xs text-gray-600">TikTok:</span>
-                                    <a href={merchant.tiktok_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                  <div className="bg-slate-800/50 p-2 rounded">
+                                    <span className="text-xs text-slate-400 block mb-1">TikTok:</span>
+                                    <a href={merchant.tiktok_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.tiktok_url}
                                     </a>
                                   </div>
                                 )}
                                 {merchant.instagram_url && (
-                                  <div>
-                                    <span className="text-xs text-gray-600">Instagram:</span>
-                                    <a href={merchant.instagram_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                  <div className="bg-slate-800/50 p-2 rounded">
+                                    <span className="text-xs text-slate-400 block mb-1">Instagram:</span>
+                                    <a href={merchant.instagram_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.instagram_url}
                                     </a>
                                   </div>
@@ -455,12 +490,12 @@ export default function AdminDashboard() {
 
             {filteredMerchants.length === 0 && (
               <div className="p-12 text-center">
-                <Store className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Aucun marchand trouvé</p>
+                <Store className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                <p className="text-slate-400">Aucun marchand trouvé</p>
               </div>
             )}
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
