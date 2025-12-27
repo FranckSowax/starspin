@@ -57,8 +57,7 @@ export default function SpinPage() {
       const { data: prizesData } = await supabase
         .from('prizes')
         .select('*')
-        .eq('merchant_id', shopId)
-        .gt('probability', 0);
+        .eq('merchant_id', shopId);
 
       setMerchant(merchantData);
       setPrizes(prizesData || []);
