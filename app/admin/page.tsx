@@ -19,7 +19,11 @@ import {
   Eye,
   Copy,
   CheckCircle2,
-  XCircle
+  XCircle,
+  LayoutDashboard,
+  Filter,
+  Calendar,
+  ChevronRight
 } from 'lucide-react';
 import QRCode from 'qrcode';
 
@@ -61,22 +65,40 @@ export default function AdminDashboard() {
   });
   const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
   const [merchantStats, setMerchantStats] = useState<Record<string, MerchantStats>>({});
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'merchants'>('dashboard');
+  const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month'>('week');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [tierFilter, setTierFilter] = useState<'all' | 'starter' | 'premium'>('all');
 
   useEffect(() => {
     checkAdminAuth();
   }, []);
 
   useEffect(() => {
+    let filtered = merchants;
+
+    // Search filter
     if (searchQuery) {
-      const filtered = merchants.filter(m => 
+      filtered = filtered.filter(m => 
         m.business_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         m.email?.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredMerchants(filtered);
-    } else {
-      setFilteredMerchants(merchants);
     }
-  }, [searchQuery, merchants]);
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(m => 
+        statusFilter === 'active' ? m.is_active !== false : m.is_active === false
+      );
+    }
+
+    // Tier filter
+    if (tierFilter !== 'all') {
+      filtered = filtered.filter(m => m.subscription_tier === tierFilter);
+    }
+
+    setFilteredMerchants(filtered);
+  }, [searchQuery, merchants, statusFilter, tierFilter]);
 
   const checkAdminAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -167,6 +189,54 @@ export default function AdminDashboard() {
     link.click();
   };
 
+  const generateAndSaveQRCode = async (merchantId: string, businessName: string) => {
+    try {
+      const url = `${process.env.NEXT_PUBLIC_APP_URL}/rate/${merchantId}`;
+      const qrDataUrl = await QRCode.toDataURL(url, {
+        width: 400,
+        margin: 2,
+        color: {
+          dark: '#2D6A4F',
+          light: '#FFFFFF',
+        },
+      });
+
+      // Convert data URL to blob
+      const response = await fetch(qrDataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `${merchantId}-qr.png`, { type: 'image/png' });
+
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('merchant-assets')
+        .upload(`qr-codes/${merchantId}.png`, file, { 
+          cacheControl: '3600',
+          upsert: true 
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('merchant-assets')
+        .getPublicUrl(`qr-codes/${merchantId}.png`);
+
+      // Update merchant record with QR URL
+      const { error: updateError } = await supabase
+        .from('merchants')
+        .update({ qr_code_url: publicUrl })
+        .eq('id', merchantId);
+
+      if (updateError) throw updateError;
+
+      alert(`QR Code généré et enregistré pour ${businessName}!`);
+      await loadMerchants(); // Reload to show updated data
+    } catch (error: any) {
+      console.error('Error generating QR code:', error);
+      alert(`Erreur: ${error.message}`);
+    }
+  };
+
   const copyRateLink = (merchantId: string) => {
     const url = `${process.env.NEXT_PUBLIC_APP_URL}/rate/${merchantId}`;
     navigator.clipboard.writeText(url);
@@ -185,33 +255,123 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className="bg-slate-900/50 border-b border-slate-700/50 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
-                <Store className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">StarSpin Admin</h1>
-                <p className="text-slate-400 text-sm mt-0.5">Gestion des marchands et QR codes</p>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-slate-900/50 border-r border-slate-700/50 backdrop-blur-xl flex flex-col">
+        {/* Logo */}
+        <div className="p-6 border-b border-slate-700/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center">
+              <Store className="w-6 h-6 text-white" />
             </div>
-            <Button
-              onClick={() => supabase.auth.signOut().then(() => router.push('/auth/login'))}
-              className="bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
-            >
-              Sign Out
-            </Button>
+            <div>
+              <h1 className="text-lg font-bold text-white">StarSpin</h1>
+              <p className="text-xs text-slate-400">Admin</p>
+            </div>
           </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          <button
+            onClick={() => setActiveSection('dashboard')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeSection === 'dashboard'
+                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+            }`}
+          >
+            <LayoutDashboard className="w-5 h-5" />
+            <span className="font-medium">Tableau de Bord</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSection('merchants')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeSection === 'merchants'
+                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+            }`}
+          >
+            <Store className="w-5 h-5" />
+            <span className="font-medium">Marchands</span>
+          </button>
+        </nav>
+
+        {/* Sign Out */}
+        <div className="p-4 border-t border-slate-700/50">
+          <Button
+            onClick={() => supabase.auth.signOut().then(() => router.push('/auth/login'))}
+            className="w-full bg-slate-800 hover:bg-slate-700 text-white border-slate-700"
+          >
+            Sign Out
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Global Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Header */}
+        <div className="bg-slate-900/50 border-b border-slate-700/50 backdrop-blur-xl">
+          <div className="px-8 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  {activeSection === 'dashboard' ? 'Tableau de Bord' : 'Gestion des Marchands'}
+                </h2>
+                <p className="text-slate-400 text-sm mt-0.5">
+                  {activeSection === 'dashboard' 
+                    ? 'Statistiques et analytics' 
+                    : 'Liste et gestion des marchands'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-8">
+        {/* Dashboard Section */}
+        {activeSection === 'dashboard' && (
+          <>
+            {/* Time Range Selector */}
+            <div className="flex gap-2 mb-6">
+              <Button
+                onClick={() => setTimeRange('day')}
+                className={`gap-2 ${
+                  timeRange === 'day'
+                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                Jour
+              </Button>
+              <Button
+                onClick={() => setTimeRange('week')}
+                className={`gap-2 ${
+                  timeRange === 'week'
+                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                Semaine
+              </Button>
+              <Button
+                onClick={() => setTimeRange('month')}
+                className={`gap-2 ${
+                  timeRange === 'month'
+                    ? 'bg-purple-500/20 text-purple-400 border-purple-500/30'
+                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                }`}
+              >
+                <Calendar className="w-4 h-4" />
+                Mois
+              </Button>
+            </div>
+
+            {/* Global Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
             <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl"></div>
             <div className="relative">
@@ -287,21 +447,56 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 mb-6 border border-slate-700/50">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Rechercher par nom ou email..."
-              value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
-          </div>
-        </div>
+          </>
+        )}
 
-        {/* Merchants List */}
+        {/* Merchants Section */}
+        {activeSection === 'merchants' && (
+          <>
+            {/* Filters */}
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 mb-6 border border-slate-700/50">
+              <div className="flex items-center gap-2 mb-4">
+                <Filter className="w-5 h-5 text-slate-400" />
+                <span className="text-sm font-semibold text-slate-300">Filtres</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={searchQuery}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as any)}
+                  className="px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="all">Tous les statuts</option>
+                  <option value="active">Actifs</option>
+                  <option value="inactive">Inactifs</option>
+                </select>
+
+                {/* Tier Filter */}
+                <select
+                  value={tierFilter}
+                  onChange={(e) => setTierFilter(e.target.value as any)}
+                  className="px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="all">Tous les plans</option>
+                  <option value="starter">Starter</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Merchants List */}
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden">
           <div className="p-6 border-b border-slate-700/50">
             <h2 className="text-xl font-bold text-white">Liste des Marchands</h2>
@@ -376,6 +571,14 @@ export default function AdminDashboard() {
                           >
                             <Download className="w-4 h-4" />
                             Download QR
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => generateAndSaveQRCode(merchant.id, merchant.business_name)}
+                            className="gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border-emerald-500/30"
+                          >
+                            <QrCode className="w-4 h-4" />
+                            Générer QR
                           </Button>
                           <Button
                             size="sm"
@@ -495,6 +698,9 @@ export default function AdminDashboard() {
               </div>
             )}
           </div>
+        </div>
+          </>
+        )}
         </div>
       </div>
     </div>
