@@ -101,20 +101,41 @@ export default function SpinPage() {
     
     let segmentCenter;
     if (prizes.length === 2) {
+      // For n=2 (180deg each):
+      // Index 0 (bottom/South): Center is 90deg.
+      // Index 1 (top/North): Center is 270deg.
       segmentCenter = 90 + (winningIndex * 180);
     } else if (prizes.length === 1) {
+      // For n=1: Full circle. Center is visually everywhere, but let's treat it as 0.
       segmentCenter = 0;
     } else {
-      segmentCenter = (winningIndex * segmentAngle) + (90 - segmentAngle/2);
+      // For n>=3: Standard logic
+      // Segment starts at index * angle.
+      // Visual center is offset by (90 - angle/2) due to skew/rotation construction?
+      // Let's re-verify the visual center.
+      // Skew construction creates a wedge starting at the rotation angle.
+      // If index=0, rotation=0. Wedge spans 0 to angle.
+      // Visual center is angle/2.
+      // But we applied `rotate(segmentAngle/2)` to the text/content?
+      // Yes: `transform: skewY(...) rotate(segmentAngle/2)` on content.
+      // So the content is centered at angle/2 relative to the segment start.
+      // Since segment start is at `index * angle`, absolute center is `index * angle + angle/2`.
+      
+      segmentCenter = (winningIndex * segmentAngle) + (segmentAngle / 2);
     }
 
-    // We want segmentCenter to move to -90 (270)
-    // current + delta = 270 - center
-    // delta = 270 - center - current
-    // Add spins: 360 * 5
+    // Target is Top (270 degrees or -90 degrees)
+    // We want: (CurrentRotation + Delta + SegmentCenter) % 360 === 270
+    // So: CurrentRotation + Delta = 270 - SegmentCenter
     
-    const targetRotation = (360 * 5) + (270 - segmentCenter);
-    const totalRotation = currentRotationRef.current + targetRotation;
+    const currentRot = currentRotationRef.current;
+    const baseTarget = 270 - segmentCenter;
+    
+    // Calculate smallest positive delta to reach target
+    const distToTarget = (baseTarget - (currentRot % 360) + 360) % 360;
+    
+    // Add 5 full spins (1800 deg) + distance
+    const totalRotation = currentRot + 1800 + distToTarget;
 
     if (wheelRef.current) {
       wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
