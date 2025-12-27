@@ -17,7 +17,8 @@ import {
   BarChart3,
   Users,
   Bell,
-  CreditCard
+  CreditCard,
+  Target
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -38,6 +39,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+    { name: 'Strategy', href: '/dashboard/strategy', icon: Target },
     { name: 'Prizes', href: '/dashboard/prizes', icon: Gift },
     { name: 'QR Code', href: '/dashboard/qr', icon: QrCode },
     { name: 'Feedback', href: '/dashboard/feedback', icon: MessageSquare },

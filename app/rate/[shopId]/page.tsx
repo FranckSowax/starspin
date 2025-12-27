@@ -70,8 +70,27 @@ export default function RatingPage() {
 
     if (!error) {
       if (rating >= 4) {
-        // Redirect based on merchant's strategy
-        const strategy = merchant.redirect_strategy || 'google_maps';
+        // Get current day of week (0 = Sunday, 1 = Monday, etc.)
+        const today = new Date().getDay();
+        // Convert to Monday-based index (0 = Monday, 6 = Sunday)
+        const dayIndex = today === 0 ? 6 : today - 1;
+        
+        // Get weekly schedule if available
+        let strategy = 'google_maps';
+        if (merchant.weekly_schedule) {
+          try {
+            const schedule = JSON.parse(merchant.weekly_schedule);
+            if (Array.isArray(schedule) && schedule.length === 7) {
+              strategy = schedule[dayIndex];
+            }
+          } catch (e) {
+            console.error('Error parsing weekly schedule:', e);
+            strategy = merchant.redirect_strategy || 'google_maps';
+          }
+        } else {
+          strategy = merchant.redirect_strategy || 'google_maps';
+        }
+        
         let redirectUrl = '';
 
         switch (strategy) {

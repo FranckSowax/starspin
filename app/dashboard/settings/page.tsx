@@ -19,13 +19,6 @@ export default function SettingsPage() {
   const [backgroundPreview, setBackgroundPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  
-  // Social media redirect settings
-  const [googleMapsUrl, setGoogleMapsUrl] = useState('');
-  const [tripadvisorUrl, setTripadvisorUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [redirectStrategy, setRedirectStrategy] = useState('google_maps');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -47,13 +40,6 @@ export default function SettingsPage() {
       setMerchant(merchantData);
       if (merchantData?.logo_url) setLogoPreview(merchantData.logo_url);
       if (merchantData?.background_url) setBackgroundPreview(merchantData.background_url);
-      
-      // Load social media settings
-      setGoogleMapsUrl(merchantData?.google_maps_url || '');
-      setTripadvisorUrl(merchantData?.tripadvisor_url || '');
-      setTiktokUrl(merchantData?.tiktok_url || '');
-      setInstagramUrl(merchantData?.instagram_url || '');
-      setRedirectStrategy(merchantData?.redirect_strategy || 'google_maps');
     };
 
     checkAuth();
@@ -133,13 +119,7 @@ export default function SettingsPage() {
     setMessage(null);
 
     try {
-      const updates: any = {
-        google_maps_url: googleMapsUrl || null,
-        tripadvisor_url: tripadvisorUrl || null,
-        tiktok_url: tiktokUrl || null,
-        instagram_url: instagramUrl || null,
-        redirect_strategy: redirectStrategy,
-      };
+      const updates: any = {};
 
       if (logoFile) {
         const logoUrl = await uploadImage(logoFile, 'logos');
@@ -151,26 +131,28 @@ export default function SettingsPage() {
         updates.background_url = backgroundUrl;
       }
 
-      const { error } = await supabase
-        .from('merchants')
-        .update(updates)
-        .eq('id', user.id);
+      if (Object.keys(updates).length > 0) {
+        const { error } = await supabase
+          .from('merchants')
+          .update(updates)
+          .eq('id', user.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Settings saved successfully!' });
-      setLogoFile(null);
-      setBackgroundFile(null);
-      
-      // Refresh merchant data
-      const { data: merchantData } = await supabase
-        .from('merchants')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      setMerchant(merchantData);
+        setMessage({ type: 'success', text: 'Images uploaded successfully!' });
+        setLogoFile(null);
+        setBackgroundFile(null);
+        
+        // Refresh merchant data
+        const { data: merchantData } = await supabase
+          .from('merchants')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        setMerchant(merchantData);
+      }
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Failed to save settings' });
+      setMessage({ type: 'error', text: error.message || 'Failed to upload images' });
     } finally {
       setUploading(false);
     }
@@ -311,96 +293,6 @@ export default function SettingsPage() {
           </div>
         </Card>
 
-        {/* Social Media Redirect Settings */}
-        <Card className="p-6">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Redirection après notation</h3>
-            <p className="text-sm text-gray-600">Configurez où rediriger vos clients après une note de 4 ou 5 étoiles</p>
-          </div>
-
-          <div className="space-y-4">
-            {/* Redirect Strategy */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Plateforme de redirection
-              </label>
-              <select
-                value={redirectStrategy}
-                onChange={(e) => setRedirectStrategy(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              >
-                <option value="google_maps">Google Maps</option>
-                <option value="tripadvisor">TripAdvisor</option>
-                <option value="tiktok">TikTok</option>
-                <option value="instagram">Instagram</option>
-                <option value="none">Aucune redirection</option>
-              </select>
-            </div>
-
-            {/* Google Maps URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien Google Maps
-              </label>
-              <input
-                type="url"
-                value={googleMapsUrl}
-                onChange={(e) => setGoogleMapsUrl(e.target.value)}
-                placeholder="https://g.page/your-business"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              />
-            </div>
-
-            {/* TripAdvisor URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien TripAdvisor
-              </label>
-              <input
-                type="url"
-                value={tripadvisorUrl}
-                onChange={(e) => setTripadvisorUrl(e.target.value)}
-                placeholder="https://www.tripadvisor.com/..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              />
-            </div>
-
-            {/* TikTok URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien TikTok
-              </label>
-              <input
-                type="url"
-                value={tiktokUrl}
-                onChange={(e) => setTiktokUrl(e.target.value)}
-                placeholder="https://www.tiktok.com/@your-account"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              />
-            </div>
-
-            {/* Instagram URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lien Instagram
-              </label>
-              <input
-                type="url"
-                value={instagramUrl}
-                onChange={(e) => setInstagramUrl(e.target.value)}
-                placeholder="https://www.instagram.com/your-account"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              />
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
-                💡 <strong>Astuce :</strong> Les clients qui donnent 4 ou 5 étoiles seront automatiquement redirigés vers la plateforme sélectionnée. Assurez-vous que le lien est correct !
-              </p>
-            </div>
-          </div>
-        </Card>
-
         {/* Save Button */}
         <div className="flex justify-end gap-3">
           <Button
@@ -416,7 +308,7 @@ export default function SettingsPage() {
           </Button>
           <Button
             onClick={handleSave}
-            disabled={uploading}
+            disabled={uploading || (!logoFile && !backgroundFile)}
             className="bg-teal-600 hover:bg-teal-700"
           >
             {uploading ? (
