@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
-import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X } from 'lucide-react';
 
 export default function PrizesPage() {
   const router = useRouter();
@@ -21,6 +21,7 @@ export default function PrizesPage() {
     description: '',
     probability: 10,
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
@@ -105,29 +106,66 @@ export default function PrizesPage() {
       let imageUrl = null;
       if (imageFile) {
         imageUrl = await uploadImage(imageFile);
+      } else if (editingId) {
+        // Keep existing image if editing and no new file selected
+        const existingPrize = prizes.find(p => p.id === editingId);
+        imageUrl = existingPrize?.image_url;
       }
 
-      const { error } = await supabase.from('prizes').insert({
+      const prizeData = {
         merchant_id: user.id,
         name: formData.name,
         description: formData.description,
         probability: formData.probability,
         image_url: imageUrl,
-      });
+      };
 
-      if (error) throw error;
+      if (editingId) {
+        const { error } = await supabase
+          .from('prizes')
+          .update(prizeData)
+          .eq('id', editingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('prizes')
+          .insert(prizeData);
+        if (error) throw error;
+      }
 
       setShowForm(false);
+      setEditingId(null);
       setFormData({ name: '', description: '', probability: 10 });
       setImageFile(null);
       setImagePreview('');
       fetchPrizes(user.id);
     } catch (error: any) {
-      alert(error.message || 'Failed to add prize');
+      alert(error.message || 'Failed to save prize');
     } finally {
       setLoading(false);
       setUploading(false);
     }
+  };
+
+  const handleEdit = (prize: Prize) => {
+    setFormData({
+      name: prize.name,
+      description: prize.description || '',
+      probability: prize.probability,
+    });
+    setEditingId(prize.id);
+    setImagePreview(prize.image_url || '');
+    setShowForm(true);
+    // Scroll to top to see form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancel = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData({ name: '', description: '', probability: 10 });
+    setImageFile(null);
+    setImagePreview('');
   };
 
   const handleDelete = async (prizeId: string) => {
@@ -169,11 +207,13 @@ export default function PrizesPage() {
             <p className="text-gray-600">Configurez vos prix et leurs probabilités pour la roue</p>
           </div>
           <Button 
-            onClick={() => setShowForm(!showForm)} 
-            className="gap-2 bg-teal-600 hover:bg-teal-700"
+            onClick={() => showForm ? handleCancel() : setShowForm(true)} 
+            className={`gap-2 ${showForm ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-teal-600 hover:bg-teal-700 text-white'}`}
+            variant={showForm ? 'outline' : 'default'}
           >
             {showForm ? (
               <>
+                <X className="w-4 h-4" />
                 <span>Annuler</span>
               </>
             ) : (
@@ -270,8 +310,21 @@ export default function PrizesPage() {
         </Card>
 
         {showForm && (
-          <Card className="p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">✨ Ajouter un Nouveau Prix</h3>
+          <Card className="p-6 border-2 border-teal-100 shadow-xl bg-white/80 backdrop-blur-sm relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-blue-500"></div>
+            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              {editingId ? (
+                <>
+                  <Pencil className="w-5 h-5 text-teal-600" />
+                  Modifier le Prix
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5 text-teal-600" />
+                  Ajouter un Nouveau Prix
+                </>
+              )}
+            </h3>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Prize Image Upload */}
               <div>
@@ -374,9 +427,9 @@ export default function PrizesPage() {
               <Button 
                 type="submit" 
                 disabled={loading || uploading} 
-                className="w-full bg-teal-600 hover:bg-teal-700"
+                className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-bold py-6 rounded-xl shadow-lg transform transition-transform active:scale-95"
               >
-                {uploading ? 'Upload en cours...' : loading ? 'Ajout...' : 'Ajouter le Prix'}
+                {uploading ? 'Upload en cours...' : loading ? 'Sauvegarde...' : (editingId ? 'Mettre à jour le Prix' : 'Créer le Prix')}
               </Button>
             </form>
           </Card>
@@ -426,9 +479,17 @@ export default function PrizesPage() {
                   )}
                   
                   <Button
+                    onClick={() => handleEdit(prize)}
+                    variant="outline"
+                    className="flex-1 text-teal-600 border-teal-600 hover:bg-teal-50 gap-2"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Modifier
+                  </Button>
+                  <Button
                     onClick={() => handleDelete(prize.id)}
                     variant="outline"
-                    className="w-full text-red-600 border-red-600 hover:bg-red-50 gap-2 mt-2"
+                    className="flex-1 text-red-600 border-red-600 hover:bg-red-50 gap-2"
                   >
                     <Trash2 className="w-4 h-4" />
                     Supprimer

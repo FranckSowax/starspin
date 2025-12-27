@@ -16,6 +16,7 @@ export default function CouponPage() {
 
   const [coupon, setCoupon] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
+  const [prizeImage, setPrizeImage] = useState<string | null>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [timeLeft, setTimeLeft] = useState('');
   const [isClient, setIsClient] = useState(false);
@@ -40,6 +41,26 @@ export default function CouponPage() {
 
       setCoupon(couponData);
       setMerchant(merchantData);
+
+      if (couponData?.spin_id) {
+        const { data: spinData } = await supabase
+          .from('spins')
+          .select('prize_id')
+          .eq('id', couponData.spin_id)
+          .single();
+        
+        if (spinData?.prize_id) {
+          const { data: prizeData } = await supabase
+            .from('prizes')
+            .select('image_url')
+            .eq('id', spinData.prize_id)
+            .single();
+            
+          if (prizeData?.image_url) {
+            setPrizeImage(prizeData.image_url);
+          }
+        }
+      }
 
       if (code) {
         const qr = await QRCode.toDataURL(code);
@@ -102,6 +123,18 @@ export default function CouponPage() {
         <p className="text-center text-xl text-gray-700 mb-6">
           {t('wheel.youWon')}: <span className="font-bold text-[#38A169]">{coupon.prize_name}</span>
         </p>
+
+        {prizeImage && (
+          <div className="flex justify-center mb-6">
+            <div className="relative w-48 h-48 rounded-2xl overflow-hidden shadow-lg border-4 border-[#38A169]/20">
+              <img 
+                src={prizeImage} 
+                alt={coupon.prize_name} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="bg-gray-50 rounded-2xl p-6 mb-6">
           <p className="text-sm text-gray-600 text-center mb-2">{t('coupon.code')}</p>
