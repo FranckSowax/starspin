@@ -33,6 +33,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Arco&display=swap" rel="stylesheet" />
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${arco.variable} antialiased`}
