@@ -6,7 +6,6 @@ import { supabase } from '@/lib/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { 
   Store, 
   QrCode, 
@@ -33,6 +32,11 @@ interface Merchant {
   background_url?: string;
   created_at: string;
   is_active?: boolean;
+  google_maps_url?: string;
+  tripadvisor_url?: string;
+  tiktok_url?: string;
+  instagram_url?: string;
+  redirect_strategy?: string;
 }
 
 interface MerchantStats {
@@ -250,12 +254,12 @@ export default function AdminDashboard() {
         <Card className="p-4 mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
+            <input
               type="text"
               placeholder="Rechercher par nom ou email..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
         </Card>
@@ -395,6 +399,51 @@ export default function AdminDashboard() {
                                 <img src={merchant.background_url} alt="Background" className="h-24 w-auto object-cover rounded" />
                               </div>
                             )}
+                            
+                            {/* Social Media Links */}
+                            <div className="border-t border-gray-200 pt-3 mt-3">
+                              <p className="text-xs font-semibold text-gray-600 mb-2">Liens de Redirection</p>
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-gray-600">Stratégie:</span>
+                                  <Badge variant="outline" className="text-xs capitalize">
+                                    {merchant.redirect_strategy?.replace('_', ' ') || 'none'}
+                                  </Badge>
+                                </div>
+                                {merchant.google_maps_url && (
+                                  <div>
+                                    <span className="text-xs text-gray-600">Google Maps:</span>
+                                    <a href={merchant.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                      {merchant.google_maps_url}
+                                    </a>
+                                  </div>
+                                )}
+                                {merchant.tripadvisor_url && (
+                                  <div>
+                                    <span className="text-xs text-gray-600">TripAdvisor:</span>
+                                    <a href={merchant.tripadvisor_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                      {merchant.tripadvisor_url}
+                                    </a>
+                                  </div>
+                                )}
+                                {merchant.tiktok_url && (
+                                  <div>
+                                    <span className="text-xs text-gray-600">TikTok:</span>
+                                    <a href={merchant.tiktok_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                      {merchant.tiktok_url}
+                                    </a>
+                                  </div>
+                                )}
+                                {merchant.instagram_url && (
+                                  <div>
+                                    <span className="text-xs text-gray-600">Instagram:</span>
+                                    <a href={merchant.instagram_url} target="_blank" rel="noopener noreferrer" className="text-xs text-teal-600 hover:underline block truncate">
+                                      {merchant.instagram_url}
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>

@@ -70,7 +70,34 @@ export default function RatingPage() {
 
     if (!error) {
       if (rating >= 4) {
-        router.push(`/social/${shopId}`);
+        // Redirect based on merchant's strategy
+        const strategy = merchant.redirect_strategy || 'google_maps';
+        let redirectUrl = '';
+
+        switch (strategy) {
+          case 'google_maps':
+            redirectUrl = merchant.google_maps_url;
+            break;
+          case 'tripadvisor':
+            redirectUrl = merchant.tripadvisor_url;
+            break;
+          case 'tiktok':
+            redirectUrl = merchant.tiktok_url;
+            break;
+          case 'instagram':
+            redirectUrl = merchant.instagram_url;
+            break;
+          case 'none':
+            redirectUrl = '';
+            break;
+        }
+
+        if (redirectUrl) {
+          window.location.href = redirectUrl;
+        } else {
+          // Fallback to social page if no URL configured
+          router.push(`/social/${shopId}`);
+        }
       } else {
         alert(t('feedback.thankYou'));
         setRating(null);
