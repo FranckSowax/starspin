@@ -11,6 +11,12 @@ import { FloatingParticles } from '@/components/animations/FloatingParticles';
 import { GradientText } from '@/components/animations/GradientText';
 import { ShineBorder } from '@/components/animations/ShineBorder';
 
+// Static assets
+import step1 from '@/app/assets/images/step1.jpg';
+import step2 from '@/app/assets/images/step2.jpg';
+import step3 from '@/app/assets/images/step3.jpg';
+import step4 from '@/app/assets/images/step4.jpg';
+
 // Force rebuild: v3 (Redesign Le Defi + Arco Fonts)
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -248,10 +254,10 @@ export default function LandingPage() {
           <div className="mb-16">
             <PhoneCarousel
               images={[
-                { src: '/step1.jpg', alt: 'Étape 1: Scan QR Code' },
-                { src: '/step2.jpg', alt: 'Étape 2: Notez votre expérience' },
-                { src: '/step3.jpg', alt: 'Étape 3: Tournez la roue' },
-                { src: '/step4.jpg', alt: 'Étape 4: Recevez votre récompense' }
+                { src: step1, alt: 'Étape 1: Scan QR Code' },
+                { src: step2, alt: 'Étape 2: Notez votre expérience' },
+                { src: step3, alt: 'Étape 3: Tournez la roue' },
+                { src: step4, alt: 'Étape 4: Recevez votre récompense' }
               ]}
             />
           </div>

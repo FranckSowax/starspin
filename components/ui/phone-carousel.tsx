@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import type { StaticImageData } from "next/image";
+
 interface IphoneFrameProps extends React.SVGProps<SVGSVGElement> {
   width?: string | number;
-  src?: string;
+  src?: string | StaticImageData;
   alt?: string;
 }
 
@@ -129,7 +131,7 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
 };
 
 export interface ImageItem {
-  src: string;
+  src: string | StaticImageData;
   alt: string;
 }
 
