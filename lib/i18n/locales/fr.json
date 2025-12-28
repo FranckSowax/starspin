@@ -195,6 +195,33 @@
       "noCommitment": "Sans engagement",
       "quickSetup": "Installation en 5 min",
       "support": "Support 7j/7"
+    },
+    "dashboard": {
+      "nav": {
+        "dashboard": "Tableau de bord",
+        "scanner": "Scanner",
+        "prizes": "Prix & Lots",
+        "feedback": "Avis Clients",
+        "qrCode": "QR Code",
+        "analytics": "Statistiques",
+        "strategy": "Stratégie",
+        "customers": "Clients",
+        "billing": "Abonnement",
+        "settings": "Paramètres",
+        "signOut": "Déconnexion"
+      },
+      "common": {
+        "loading": "Chargement...",
+        "online": "En ligne",
+        "save": "Enregistrer",
+        "cancel": "Annuler",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "add": "Ajouter",
+        "download": "Télécharger",
+        "upload": "Importer",
+        "close": "Fermer"
+      }
     }
   }
 }

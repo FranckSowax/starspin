@@ -6,6 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n/config';
 import { 
   LayoutDashboard, 
   Gift, 
@@ -31,6 +33,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
+  const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -41,16 +44,16 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
   };
 
   const navigation = [
-    { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Scanner', href: '/dashboard/scan', icon: ScanLine },
-    { name: 'Prix & Lots', href: '/dashboard/prizes', icon: Gift },
-    { name: 'Avis Clients', href: '/dashboard/feedback', icon: MessageSquare },
-    { name: 'QR Code', href: '/dashboard/qr', icon: QrCode },
-    { name: 'Statistiques', href: '/dashboard/analytics', icon: BarChart3 },
-    { name: 'Stratégie', href: '/dashboard/strategy', icon: Target },
-    { name: 'Clients', href: '/dashboard/customers', icon: Users },
-    { name: 'Abonnement', href: '/dashboard/billing', icon: CreditCard },
-    { name: 'Paramètres', href: '/dashboard/settings', icon: Settings },
+    { name: t('dashboard.nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('dashboard.nav.scanner'), href: '/dashboard/scan', icon: ScanLine },
+    { name: t('dashboard.nav.prizes'), href: '/dashboard/prizes', icon: Gift },
+    { name: t('dashboard.nav.feedback'), href: '/dashboard/feedback', icon: MessageSquare },
+    { name: t('dashboard.nav.qrCode'), href: '/dashboard/qr', icon: QrCode },
+    { name: t('dashboard.nav.analytics'), href: '/dashboard/analytics', icon: BarChart3 },
+    { name: t('dashboard.nav.strategy'), href: '/dashboard/strategy', icon: Target },
+    { name: t('dashboard.nav.customers'), href: '/dashboard/customers', icon: Users },
+    { name: t('dashboard.nav.billing'), href: '/dashboard/billing', icon: CreditCard },
+    { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
   ];
 
   return (
@@ -143,7 +146,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
               className="w-full justify-start gap-3 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
             >
               <LogOut className="w-5 h-5" />
-              Déconnexion
+              {t('dashboard.nav.signOut')}
             </Button>
           </div>
         </div>
@@ -164,10 +167,10 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
 
               <div className="flex flex-col">
                 <h1 className="text-xl font-bold text-slate-900">
-                  {navigation.find(item => item.href === pathname)?.name || 'Dashboard'}
+                  {navigation.find(item => item.href === pathname)?.name || t('dashboard.nav.dashboard')}
                 </h1>
                 <p className="text-sm text-slate-500 hidden sm:block">
-                  Gérez votre activité et vos récompenses
+                  {t('dashboard.common.online')}
                 </p>
               </div>
             </div>
@@ -179,7 +182,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                En ligne
+                {t('dashboard.common.online')}
               </div>
               <button className="p-2.5 rounded-full hover:bg-slate-100 relative transition-colors">
                 <Bell className="w-5 h-5 text-slate-600" />

@@ -195,6 +195,33 @@
       "noCommitment": "ไม่มีข้อผูกมัด",
       "quickSetup": "ตั้งค่า 5 นาที",
       "support": "การสนับสนุน 24/7"
+    },
+    "dashboard": {
+      "nav": {
+        "dashboard": "แดชบอร์ด",
+        "scanner": "สแกนเนอร์",
+        "prizes": "รางวัลและของรางวัล",
+        "feedback": "รีวิวลูกค้า",
+        "qrCode": "QR Code",
+        "analytics": "สถิติ",
+        "strategy": "กลยุทธ์",
+        "customers": "ลูกค้า",
+        "billing": "การสมัครสมาชิก",
+        "settings": "การตั้งค่า",
+        "signOut": "ออกจากระบบ"
+      },
+      "common": {
+        "loading": "กำลังโหลด...",
+        "online": "ออนไลน์",
+        "save": "บันทึก",
+        "cancel": "ยกเลิก",
+        "delete": "ลบ",
+        "edit": "แก้ไข",
+        "add": "เพิ่ม",
+        "download": "ดาวน์โหลด",
+        "upload": "อัปโหลด",
+        "close": "ปิด"
+      }
     }
   }
 }
