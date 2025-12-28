@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ChartAreaInteractive } from '@/components/dashboard/ChartAreaInteractive';
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n/config';
 import { 
   TrendingUp, 
   Copy, 
@@ -23,6 +25,7 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
@@ -132,7 +135,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-slate-600">Chargement du tableau de bord...</p>
+          <p className="text-lg text-slate-600">{t('dashboard.common.loading')}</p>
         </div>
       </div>
     );
@@ -145,15 +148,15 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold text-slate-900">
-              Bonjour, {merchant.business_name || 'Commerçant'} 👋
+              {t('dashboard.welcome', { name: merchant.business_name || 'Commerçant' })}
             </h2>
             <p className="text-slate-500 mt-1">
-              Voici un aperçu de vos performances aujourd'hui.
+              {t('dashboard.welcomeSubtitle')}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              {new Date().toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
           </div>
         </div>
@@ -171,7 +174,7 @@ export default function DashboardPage() {
               </Badge>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Avis Totaux</p>
+              <p className="text-sm font-medium text-slate-500">{t('dashboard.totalReviews')}</p>
               <h3 className="text-3xl font-bold text-slate-900 mt-1">{stats.totalReviews}</h3>
             </div>
           </Card>
@@ -187,7 +190,7 @@ export default function DashboardPage() {
               </Badge>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Note Moyenne</p>
+              <p className="text-sm font-medium text-slate-500">{t('dashboard.avgRating')}</p>
               <div className="flex items-baseline gap-2 mt-1">
                 <h3 className="text-3xl font-bold text-slate-900">{stats.avgRating}</h3>
                 <span className="text-sm text-slate-400">/ 5.0</span>
@@ -206,7 +209,7 @@ export default function DashboardPage() {
               </Badge>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Tours de Roue</p>
+              <p className="text-sm font-medium text-slate-500">{t('dashboard.totalSpins')}</p>
               <h3 className="text-3xl font-bold text-slate-900 mt-1">{stats.totalSpins}</h3>
             </div>
           </Card>
@@ -222,7 +225,7 @@ export default function DashboardPage() {
               </Badge>
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-500">Prix Distribués</p>
+              <p className="text-sm font-medium text-slate-500">{t('dashboard.rewards')}</p>
               <h3 className="text-3xl font-bold text-slate-900 mt-1">{stats.rewardsRedeemed}</h3>
             </div>
           </Card>
@@ -233,8 +236,8 @@ export default function DashboardPage() {
           <Card className="lg:col-span-2 p-6 border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Activité des Avis</h3>
-                <p className="text-sm text-slate-500">Évolution sur les 30 derniers jours</p>
+                <h3 className="text-lg font-bold text-slate-900">{t('dashboard.activity.title')}</h3>
+                <p className="text-sm text-slate-500">{t('dashboard.activity.subtitle')}</p>
               </div>
             </div>
             <ChartAreaInteractive data={chartData} />
@@ -242,7 +245,7 @@ export default function DashboardPage() {
 
           {/* Recent Activity Feed */}
           <Card className="p-6 border-slate-100 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 mb-6">Avis Récents</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-6">{t('dashboard.recentReviews.title')}</h3>
             <div className="space-y-6">
               {recentActivity.length > 0 ? (
                 recentActivity.map((activity, idx) => (
@@ -256,21 +259,21 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <p className="text-sm font-medium text-slate-900 truncate">
-                          Nouveau client
+                          {t('dashboard.recentReviews.newCustomer')}
                         </p>
                         <span className="text-xs text-slate-400 whitespace-nowrap">
-                          {new Date(activity.date).toLocaleDateString()}
+                          {new Date(activity.date).toLocaleDateString(i18n.language)}
                         </span>
                       </div>
                       <p className="text-sm text-slate-600 mt-1 line-clamp-2">
-                        {activity.comment || "Pas de commentaire"}
+                        {activity.comment || t('dashboard.recentReviews.noComment')}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="text-center py-8 text-slate-500 text-sm">
-                  Aucun avis récent pour le moment.
+                  {t('dashboard.recentReviews.noReviews')}
                 </div>
               )}
               
@@ -279,7 +282,7 @@ export default function DashboardPage() {
                 className="w-full mt-4"
                 onClick={() => router.push('/dashboard/feedback')}
               >
-                Voir tous les avis
+                {t('dashboard.recentReviews.viewAll')}
               </Button>
             </div>
           </Card>
@@ -289,7 +292,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Quick Actions Grid */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Actions Rapides</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">{t('dashboard.quickActions.title')}</h3>
             <div className="grid grid-cols-2 gap-4">
               <button 
                 onClick={() => router.push('/dashboard/scan')}
@@ -298,8 +301,8 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                   <ScanLine className="w-5 h-5" />
                 </div>
-                <h4 className="font-semibold text-slate-900">Scanner Coupon</h4>
-                <p className="text-xs text-slate-500 mt-1">Valider un gain client</p>
+                <h4 className="font-semibold text-slate-900">{t('dashboard.quickActions.scan')}</h4>
+                <p className="text-xs text-slate-500 mt-1">{t('dashboard.quickActions.scanDesc')}</p>
               </button>
 
               <button 
@@ -309,8 +312,8 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 bg-pink-50 text-pink-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-pink-600 group-hover:text-white transition-colors">
                   <Gift className="w-5 h-5" />
                 </div>
-                <h4 className="font-semibold text-slate-900">Gérer les Prix</h4>
-                <p className="text-xs text-slate-500 mt-1">Modifier les lots</p>
+                <h4 className="font-semibold text-slate-900">{t('dashboard.quickActions.prizes')}</h4>
+                <p className="text-xs text-slate-500 mt-1">{t('dashboard.quickActions.prizesDesc')}</p>
               </button>
 
               <button 
@@ -320,8 +323,8 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                   <Star className="w-5 h-5" />
                 </div>
-                <h4 className="font-semibold text-slate-900">Avis Clients</h4>
-                <p className="text-xs text-slate-500 mt-1">Répondre aux avis</p>
+                <h4 className="font-semibold text-slate-900">{t('dashboard.quickActions.reviews')}</h4>
+                <p className="text-xs text-slate-500 mt-1">{t('dashboard.quickActions.reviewsDesc')}</p>
               </button>
 
               <button 
@@ -331,20 +334,20 @@ export default function DashboardPage() {
                 <div className="w-10 h-10 bg-teal-50 text-teal-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-teal-600 group-hover:text-white transition-colors">
                   <BarChart3 className="w-5 h-5" />
                 </div>
-                <h4 className="font-semibold text-slate-900">Analyses</h4>
-                <p className="text-xs text-slate-500 mt-1">Voir les stats</p>
+                <h4 className="font-semibold text-slate-900">{t('dashboard.quickActions.analytics')}</h4>
+                <p className="text-xs text-slate-500 mt-1">{t('dashboard.quickActions.analyticsDesc')}</p>
               </button>
             </div>
           </div>
 
           {/* Review Link Card */}
           <div>
-            <h3 className="text-lg font-bold text-slate-900 mb-4">Votre Lien d'Avis</h3>
+            <h3 className="text-lg font-bold text-slate-900 mb-4">{t('dashboard.reviewLink.title')}</h3>
             <Card className="p-6 border-slate-100 shadow-sm bg-gradient-to-br from-slate-900 to-slate-800 text-white">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h4 className="text-lg font-semibold text-white">Lien Public</h4>
-                  <p className="text-sm text-slate-400 mt-1">Partagez ce lien avec vos clients</p>
+                  <h4 className="text-lg font-semibold text-white">{t('dashboard.reviewLink.publicLink')}</h4>
+                  <p className="text-sm text-slate-400 mt-1">{t('dashboard.reviewLink.desc')}</p>
                 </div>
                 <div className="p-2 bg-white/10 rounded-lg">
                   <ArrowUpRight className="w-5 h-5 text-white" />
@@ -361,12 +364,12 @@ export default function DashboardPage() {
                 <Button 
                   onClick={() => {
                     navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`);
-                    alert('Lien copié !');
+                    alert(t('dashboard.reviewLink.copied'));
                   }}
                   className="bg-white text-slate-900 hover:bg-slate-100 border-0"
                 >
                   <Copy className="w-4 h-4 mr-2" />
-                  Copier
+                  {t('dashboard.reviewLink.copy')}
                 </Button>
                 <Button 
                   variant="outline"
@@ -374,7 +377,7 @@ export default function DashboardPage() {
                   className="border-white/20 text-white hover:bg-white/10 bg-transparent"
                 >
                   <ScanLine className="w-4 h-4 mr-2" />
-                  QR Code
+                  {t('dashboard.reviewLink.qrCode')}
                 </Button>
               </div>
             </Card>

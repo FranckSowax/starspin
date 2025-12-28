@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import { useTranslation } from "react-i18next"
+import '@/lib/i18n/config'
 
 import {
   Card,
@@ -26,26 +28,23 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-const chartConfig = {
-  visitors: {
-    label: "Reviews",
-  },
-  positive: {
-    label: "Positive",
-    color: "hsl(173, 58%, 39%)",
-  },
-  negative: {
-    label: "Negative",
-    color: "hsl(0, 84%, 60%)",
-  },
-} satisfies ChartConfig
-
-interface ChartAreaInteractiveProps {
-  data?: Array<{ date: string; positive: number; negative: number }>;
-}
-
-export function ChartAreaInteractive({ data }: ChartAreaInteractiveProps) {
+export function ChartAreaInteractive({ data }: { data?: Array<{ date: string; positive: number; negative: number }> }) {
+  const { t, i18n } = useTranslation()
   const [timeRange, setTimeRange] = React.useState("90d")
+
+  const chartConfig = {
+    visitors: {
+      label: t('dashboard.charts.legend.reviews'),
+    },
+    positive: {
+      label: t('dashboard.charts.legend.positive'),
+      color: "hsl(173, 58%, 39%)",
+    },
+    negative: {
+      label: t('dashboard.charts.legend.negative'),
+      color: "hsl(0, 84%, 60%)",
+    },
+  } satisfies ChartConfig
 
   // Default sample data if no data provided
   const defaultData = [
@@ -101,9 +100,9 @@ export function ChartAreaInteractive({ data }: ChartAreaInteractiveProps) {
     <Card className="pt-0">
       <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
         <div className="grid flex-1 gap-1">
-          <CardTitle>Reviews Analytics</CardTitle>
+          <CardTitle>{t('dashboard.charts.title')}</CardTitle>
           <CardDescription>
-            Showing positive and negative reviews over time
+            {t('dashboard.charts.description')}
           </CardDescription>
         </div>
         <Select value={timeRange} onValueChange={setTimeRange}>
@@ -111,17 +110,17 @@ export function ChartAreaInteractive({ data }: ChartAreaInteractiveProps) {
             className="w-[160px] rounded-lg"
             aria-label="Select a value"
           >
-            <SelectValue placeholder="Last 3 months" />
+            <SelectValue placeholder={t('dashboard.charts.timeRange.last90Days')} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
             <SelectItem value="90d" className="rounded-lg">
-              Last 3 months
+              {t('dashboard.charts.timeRange.last90Days')}
             </SelectItem>
             <SelectItem value="30d" className="rounded-lg">
-              Last 30 days
+              {t('dashboard.charts.timeRange.last30Days')}
             </SelectItem>
             <SelectItem value="7d" className="rounded-lg">
-              Last 7 days
+              {t('dashboard.charts.timeRange.last7Days')}
             </SelectItem>
           </SelectContent>
         </Select>
@@ -167,7 +166,7 @@ export function ChartAreaInteractive({ data }: ChartAreaInteractiveProps) {
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
+                return date.toLocaleDateString(i18n.language, {
                   month: "short",
                   day: "numeric",
                 })
@@ -178,7 +177,7 @@ export function ChartAreaInteractive({ data }: ChartAreaInteractiveProps) {
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
+                    return new Date(value).toLocaleDateString(i18n.language, {
                       month: "short",
                       day: "numeric",
                     })
