@@ -46,7 +46,81 @@
     "scans": "Escaneos totales",
     "avgRating": "Calificación promedio",
     "conversion": "Tasa de conversión",
-    "rewards": "Recompensas distribuidas"
+    "rewards": "Recompensas distribuidas",
+    "welcome": "Hola, {{name}} 👋",
+    "welcomeSubtitle": "Aquí tienes un resumen de tu rendimiento hoy.",
+    "totalReviews": "Total de Reseñas",
+    "totalSpins": "Giros Totales",
+    "activity": {
+      "title": "Actividad de Reseñas",
+      "subtitle": "Evolución en los últimos 30 días"
+    },
+    "charts": {
+      "title": "Analítica de Reseñas",
+      "description": "Mostrando reseñas positivas y negativas a lo largo del tiempo",
+      "timeRange": {
+        "last90Days": "Últimos 3 meses",
+        "last30Days": "Últimos 30 días",
+        "last7Days": "Últimos 7 días"
+      },
+      "legend": {
+        "reviews": "Reseñas",
+        "positive": "Positivas",
+        "negative": "Negativas"
+      }
+    },
+    "recentReviews": {
+      "title": "Reseñas Recientes",
+      "noReviews": "Aún no hay reseñas recientes.",
+      "viewAll": "Ver todas las reseñas",
+      "newCustomer": "Nuevo Cliente",
+      "noComment": "Sin comentarios"
+    },
+    "quickActions": {
+      "title": "Acciones Rápidas",
+      "scan": "Escanear Cupón",
+      "scanDesc": "Validar recompensa",
+      "prizes": "Gestionar Premios",
+      "prizesDesc": "Editar recompensas",
+      "reviews": "Reseñas de Clientes",
+      "reviewsDesc": "Responder reseñas",
+      "analytics": "Analítica",
+      "analyticsDesc": "Ver estadísticas"
+    },
+    "reviewLink": {
+      "title": "Tu Enlace de Reseña",
+      "publicLink": "Enlace Público",
+      "desc": "Comparte este enlace con tus clientes",
+      "copy": "Copiar",
+      "copied": "¡Enlace copiado!",
+      "qrCode": "Código QR"
+    },
+    "nav": {
+      "mainMenu": "Menú Principal",
+      "dashboard": "Panel de control",
+      "scanner": "Escáner",
+      "prizes": "Premios y Recompensas",
+      "feedback": "Opiniones de Clientes",
+      "qrCode": "Código QR",
+      "analytics": "Analítica",
+      "strategy": "Estrategia",
+      "customers": "Clientes",
+      "billing": "Facturación",
+      "settings": "Configuración",
+      "signOut": "Cerrar Sesión"
+    },
+    "common": {
+      "loading": "Cargando...",
+      "online": "En línea",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "edit": "Editar",
+      "add": "Agregar",
+      "download": "Descargar",
+      "upload": "Subir",
+      "close": "Cerrar"
+    }
   },
   "languageSelect": {
     "title": "Selecciona tu idioma",

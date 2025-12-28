@@ -46,7 +46,81 @@
     "scans": "Total Scans",
     "avgRating": "Average Rating",
     "conversion": "Conversion Rate",
-    "rewards": "Rewards Distributed"
+    "rewards": "Rewards Distributed",
+    "welcome": "Hello, {{name}} 👋",
+    "welcomeSubtitle": "Here is an overview of your performance today.",
+    "totalReviews": "Total Reviews",
+    "totalSpins": "Total Spins",
+    "activity": {
+      "title": "Review Activity",
+      "subtitle": "Evolution over the last 30 days"
+    },
+    "charts": {
+      "title": "Reviews Analytics",
+      "description": "Showing positive and negative reviews over time",
+      "timeRange": {
+        "last90Days": "Last 3 months",
+        "last30Days": "Last 30 days",
+        "last7Days": "Last 7 days"
+      },
+      "legend": {
+        "reviews": "Reviews",
+        "positive": "Positive",
+        "negative": "Negative"
+      }
+    },
+    "recentReviews": {
+      "title": "Recent Reviews",
+      "noReviews": "No recent reviews yet.",
+      "viewAll": "View all reviews",
+      "newCustomer": "New Customer",
+      "noComment": "No comment"
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "scan": "Scan Coupon",
+      "scanDesc": "Validate a customer reward",
+      "prizes": "Manage Prizes",
+      "prizesDesc": "Edit rewards",
+      "reviews": "Customer Reviews",
+      "reviewsDesc": "Reply to reviews",
+      "analytics": "Analytics",
+      "analyticsDesc": "View stats"
+    },
+    "reviewLink": {
+      "title": "Your Review Link",
+      "publicLink": "Public Link",
+      "desc": "Share this link with your customers",
+      "copy": "Copy",
+      "copied": "Link copied!",
+      "qrCode": "QR Code"
+    },
+    "nav": {
+      "mainMenu": "Main Menu",
+      "dashboard": "Dashboard",
+      "scanner": "Scanner",
+      "prizes": "Prizes & Rewards",
+      "feedback": "Customer Reviews",
+      "qrCode": "QR Code",
+      "analytics": "Analytics",
+      "strategy": "Strategy",
+      "customers": "Customers",
+      "billing": "Subscription",
+      "settings": "Settings",
+      "signOut": "Sign Out"
+    },
+    "common": {
+      "loading": "Loading...",
+      "online": "Online",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "add": "Add",
+      "download": "Download",
+      "upload": "Upload",
+      "close": "Close"
+    }
   },
   "languageSelect": {
     "title": "Select Your Language",
@@ -206,33 +280,6 @@
       "feature2Desc": "Ready in less than 5 minutes",
       "feature3": "Real Results",
       "feature3Desc": "Proven increase in positive reviews"
-    },
-    "dashboard": {
-      "nav": {
-        "dashboard": "Dashboard",
-        "scanner": "Scanner",
-        "prizes": "Prizes & Rewards",
-        "feedback": "Customer Reviews",
-        "qrCode": "QR Code",
-        "analytics": "Analytics",
-        "strategy": "Strategy",
-        "customers": "Customers",
-        "billing": "Subscription",
-        "settings": "Settings",
-        "signOut": "Sign Out"
-      },
-      "common": {
-        "loading": "Loading...",
-        "online": "Online",
-        "save": "Save",
-        "cancel": "Cancel",
-        "delete": "Delete",
-        "edit": "Edit",
-        "add": "Add",
-        "download": "Download",
-        "upload": "Upload",
-        "close": "Close"
-      }
     }
   }
 }

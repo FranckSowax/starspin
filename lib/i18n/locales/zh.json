@@ -46,7 +46,81 @@
     "scans": "总扫描次数",
     "avgRating": "平均评分",
     "conversion": "转化率",
-    "rewards": "已分发奖励"
+    "rewards": "已分发奖励",
+    "welcome": "你好, {{name}} 👋",
+    "welcomeSubtitle": "这是您今天的表现概览。",
+    "totalReviews": "总评论数",
+    "totalSpins": "总旋转次数",
+    "activity": {
+      "title": "评论活动",
+      "subtitle": "过去30天的演变"
+    },
+    "charts": {
+      "title": "评论分析",
+      "description": "显示随时间变化的正面和负面评论",
+      "timeRange": {
+        "last90Days": "过去3个月",
+        "last30Days": "过去30天",
+        "last7Days": "过去7天"
+      },
+      "legend": {
+        "reviews": "评论",
+        "positive": "正面",
+        "negative": "负面"
+      }
+    },
+    "recentReviews": {
+      "title": "最近评论",
+      "noReviews": "暂无最近评论。",
+      "viewAll": "查看所有评论",
+      "newCustomer": "新客户",
+      "noComment": "无评论"
+    },
+    "quickActions": {
+      "title": "快速操作",
+      "scan": "扫描优惠券",
+      "scanDesc": "验证客户奖励",
+      "prizes": "管理奖品",
+      "prizesDesc": "编辑奖励",
+      "reviews": "客户评论",
+      "reviewsDesc": "回复评论",
+      "analytics": "分析",
+      "analyticsDesc": "查看统计"
+    },
+    "reviewLink": {
+      "title": "您的评论链接",
+      "publicLink": "公开链接",
+      "desc": "与您的客户分享此链接",
+      "copy": "复制",
+      "copied": "链接已复制！",
+      "qrCode": "二维码"
+    },
+    "nav": {
+      "mainMenu": "主菜单",
+      "dashboard": "仪表板",
+      "scanner": "扫描仪",
+      "prizes": "奖品与奖励",
+      "feedback": "客户评论",
+      "qrCode": "二维码",
+      "analytics": "分析",
+      "strategy": "策略",
+      "customers": "客户",
+      "billing": "订阅",
+      "settings": "设置",
+      "signOut": "退出"
+    },
+    "common": {
+      "loading": "加载中...",
+      "online": "在线",
+      "save": "保存",
+      "cancel": "取消",
+      "delete": "删除",
+      "edit": "编辑",
+      "add": "添加",
+      "download": "下载",
+      "upload": "上传",
+      "close": "关闭"
+    }
   },
   "languageSelect": {
     "title": "选择您的语言",

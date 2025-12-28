@@ -46,7 +46,81 @@
     "scans": "Scans totaux",
     "avgRating": "Note moyenne",
     "conversion": "Taux de conversion",
-    "rewards": "Récompenses distribuées"
+    "rewards": "Récompenses distribuées",
+    "welcome": "Bonjour, {{name}} 👋",
+    "welcomeSubtitle": "Voici un aperçu de vos performances aujourd'hui.",
+    "totalReviews": "Avis Totaux",
+    "totalSpins": "Tours de Roue",
+    "activity": {
+      "title": "Activité des Avis",
+      "subtitle": "Évolution sur les 30 derniers jours"
+    },
+    "charts": {
+      "title": "Analyses des Avis",
+      "description": "Affichage des avis positifs et négatifs au fil du temps",
+      "timeRange": {
+        "last90Days": "3 derniers mois",
+        "last30Days": "30 derniers jours",
+        "last7Days": "7 derniers jours"
+      },
+      "legend": {
+        "reviews": "Avis",
+        "positive": "Positifs",
+        "negative": "Négatifs"
+      }
+    },
+    "recentReviews": {
+      "title": "Avis Récents",
+      "noReviews": "Aucun avis récent pour le moment.",
+      "viewAll": "Voir tous les avis",
+      "newCustomer": "Nouveau client",
+      "noComment": "Pas de commentaire"
+    },
+    "quickActions": {
+      "title": "Actions Rapides",
+      "scan": "Scanner Coupon",
+      "scanDesc": "Valider un gain client",
+      "prizes": "Gérer les Prix",
+      "prizesDesc": "Modifier les lots",
+      "reviews": "Avis Clients",
+      "reviewsDesc": "Répondre aux avis",
+      "analytics": "Analyses",
+      "analyticsDesc": "Voir les stats"
+    },
+    "reviewLink": {
+      "title": "Votre Lien d'Avis",
+      "publicLink": "Lien Public",
+      "desc": "Partagez ce lien avec vos clients",
+      "copy": "Copier",
+      "copied": "Lien copié !",
+      "qrCode": "QR Code"
+    },
+    "nav": {
+      "mainMenu": "Menu Principal",
+      "dashboard": "Tableau de bord",
+      "scanner": "Scanner",
+      "prizes": "Prix & Lots",
+      "feedback": "Avis Clients",
+      "qrCode": "QR Code",
+      "analytics": "Statistiques",
+      "strategy": "Stratégie",
+      "customers": "Clients",
+      "billing": "Abonnement",
+      "settings": "Paramètres",
+      "signOut": "Déconnexion"
+    },
+    "common": {
+      "loading": "Chargement...",
+      "online": "En ligne",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "add": "Ajouter",
+      "download": "Télécharger",
+      "upload": "Importer",
+      "close": "Fermer"
+    }
   },
   "languageSelect": {
     "title": "Choisissez votre langue",
@@ -206,33 +280,6 @@
       "feature2Desc": "Prêt en moins de 5 minutes",
       "feature3": "Résultats réels",
       "feature3Desc": "Augmentation prouvée des avis positifs"
-    },
-    "dashboard": {
-      "nav": {
-        "dashboard": "Tableau de bord",
-        "scanner": "Scanner",
-        "prizes": "Prix & Lots",
-        "feedback": "Avis Clients",
-        "qrCode": "QR Code",
-        "analytics": "Statistiques",
-        "strategy": "Stratégie",
-        "customers": "Clients",
-        "billing": "Abonnement",
-        "settings": "Paramètres",
-        "signOut": "Déconnexion"
-      },
-      "common": {
-        "loading": "Chargement...",
-        "online": "En ligne",
-        "save": "Enregistrer",
-        "cancel": "Annuler",
-        "delete": "Supprimer",
-        "edit": "Modifier",
-        "add": "Ajouter",
-        "download": "Télécharger",
-        "upload": "Importer",
-        "close": "Fermer"
-      }
     }
   }
 }
