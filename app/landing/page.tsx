@@ -52,7 +52,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <LanguageSwitcher variant="light" />
             <Link href="/auth/signup">
-              <Button variant="outline" className="border-2 border-white rounded-full text-white hover:bg-white hover:text-[#1B4332]">
+              <Button className="bg-[#FFD700] text-black font-bold rounded-full hover:bg-[#FFC700] hover:shadow-lg transition-all">
                 {t('landing.nav.getStarted')}
               </Button>
             </Link>
