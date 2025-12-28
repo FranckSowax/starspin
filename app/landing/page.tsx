@@ -11,6 +11,8 @@ import { FloatingParticles } from '@/components/animations/FloatingParticles';
 import { GradientText } from '@/components/animations/GradientText';
 import { ShineBorder } from '@/components/animations/ShineBorder';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n/config';
 
 // Static assets
 import step1 from '@/app/assets/images/step1.jpg';
@@ -20,8 +22,8 @@ import step4 from '@/app/assets/images/step4.jpg';
 
 // Force rebuild: v3 (Redesign Le Defi + Arco Fonts)
 export default function LandingPage() {
+  const { t } = useTranslation();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [language, setLanguage] = useState('FR');
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -41,16 +43,16 @@ export default function LandingPage() {
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-white/90 hover:text-white transition text-sm">How it works</a>
-            <a href="#pricing" className="text-white/90 hover:text-white transition text-sm">Stories</a>
-            <a href="#testimonials" className="text-white/90 hover:text-white transition text-sm">Video message</a>
+            <a href="#features" className="text-white/90 hover:text-white transition text-sm">{t('landing.nav.howItWorks')}</a>
+            <a href="#pricing" className="text-white/90 hover:text-white transition text-sm">{t('landing.nav.pricing')}</a>
+            <a href="#testimonials" className="text-white/90 hover:text-white transition text-sm">{t('landing.nav.testimonials')}</a>
           </nav>
 
           <div className="flex items-center gap-4">
             <LanguageSwitcher variant="light" />
             <Link href="/auth/signup">
               <Button variant="outline" className="border-2 border-white rounded-full text-white hover:bg-white hover:text-[#1B4332]">
-                Get Started
+                {t('landing.nav.getStarted')}
               </Button>
             </Link>
           </div>
@@ -77,22 +79,22 @@ export default function LandingPage() {
             <div className="text-left space-y-6">
               {/* Main Title */}
               <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-                Transformez vos clients satisfaits en
+                {t('landing.hero.title')}
                 <span className="block mt-3 text-white">
-                  Étoiles
+                  {t('landing.hero.titleHighlight')}
                 </span>
               </h1>
 
               {/* Subtitle */}
               <p className="text-lg md:text-xl text-white/80 leading-relaxed">
-                La roue gamifiée qui booste vos avis Google
+                {t('landing.hero.subtitle')}
               </p>
 
               {/* CTA Button */}
               <div className="pt-4">
                 <Link href="/auth/signup">
                   <Button size="lg" className="bg-[#52B788] hover:bg-[#40916C] text-white px-10 py-6 text-lg font-bold rounded-full shadow-2xl">
-                    Essayer gratuitement
+                    {t('landing.hero.cta')}
                   </Button>
                 </Link>
               </div>
@@ -100,13 +102,13 @@ export default function LandingPage() {
               {/* Features badges */}
               <div className="flex flex-wrap gap-3 pt-4">
                 <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
-                  Multilingue
+                  {t('landing.hero.badge1')}
                 </Badge>
                 <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
-                  Sans engagement
+                  {t('landing.hero.badge2')}
                 </Badge>
                 <Badge className="bg-white/10 text-white border-white/20 px-4 py-2 text-sm">
-                  Setup 5 min
+                  {t('landing.hero.badge3')}
                 </Badge>
               </div>
             </div>
@@ -136,19 +138,19 @@ export default function LandingPage() {
           <div className="mt-16 flex flex-wrap items-center justify-center gap-12 text-white/80">
             <div className="text-center">
               <div className="text-3xl font-black text-white">100K+</div>
-              <div className="text-sm">Commerces actifs</div>
+              <div className="text-sm">{t('landing.stats.businesses')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-black text-white">4.9★</div>
-              <div className="text-sm">Note moyenne</div>
+              <div className="text-sm">{t('landing.stats.avgRating')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-black text-white">+45%</div>
-              <div className="text-sm">Avis positifs</div>
+              <div className="text-sm">{t('landing.stats.positiveReviews')}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-black text-white">6</div>
-              <div className="text-sm">Langues supportées</div>
+              <div className="text-sm">{t('landing.stats.languages')}</div>
             </div>
           </div>
         </div>
@@ -161,13 +163,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
-              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Le Défi</span>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.challenge.tag')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Pourquoi vos clients satisfaits ne laissent pas d'avis ?
+              {t('landing.challenge.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Le paradoxe de la satisfaction client dans le tourisme et l'hôtellerie
+              {t('landing.challenge.subtitle')}
             </p>
           </div>
           
@@ -183,12 +185,12 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg">Les Mécontents</h3>
-                    <p className="text-red-600 text-sm font-semibold">80% des avis spontanés</p>
+                    <h3 className="font-bold text-gray-900 text-lg">{t('landing.challenge.unhappy')}</h3>
+                    <p className="text-red-600 text-sm font-semibold">{t('landing.challenge.unhappyPercent')}</p>
                   </div>
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Les clients déçus sont 3x plus motivés à laisser un avis pour se plaindre, plombant votre moyenne.
+                  {t('landing.challenge.unhappyDesc')}
                 </p>
               </Card>
 
@@ -201,12 +203,12 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900 text-lg">Les Silencieux</h3>
-                    <p className="text-gray-500 text-sm font-semibold">Les clients satisfaits</p>
+                    <h3 className="font-bold text-gray-900 text-lg">{t('landing.challenge.silent')}</h3>
+                    <p className="text-gray-500 text-sm font-semibold">{t('landing.challenge.silentSubtitle')}</p>
                   </div>
                 </div>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Ils ont adoré leur expérience mais "oublient" de laisser un avis une fois partis.
+                  {t('landing.challenge.silentDesc')}
                 </p>
               </Card>
 
@@ -221,12 +223,12 @@ export default function LandingPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-bold text-white text-lg">L'Opportunité</h3>
-                      <p className="text-[#52B788] text-sm font-semibold text-white/90">+9% de CA potentiel</p>
+                      <h3 className="font-bold text-white text-lg">{t('landing.challenge.opportunity')}</h3>
+                      <p className="text-[#52B788] text-sm font-semibold text-white/90">{t('landing.challenge.opportunityPercent')}</p>
                     </div>
                   </div>
                   <p className="text-white/80 text-sm leading-relaxed">
-                    Convertir ces silencieux en étoiles vous fait remonter en 1ère position sur Google.
+                    {t('landing.challenge.opportunityDesc')}
                   </p>
                 </div>
               </Card>
@@ -242,13 +244,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
-              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Comment ça marche</span>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.workflow.tag')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Le Workflow StarSpin
+              {t('landing.workflow.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              4 étapes simples pour transformer vos clients en ambassadeurs
+              {t('landing.workflow.subtitle')}
             </p>
           </div>
 
@@ -277,9 +279,9 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 1</Badge>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Scan QR Code</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.workflow.step1')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Le client scanne le QR code pour accéder instantanément à l'expérience
+                  {t('landing.workflow.step1Desc')}
                 </p>
               </div>
             </Card>
@@ -295,9 +297,9 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 2</Badge>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Filtrage Intelligent</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.workflow.step2')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Les avis négatifs sont capturés en privé pour amélioration interne
+                  {t('landing.workflow.step2Desc')}
                 </p>
               </div>
             </Card>
@@ -313,9 +315,9 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 3</Badge>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Roue de Récompense</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.workflow.step3')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Les clients satisfaits tournent la roue pour gagner un cadeau instantané
+                  {t('landing.workflow.step3Desc')}
                 </p>
               </div>
             </Card>
@@ -331,9 +333,9 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 mb-4 font-bold">Étape 4</Badge>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Fidélisation</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.workflow.step4')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Le cadeau expire rapidement, incitant le client à revenir vite
+                  {t('landing.workflow.step4Desc')}
                 </p>
               </div>
             </Card>
@@ -343,14 +345,14 @@ export default function LandingPage() {
           <div className="mt-16 text-center">
             <Card className="max-w-3xl mx-auto bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-10">
               <h3 className="text-3xl font-bold text-white mb-4">
-                Prêt à booster votre réputation ?
+                {t('landing.workflow.ctaTitle')}
               </h3>
               <p className="text-xl text-white/90 mb-8">
-                Rejoignez les 100K+ commerces qui utilisent StarSpin
+                {t('landing.workflow.ctaSubtitle')}
               </p>
               <Link href="/auth/signup">
                 <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-6 text-lg font-bold">
-                  Démarrer l'essai gratuit
+                  {t('landing.workflow.ctaButton')}
                 </Button>
               </Link>
             </Card>
