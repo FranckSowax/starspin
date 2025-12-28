@@ -196,6 +196,17 @@
       "quickSetup": "5 min setup",
       "support": "Support 7j/7"
     },
+    "demo": {
+      "tag": "See it in action",
+      "title": "Discover StarSpin in 2 minutes",
+      "subtitle": "Watch how our solution transforms your customer reviews into positive ratings",
+      "feature1": "Live Demo",
+      "feature1Desc": "See the complete customer journey",
+      "feature2": "Quick Setup",
+      "feature2Desc": "Ready in less than 5 minutes",
+      "feature3": "Real Results",
+      "feature3Desc": "Proven increase in positive reviews"
+    },
     "dashboard": {
       "nav": {
         "dashboard": "Dashboard",

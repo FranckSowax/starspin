@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { DemoVideoPlayer } from '@/components/landing/DemoVideoPlayer';
 import { PhoneCarousel } from '@/components/ui/phone-carousel';
 import { SpinningWheel } from '@/components/animations/SpinningWheel';
 import { FloatingParticles } from '@/components/animations/FloatingParticles';
@@ -151,6 +152,60 @@ export default function LandingPage() {
             <div className="text-center">
               <div className="text-3xl font-black text-white">6</div>
               <div className="text-sm">{t('landing.stats.languages')}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Video Section */}
+      <section className="py-24 px-4 bg-gradient-to-br from-slate-50 to-white">
+        <div className="container mx-auto max-w-7xl">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.demo.tag')}</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
+              {t('landing.demo.title')}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              {t('landing.demo.subtitle')}
+            </p>
+          </div>
+
+          {/* Video Player */}
+          <div className="max-w-5xl mx-auto">
+            <DemoVideoPlayer className="aspect-video" />
+          </div>
+
+          {/* Video Features */}
+          <div className="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('landing.demo.feature1')}</h3>
+              <p className="text-sm text-gray-600">{t('landing.demo.feature1Desc')}</p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('landing.demo.feature2')}</h3>
+              <p className="text-sm text-gray-600">{t('landing.demo.feature2Desc')}</p>
+            </div>
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-gray-900 mb-2">{t('landing.demo.feature3')}</h3>
+              <p className="text-sm text-gray-600">{t('landing.demo.feature3Desc')}</p>
             </div>
           </div>
         </div>

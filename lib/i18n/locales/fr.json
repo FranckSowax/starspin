@@ -196,6 +196,17 @@
       "quickSetup": "Installation en 5 min",
       "support": "Support 7j/7"
     },
+    "demo": {
+      "tag": "Voyez-le en action",
+      "title": "Découvrez StarSpin en 2 minutes",
+      "subtitle": "Regardez comment notre solution transforme vos avis clients en notes positives",
+      "feature1": "Démo en direct",
+      "feature1Desc": "Voyez le parcours client complet",
+      "feature2": "Installation rapide",
+      "feature2Desc": "Prêt en moins de 5 minutes",
+      "feature3": "Résultats réels",
+      "feature3Desc": "Augmentation prouvée des avis positifs"
+    },
     "dashboard": {
       "nav": {
         "dashboard": "Tableau de bord",
