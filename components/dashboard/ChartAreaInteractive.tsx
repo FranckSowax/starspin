@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/select"
 
 export function ChartAreaInteractive({ data }: { data?: Array<{ date: string; positive: number; negative: number }> }) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation(undefined, { useSuspense: false })
   const [timeRange, setTimeRange] = React.useState("90d")
 
   const chartConfig = {

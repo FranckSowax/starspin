@@ -34,6 +34,9 @@ i18n
       order: ['querystring', 'navigator', 'htmlTag'],
       caches: ['localStorage'],
     },
+    react: {
+      useSuspense: false,
+    },
   });
 
 export default i18n;

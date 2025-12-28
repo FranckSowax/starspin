@@ -25,7 +25,7 @@ import {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(undefined, { useSuspense: false });
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
