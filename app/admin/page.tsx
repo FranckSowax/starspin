@@ -58,6 +58,7 @@ export default function AdminDashboard() {
   const [filteredMerchants, setFilteredMerchants] = useState<Merchant[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalMerchants: 0,
     activeMerchants: 0,
@@ -84,6 +85,7 @@ export default function AdminDashboard() {
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setError(null);
     await loadMerchants();
     setLastUpdated(new Date());
     setIsRefreshing(false);
@@ -147,11 +149,13 @@ export default function AdminDashboard() {
 
   const loadMerchants = async () => {
     try {
+      setError(null);
       // Get session for authorization header
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
         console.error('No session found');
+        setError('Session non trouvée. Veuillez vous reconnecter.');
         return;
       }
 
@@ -163,7 +167,8 @@ export default function AdminDashboard() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch merchants');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Erreur API: ${response.status}`);
       }
 
       const data = await response.json();
@@ -198,8 +203,9 @@ export default function AdminDashboard() {
         
         setLastUpdated(new Date());
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading merchants:', error);
+      setError(error.message || 'Impossible de charger les données marchands');
     }
   };
 
