@@ -11,6 +11,7 @@ import { FloatingParticles } from '@/components/animations/FloatingParticles';
 import { GradientText } from '@/components/animations/GradientText';
 import { ShineBorder } from '@/components/animations/ShineBorder';
 
+// Force rebuild: v3 (Redesign Le Defi + Arco Fonts)
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [language, setLanguage] = useState('FR');
@@ -67,7 +68,7 @@ export default function LandingPage() {
             {/* Left column - Text Content (1/3) */}
             <div className="text-left space-y-6">
               {/* Main Title */}
-              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'Arco, sans-serif' }}>
+              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
                 Transformez vos clients satisfaits en
                 <span className="block mt-3 text-white">
                   Étoiles
@@ -154,7 +155,7 @@ export default function LandingPage() {
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Le Défi</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Pourquoi vos clients satisfaits ne laissent pas d'avis ?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -162,132 +163,66 @@ export default function LandingPage() {
             </p>
           </div>
           
-          {/* Problem cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
-            {/* Negative reviews card */}
-            <Card className="bg-white border-2 border-red-100 rounded-2xl p-8 hover:shadow-xl transition-shadow">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="flex-shrink-0 w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Clients Mécontents</h3>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 rounded-full mb-4">
-                    <span className="text-sm font-bold text-red-600">80% d'activité</span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                Les clients insatisfaits sont 3 fois plus susceptibles de laisser un avis public négatif, impactant directement votre réputation en ligne.
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-                  <span className="text-gray-600">Avis publics négatifs</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-                  <span className="text-gray-600">Impact sur la note Google</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-                  <span className="text-gray-600">Perte de visibilité</span>
-                </div>
-              </div>
-            </Card>
-            
-            {/* Silent satisfied card */}
-            <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-shadow">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="flex-shrink-0 w-14 h-14 bg-gray-50 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Clients Satisfaits</h3>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full mb-4">
-                    <span className="text-sm font-bold text-gray-600">20% d'activité</span>
-                  </div>
-                </div>
-              </div>
-              <p className="text-gray-700 text-lg leading-relaxed mb-6">
-                La majorité de vos clients satisfaits ne prennent pas le temps de laisser un avis positif, laissant votre note stagner ou baisser.
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-600">Aucun avis laissé</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-600">Note qui stagne</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-                  <span className="text-gray-600">Potentiel inexploité</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Impact card */}
-          <div className="max-w-5xl mx-auto">
-            <Card className="bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-12 shadow-2xl">
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-6">
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+          {/* Problem - Compact Version */}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Negative reviews card */}
+              <Card className="bg-white border border-red-100 shadow-sm hover:shadow-md transition-all p-6 rounded-2xl">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                    <span className="text-sm font-semibold text-white uppercase tracking-wide">Impact Prouvé</span>
                   </div>
-                  <h3 className="text-4xl font-bold text-white mb-4">
-                    +1 point sur Google
-                  </h3>
-                  <p className="text-xl text-white/90 mb-8">
-                    Augmente votre chiffre d'affaires de 5 à 9%
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">Les Mécontents</h3>
+                    <p className="text-red-600 text-sm font-semibold">80% des avis spontanés</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Les clients déçus sont 3x plus motivés à laisser un avis pour se plaindre, plombant votre moyenne.
+                </p>
+              </Card>
+
+              {/* Silent satisfied card */}
+              <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all p-6 rounded-2xl">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-600">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 text-lg">Les Silencieux</h3>
+                    <p className="text-gray-500 text-sm font-semibold">Les clients satisfaits</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Ils ont adoré leur expérience mais "oublient" de laisser un avis une fois partis.
+                </p>
+              </Card>
+
+              {/* Impact card - Compact */}
+              <Card className="bg-[#2D6A4F] border-0 shadow-lg p-6 rounded-2xl text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-white">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white text-lg">L'Opportunité</h3>
+                      <p className="text-[#52B788] text-sm font-semibold text-white/90">+9% de CA potentiel</p>
+                    </div>
+                  </div>
+                  <p className="text-white/80 text-sm leading-relaxed">
+                    Convertir ces silencieux en étoiles vous fait remonter en 1ère position sur Google.
                   </p>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
-                      <span className="text-white/90">Meilleure visibilité locale</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
-                      <span className="text-white/90">Plus de réservations</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-[#52B788] rounded-full"></div>
-                      <span className="text-white/90">Confiance renforcée</span>
-                    </div>
-                  </div>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
-                  <div className="text-center mb-6">
-                    <div className="text-7xl font-black text-white mb-2">+5-9%</div>
-                    <div className="text-lg text-white/80 font-semibold">Chiffre d'Affaires</div>
-                  </div>
-                  <div className="h-px bg-white/20 mb-6"></div>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80">Note actuelle</span>
-                      <span className="text-white font-bold">4.2 ⭐</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80">Note cible</span>
-                      <span className="text-[#52B788] font-bold">4.5+ ⭐</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-white/80">Impact CA</span>
-                      <span className="text-[#52B788] font-bold">+7% moyen</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
@@ -301,7 +236,7 @@ export default function LandingPage() {
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Comment ça marche</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Le Workflow StarSpin
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -313,10 +248,10 @@ export default function LandingPage() {
           <div className="mb-16">
             <PhoneCarousel
               images={[
-                { src: '/workflow-step1.svg', alt: 'Étape 1: Scan QR Code' },
-                { src: '/workflow-step2.svg', alt: 'Étape 2: Notez votre expérience' },
-                { src: '/workflow-step3.svg', alt: 'Étape 3: Tournez la roue' },
-                { src: '/workflow-step4.svg', alt: 'Étape 4: Recevez votre récompense' }
+                { src: '/step1.jpg', alt: 'Étape 1: Scan QR Code' },
+                { src: '/step2.jpg', alt: 'Étape 2: Notez votre expérience' },
+                { src: '/step3.jpg', alt: 'Étape 3: Tournez la roue' },
+                { src: '/step4.jpg', alt: 'Étape 4: Recevez votre récompense' }
               ]}
             />
           </div>
@@ -424,7 +359,7 @@ export default function LandingPage() {
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Pourquoi StarSpin</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Adapté aux Zones Touristiques de Thaïlande
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -537,7 +472,7 @@ export default function LandingPage() {
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Témoignages</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Ils ont boosté leur réputation avec StarSpin
             </h2>
           </div>
@@ -625,7 +560,7 @@ export default function LandingPage() {
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Tarification</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Choisissez votre plan
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -811,7 +746,7 @@ export default function LandingPage() {
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">FAQ</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Questions Fréquentes
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -920,7 +855,7 @@ export default function LandingPage() {
               <span className="text-sm font-semibold text-white uppercase tracking-wide">Commencez maintenant</span>
             </div>
             
-            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight">
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
               Prêt à transformer votre réputation en ligne ?
             </h2>
             

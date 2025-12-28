@@ -7,16 +7,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-interface Iphone15ProProps extends React.SVGProps<SVGSVGElement> {
+interface IphoneFrameProps extends React.SVGProps<SVGSVGElement> {
   width?: string | number;
-  height?: string | number;
   src?: string;
   alt?: string;
 }
 
-const Iphone15Pro: React.FC<Iphone15ProProps> = ({
+const IphoneFrame: React.FC<IphoneFrameProps> = ({
   width = "100%",
-  height = "auto",
   src,
   alt = "iPhone screen content",
   className,
@@ -26,8 +24,9 @@ const Iphone15Pro: React.FC<Iphone15ProProps> = ({
     <div className={cn("relative", className)}>
       <svg
         width={width}
-        height={height}
         viewBox="0 0 433 882"
+        style={{ height: "auto" }}
+        data-version="v3"
         preserveAspectRatio="xMidYMid meet"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -211,9 +210,8 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
                 zIndex: 10,
               }}
             >
-              <Iphone15Pro
+              <IphoneFrame
                 width={isMobile ? 280 : 350}
-                height="auto"
                 src={prevImage.src}
                 alt={prevImage.alt}
               />
@@ -227,9 +225,8 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
                 zIndex: 20,
               }}
             >
-              <Iphone15Pro
+              <IphoneFrame
                 width={isMobile ? 280 : 350}
-                height="auto"
                 src={nextImage.src}
                 alt={nextImage.alt}
               />
@@ -243,9 +240,8 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
                 zIndex: 30,
               }}
             >
-              <Iphone15Pro
+              <IphoneFrame
                 width={isMobile ? 280 : 350}
-                height="auto"
                 src={activeImage.src}
                 alt={activeImage.alt}
               />
@@ -318,9 +314,8 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
                     aria-hidden={!isActive}
                   >
                     <div className="group">
-                      <Iphone15Pro
+                      <IphoneFrame
                         width={isMobile ? 280 : 350}
-                        height="auto"
                         src={image.src}
                         alt={image.alt}
                         className="transition-all duration-100 hover:scale-105 hover:-rotate-6"
