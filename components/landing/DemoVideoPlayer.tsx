@@ -10,14 +10,20 @@ interface DemoVideoPlayerProps {
 
 export function DemoVideoPlayer({ className = '' }: DemoVideoPlayerProps) {
   const { i18n } = useTranslation();
+  const [mounted, setMounted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [videoRef, setVideoRef] = useState<HTMLVideoElement | null>(null);
   const [currentLanguage, setCurrentLanguage] = useState<'fr' | 'en' | 'th'>('fr');
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Update video source when language changes
   useEffect(() => {
-    const lang = i18n.language.toLowerCase();
+    if (!mounted) return;
+    const lang = i18n.language?.toLowerCase() || 'fr';
     if (lang.startsWith('fr')) {
       setCurrentLanguage('fr');
     } else if (lang.startsWith('th')) {
@@ -25,7 +31,13 @@ export function DemoVideoPlayer({ className = '' }: DemoVideoPlayerProps) {
     } else {
       setCurrentLanguage('en');
     }
-  }, [i18n.language]);
+  }, [i18n.language, mounted]);
+
+  if (!mounted) {
+    return (
+      <div className={`relative group ${className} bg-slate-100 rounded-2xl animate-pulse aspect-video`} />
+    );
+  }
 
   // Get video URL from Supabase Storage
   const getVideoUrl = (language: 'fr' | 'en' | 'th') => {
@@ -64,7 +76,7 @@ export function DemoVideoPlayer({ className = '' }: DemoVideoPlayerProps) {
         ref={setVideoRef}
         className="w-full h-full rounded-2xl shadow-2xl object-cover"
         src={getVideoUrl(currentLanguage)}
-        poster="/video-poster.jpg"
+        poster="/BANNER-SPIN-HERO-.png"
         playsInline
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
