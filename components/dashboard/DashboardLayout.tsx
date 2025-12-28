@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
@@ -33,10 +33,15 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation(undefined, { useSuspense: false });
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -55,6 +60,10 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
     { name: t('dashboard.nav.billing'), href: '/dashboard/billing', icon: CreditCard },
     { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
   ];
+
+  if (!mounted) {
+    return null; // Prevent hydration mismatch
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -112,7 +121,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800">
-            <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Menu Principal</p>
+            <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">{t('dashboard.nav.mainMenu')}</p>
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
