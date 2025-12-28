@@ -80,7 +80,7 @@ export default function LandingPage() {
               {/* Main Title */}
               <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
                 {t('landing.hero.title')}
-                <span className="block mt-3 text-white">
+                <span className="block mt-3 text-[#FFD700]">
                   {t('landing.hero.titleHighlight')}
                 </span>
               </h1>
@@ -367,13 +367,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
-              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Pourquoi StarSpin</span>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.benefits.tag')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Adapté aux Zones Touristiques de Thaïlande
+              {t('landing.benefits.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Une solution pensée pour tous les commerces accueillant des touristes internationaux
+              {t('landing.benefits.subtitle')}
             </p>
           </div>
 
@@ -387,9 +387,9 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Multilingue</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.benefits.multilingual')}</h3>
                 <p className="text-gray-600 leading-relaxed mb-4">
-                  Interface automatique en 6 langues pour vos clients internationaux
+                  {t('landing.benefits.multilingualDesc')}
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   <Badge className="bg-gray-100 text-gray-700 border-0 text-xs">🇬🇧 EN</Badge>
@@ -410,9 +410,9 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Contrôle Total</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.benefits.control')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Gérez vos lots, probabilités et récompenses selon votre budget
+                  {t('landing.benefits.controlDesc')}
                 </p>
               </div>
             </Card>
@@ -425,9 +425,9 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Dashboard Pro</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.benefits.dashboard')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Statistiques et analytics en temps réel de vos performances
+                  {t('landing.benefits.dashboardDesc')}
                 </p>
               </div>
             </Card>
@@ -440,9 +440,9 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Protection</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.benefits.protection')}</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  Filtrez les avis négatifs avant qu'ils n'impactent votre réputation
+                  {t('landing.benefits.protectionDesc')}
                 </p>
               </div>
             </Card>
@@ -454,18 +454,18 @@ export default function LandingPage() {
               <div className="grid md:grid-cols-3 gap-8 text-center">
                 <div>
                   <div className="text-4xl font-black text-white mb-2">🇹🇭</div>
-                  <h4 className="text-lg font-bold text-white mb-2">Adapté à la Thaïlande</h4>
-                  <p className="text-white/80 text-sm">Interface en thaï et monnaie locale (THB)</p>
+                  <h4 className="text-lg font-bold text-white mb-2">{t('landing.benefits.thailand')}</h4>
+                  <p className="text-white/80 text-sm">{t('landing.benefits.thailandDesc')}</p>
                 </div>
                 <div>
                   <div className="text-4xl font-black text-white mb-2">🏖️</div>
-                  <h4 className="text-lg font-bold text-white mb-2">Zones Touristiques</h4>
-                  <p className="text-white/80 text-sm">Parfait pour Phuket, Bangkok, Pattaya, Koh Samui</p>
+                  <h4 className="text-lg font-bold text-white mb-2">{t('landing.benefits.touristZones')}</h4>
+                  <p className="text-white/80 text-sm">{t('landing.benefits.touristZonesDesc')}</p>
                 </div>
                 <div>
                   <div className="text-4xl font-black text-white mb-2">⭐</div>
-                  <h4 className="text-lg font-bold text-white mb-2">TripAdvisor & Google</h4>
-                  <p className="text-white/80 text-sm">Boostez vos avis sur les plateformes clés</p>
+                  <h4 className="text-lg font-bold text-white mb-2">{t('landing.benefits.platforms')}</h4>
+                  <p className="text-white/80 text-sm">{t('landing.benefits.platformsDesc')}</p>
                 </div>
               </div>
             </Card>
@@ -480,10 +480,10 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
-              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Témoignages</span>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.testimonials.tag')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Ils ont boosté leur réputation avec StarSpin
+              {t('landing.testimonials.title')}
             </h2>
           </div>
 
@@ -568,13 +568,13 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
               <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
-              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">Tarification</span>
+              <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.pricing.tag')}</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Choisissez votre plan
+              {t('landing.pricing.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Tarification simple et transparente pour tous les types de commerces
+              {t('landing.pricing.subtitle')}
             </p>
           </div>
 
@@ -583,41 +583,41 @@ export default function LandingPage() {
             {/* Starter Plan */}
             <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Découverte</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('landing.pricing.discovery')}</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-gray-900">0฿</span>
+                  <span className="text-5xl font-black text-gray-900">{t('landing.pricing.discoveryPrice')}</span>
                 </div>
-                <p className="text-gray-600">Gratuit 15 jours</p>
+                <p className="text-gray-600">{t('landing.pricing.discoveryPeriod')}</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">50 scans/mois</span>
+                  <span className="text-gray-700">50 {t('landing.pricing.scansMonth')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">1 établissement</span>
+                  <span className="text-gray-700">1 {t('landing.pricing.establishment')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">Roue basique</span>
+                  <span className="text-gray-700">{t('landing.pricing.basicWheel')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">Statistiques essentielles</span>
+                  <span className="text-gray-700">{t('landing.pricing.essentialStats')}</span>
                 </li>
               </ul>
               <Link href="/auth/signup" className="w-full">
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
-                  Commencer gratuitement
+                  {t('landing.pricing.startFree')}
                 </Button>
               </Link>
             </Card>
@@ -626,57 +626,57 @@ export default function LandingPage() {
             <Card className="bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-2xl p-8 shadow-2xl relative transform md:scale-105">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-[#FFB703] text-gray-900 border-0 px-4 py-1 font-bold shadow-lg">
-                  POPULAIRE
+                  {t('landing.pricing.popular')}
                 </Badge>
               </div>
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-white mb-4">Pro</h3>
+                <h3 className="text-2xl font-bold text-white mb-4">{t('landing.pricing.pro')}</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-white">1,000฿</span>
+                  <span className="text-5xl font-black text-white">{t('landing.pricing.proPrice')}</span>
                 </div>
-                <p className="text-white/80">par mois</p>
+                <p className="text-white/80">{t('landing.pricing.proPeriod')}</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">Scans illimités</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.unlimited')} scans</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">1 établissement</span>
+                  <span className="text-white font-semibold">1 {t('landing.pricing.establishment')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">Roue personnalisée</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.customWheel')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">Dashboard complet</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.fullDashboard')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">Support prioritaire</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.prioritySupport')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">Multilingue (6 langues)</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.multilingualSupport')}</span>
                 </li>
               </ul>
               <Link href="/auth/signup" className="w-full">
                 <Button className="w-full bg-white text-[#2D6A4F] hover:bg-gray-100 font-bold">
-                  Essayer 14 jours gratuits
+                  {t('landing.pricing.try14Days')}
                 </Button>
               </Link>
             </Card>
@@ -684,47 +684,47 @@ export default function LandingPage() {
             {/* Enterprise Plan */}
             <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Entreprise</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('landing.pricing.enterprise')}</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-gray-900">Sur devis</span>
+                  <span className="text-5xl font-black text-gray-900">{t('landing.pricing.enterprisePrice')}</span>
                 </div>
-                <p className="text-gray-600">Pour les chaînes</p>
+                <p className="text-gray-600">{t('landing.pricing.enterprisePeriod')}</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">Tout du plan Pro</span>
+                  <span className="text-gray-700">{t('landing.pricing.allProFeatures')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">Plusieurs établissements</span>
+                  <span className="text-gray-700">{t('landing.pricing.establishments')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">Dashboard centralisé</span>
+                  <span className="text-gray-700">{t('landing.pricing.centralizedDashboard')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">API personnalisée</span>
+                  <span className="text-gray-700">{t('landing.pricing.customApi')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-gray-700">Account manager dédié</span>
+                  <span className="text-gray-700">{t('landing.pricing.dedicatedManager')}</span>
                 </li>
               </ul>
               <Link href="/contact" className="w-full">
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
-                  Nous contacter
+                  {t('landing.pricing.contactUs')}
                 </Button>
               </Link>
             </Card>
@@ -738,8 +738,8 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <div className="text-left">
-                  <h4 className="text-xl font-bold text-gray-900 mb-1">Sans Engagement</h4>
-                  <p className="text-gray-600">14 jours d'essai gratuit, sans engagement. Annulez à tout moment.</p>
+                  <h4 className="text-xl font-bold text-gray-900 mb-1">{t('landing.pricing.guarantee')}</h4>
+                  <p className="text-gray-600">{t('landing.pricing.guaranteeDesc')}</p>
                 </div>
               </div>
             </Card>
@@ -757,10 +757,10 @@ export default function LandingPage() {
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">FAQ</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Questions Fréquentes
+              {t('landing.faq.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Tout ce que vous devez savoir sur StarSpin
+              {t('landing.faq.subtitle')}
             </p>
           </div>
 
@@ -769,20 +769,20 @@ export default function LandingPage() {
             <div className="space-y-4">
               {[
                 {
-                  q: "Comment ça marche concrètement ?",
-                  a: "Vous imprimez un QR code, le client le scanne, note son expérience. Si c'est positif (4-5★), il accède à la roue pour gagner un cadeau instantané."
+                  q: t('landing.faq.q1'),
+                  a: t('landing.faq.a1')
                 },
                 {
-                  q: "Que deviennent les avis négatifs ?",
-                  a: "Ils arrivent dans votre dashboard privé. Vous pouvez les traiter en interne sans qu'ils n'affectent votre réputation publique."
+                  q: t('landing.faq.q2'),
+                  a: t('landing.faq.a2')
                 },
                 {
-                  q: "C'est compatible avec mon système de caisse ?",
-                  a: "StarSpin fonctionne de manière autonome via QR code. Aucune intégration technique nécessaire."
+                  q: t('landing.faq.q3'),
+                  a: t('landing.faq.a3')
                 },
                 {
-                  q: "Combien coûtent les cadeaux ?",
-                  a: "Vous décidez ! Café offert, -10%, dessert gratuit... Vous contrôlez les lots et leur valeur."
+                  q: t('landing.faq.q4'),
+                  a: t('landing.faq.a4')
                 }
               ].map((faq, index) => (
                 <Card key={index} className="bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow">
@@ -815,34 +815,34 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Contactez-nous</h3>
-                  <p className="text-gray-600 text-sm">Une question ? Nous sommes là</p>
+                  <h3 className="text-2xl font-bold text-gray-900">{t('landing.faq.contactTitle')}</h3>
+                  <p className="text-gray-600 text-sm">{t('landing.faq.contactSubtitle')}</p>
                 </div>
               </div>
               <form className="space-y-4">
                 <div>
                   <input
                     type="text"
-                    placeholder="Votre nom"
+                    placeholder={t('landing.faq.yourName')}
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#2D6A4F] focus:outline-none transition"
                   />
                 </div>
                 <div>
                   <input
                     type="email"
-                    placeholder="Votre email"
+                    placeholder={t('landing.faq.yourEmail')}
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#2D6A4F] focus:outline-none transition"
                   />
                 </div>
                 <div>
                   <textarea
-                    placeholder="Votre message"
+                    placeholder={t('landing.faq.yourMessage')}
                     rows={4}
                     className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#2D6A4F] focus:outline-none transition resize-none"
                   />
                 </div>
                 <Button className="w-full bg-[#2D6A4F] hover:bg-[#1B4332] text-white py-6 text-lg font-bold">
-                  Envoyer le message
+                  {t('landing.faq.sendMessage')}
                 </Button>
               </form>
             </Card>
@@ -862,26 +862,26 @@ export default function LandingPage() {
           <Card className="bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl p-12 md:p-16 text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full mb-8">
               <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span className="text-sm font-semibold text-white uppercase tracking-wide">Commencez maintenant</span>
+              <span className="text-sm font-semibold text-white uppercase tracking-wide">{t('landing.cta.tag')}</span>
             </div>
             
             <h2 className="text-4xl md:text-6xl font-black text-white mb-6 leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
-              Prêt à transformer votre réputation en ligne ?
+              {t('landing.cta.title')}
             </h2>
             
             <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-3xl mx-auto">
-              Rejoignez les milliers de commerces qui boostent leurs avis Google avec StarSpin
+              {t('landing.cta.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link href="/auth/signup">
                 <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-7 text-xl font-bold rounded-full shadow-2xl">
-                  Essayer gratuitement 14 jours
+                  {t('landing.cta.tryFree')}
                 </Button>
               </Link>
               <Link href="/demo">
                 <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-12 py-7 text-xl font-bold rounded-full">
-                  Voir une démo
+                  {t('landing.cta.seeDemo')}
                 </Button>
               </Link>
             </div>
@@ -891,19 +891,19 @@ export default function LandingPage() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Sans engagement</span>
+                <span>{t('landing.cta.noCommitment')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Installation en 5 min</span>
+                <span>{t('landing.cta.quickSetup')}</span>
               </div>
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                 </svg>
-                <span>Support 7j/7</span>
+                <span>{t('landing.cta.support')}</span>
               </div>
             </div>
           </Card>
