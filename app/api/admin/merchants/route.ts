@@ -41,58 +41,77 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Fetch all merchants using admin client (bypasses RLS)
-    const { data: merchants, error: merchantsError } = await adminClient
-      .from('merchants')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // Fetch all related data in parallel to avoid N+1 problem
+    const [
+      { data: merchants, error: merchantsError },
+      { data: feedback, error: feedbackError },
+      { data: spins, error: spinsError },
+      { data: coupons, error: couponsError }
+    ] = await Promise.all([
+      adminClient.from('merchants').select('*').order('created_at', { ascending: false }),
+      adminClient.from('feedback').select('merchant_id, rating, is_positive'),
+      adminClient.from('spins').select('merchant_id'),
+      adminClient.from('coupons').select('merchant_id, used')
+    ]);
 
-    if (merchantsError) {
-      console.error('Error fetching merchants:', merchantsError);
-      return NextResponse.json({ error: merchantsError.message }, { status: 500 });
-    }
+    if (merchantsError) throw merchantsError;
+    if (feedbackError) console.error('Error fetching feedback:', feedbackError);
+    if (spinsError) console.error('Error fetching spins:', spinsError);
+    if (couponsError) console.error('Error fetching coupons:', couponsError);
 
-    // Fetch stats for each merchant
-    const merchantsWithStats = await Promise.all(
-      (merchants || []).map(async (merchant) => {
-        // Get feedback stats
-        const { data: feedbackData } = await adminClient
-          .from('feedback')
-          .select('rating, is_positive')
-          .eq('merchant_id', merchant.id);
+    // Group stats by merchant_id
+    const statsByMerchant = (merchants || []).reduce((acc: any, merchant) => {
+      acc[merchant.id] = {
+        totalReviews: 0,
+        positiveReviews: 0,
+        totalRatingSum: 0,
+        totalSpins: 0,
+        couponsRedeemed: 0
+      };
+      return acc;
+    }, {});
 
-        // Get spins count
-        const { count: spinsCount } = await adminClient
-          .from('spins')
-          .select('*', { count: 'exact', head: true })
-          .eq('merchant_id', merchant.id);
+    // Process feedback
+    (feedback || []).forEach((f: any) => {
+      if (statsByMerchant[f.merchant_id]) {
+        statsByMerchant[f.merchant_id].totalReviews++;
+        statsByMerchant[f.merchant_id].totalRatingSum += f.rating;
+        if (f.is_positive) statsByMerchant[f.merchant_id].positiveReviews++;
+      }
+    });
 
-        // Get coupons stats
-        const { data: couponsData } = await adminClient
-          .from('coupons')
-          .select('used')
-          .eq('merchant_id', merchant.id);
+    // Process spins
+    (spins || []).forEach((s: any) => {
+      if (statsByMerchant[s.merchant_id]) {
+        statsByMerchant[s.merchant_id].totalSpins++;
+      }
+    });
 
-        const safeFeedbackData = feedbackData || [];
-        const totalReviews = safeFeedbackData.length;
-        const positiveReviews = safeFeedbackData.filter(f => f.is_positive).length;
-        const avgRating = totalReviews > 0 
-          ? safeFeedbackData.reduce((sum, f) => sum + f.rating, 0) / totalReviews 
-          : 0;
-        const couponsRedeemed = couponsData?.filter(c => c.used).length || 0;
+    // Process coupons
+    (coupons || []).forEach((c: any) => {
+      if (statsByMerchant[c.merchant_id] && c.used) {
+        statsByMerchant[c.merchant_id].couponsRedeemed++;
+      }
+    });
 
-        return {
-          ...merchant,
-          stats: {
-            totalReviews,
-            positiveReviews,
-            avgRating: Math.round(avgRating * 10) / 10,
-            totalSpins: spinsCount || 0,
-            couponsRedeemed,
-          }
-        };
-      })
-    );
+    // Format final response
+    const merchantsWithStats = (merchants || []).map((merchant) => {
+      const stats = statsByMerchant[merchant.id];
+      const avgRating = stats.totalReviews > 0 
+        ? stats.totalRatingSum / stats.totalReviews 
+        : 0;
+
+      return {
+        ...merchant,
+        stats: {
+          totalReviews: stats.totalReviews,
+          positiveReviews: stats.positiveReviews,
+          avgRating: Math.round(avgRating * 10) / 10,
+          totalSpins: stats.totalSpins,
+          couponsRedeemed: stats.couponsRedeemed,
+        }
+      };
+    });
 
     // Calculate global stats
     const globalStats = {
