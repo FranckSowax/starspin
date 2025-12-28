@@ -79,10 +79,28 @@ export default function AdminDashboard() {
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month'>('week');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [tierFilter, setTierFilter] = useState<'all' | 'starter' | 'premium'>('all');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadMerchants();
+    setLastUpdated(new Date());
+    setIsRefreshing(false);
+  };
 
   useEffect(() => {
     checkAdminAuth();
-  }, []);
+    
+    // Set up real-time refresh every 30 seconds
+    const interval = setInterval(() => {
+      if (user) {
+        loadMerchants();
+      }
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     let filtered = merchants;
@@ -128,73 +146,60 @@ export default function AdminDashboard() {
   };
 
   const loadMerchants = async () => {
-    const { data: merchantsData } = await supabase
-      .from('merchants')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (merchantsData) {
-      setMerchants(merchantsData);
-      setFilteredMerchants(merchantsData);
-
-      // Load stats for each merchant
-      const statsPromises = merchantsData.map(async (merchant) => {
-        // Optimize feedback fetch: only get necessary columns
-        const { data: feedbackData } = await supabase
-          .from('feedback')
-          .select('rating, is_positive')
-          .eq('merchant_id', merchant.id);
-
-        // Optimize spins fetch: only get count
-        const { count: spinsCount } = await supabase
-          .from('spins')
-          .select('*', { count: 'exact', head: true })
-          .eq('merchant_id', merchant.id);
-
-        const safeFeedbackData = feedbackData || [];
-        const totalReviews = safeFeedbackData.length;
-        const positiveReviews = safeFeedbackData.filter(f => f.is_positive).length;
-        const avgRating = safeFeedbackData.reduce((sum, f) => sum + f.rating, 0) / (totalReviews || 1);
-
-        return {
-          merchantId: merchant.id,
-          stats: {
-            totalReviews,
-            positiveReviews,
-            avgRating: Math.round(avgRating * 10) / 10,
-            totalSpins: spinsCount || 0,
-          }
-        };
-      });
-
-      const statsResults = await Promise.all(statsPromises);
-      const statsMap: Record<string, MerchantStats> = {};
-      statsResults.forEach(({ merchantId, stats }) => {
-        statsMap[merchantId] = stats;
-      });
-      setMerchantStats(statsMap);
-
-      // Calculate global stats
-      const totalReviews = Object.values(statsMap).reduce((sum, s) => sum + s.totalReviews, 0);
-      const totalSpins = Object.values(statsMap).reduce((sum, s) => sum + s.totalSpins, 0);
+    try {
+      // Get session for authorization header
+      const { data: { session } } = await supabase.auth.getSession();
       
-      const totalRevenue = merchantsData.reduce((sum, m) => {
-        // Only count active merchants for MRR if desired, otherwise all
-        if (m.is_active === false) return sum;
-        
-        const tier = m.subscription_tier?.toLowerCase() || 'free';
-        // @ts-ignore
-        const price = TIER_PRICING[tier] || 0;
-        return sum + price;
-      }, 0);
+      if (!session) {
+        console.error('No session found');
+        return;
+      }
 
-      setStats({
-        totalMerchants: merchantsData.length,
-        activeMerchants: merchantsData.filter(m => m.is_active !== false).length,
-        totalReviews,
-        totalRevenue,
-        totalSpins,
+      // Use admin API to fetch all merchants (bypasses RLS)
+      const response = await fetch('/api/admin/merchants', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch merchants');
+      }
+
+      const data = await response.json();
+      
+      if (data.merchants) {
+        setMerchants(data.merchants);
+        setFilteredMerchants(data.merchants);
+
+        // Build stats map from API response
+        const statsMap: Record<string, MerchantStats> = {};
+        data.merchants.forEach((merchant: any) => {
+          statsMap[merchant.id] = merchant.stats;
+        });
+        setMerchantStats(statsMap);
+
+        // Calculate revenue
+        const totalRevenue = data.merchants.reduce((sum: number, m: any) => {
+          if (m.is_active === false) return sum;
+          const tier = m.subscription_tier?.toLowerCase() || 'free';
+          // @ts-ignore
+          const price = TIER_PRICING[tier] || 0;
+          return sum + price;
+        }, 0);
+
+        setStats({
+          totalMerchants: data.globalStats.totalMerchants,
+          activeMerchants: data.globalStats.activeMerchants,
+          totalReviews: data.globalStats.totalReviews,
+          totalRevenue,
+          totalSpins: data.globalStats.totalSpins,
+        });
+        
+        setLastUpdated(new Date());
+      }
+    } catch (error) {
+      console.error('Error loading merchants:', error);
     }
   };
 
@@ -349,6 +354,21 @@ export default function AdminDashboard() {
                     ? 'Statistiques et analytics' 
                     : 'Liste et gestion des marchands'}
                 </p>
+              </div>
+              <div className="flex items-center gap-4">
+                {lastUpdated && (
+                  <span className="text-xs text-slate-500">
+                    Mis à jour: {lastUpdated.toLocaleTimeString('fr-FR')}
+                  </span>
+                )}
+                <Button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="gap-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border-purple-500/30"
+                >
+                  <RotateCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'Actualisation...' : 'Actualiser'}
+                </Button>
               </div>
             </div>
           </div>
