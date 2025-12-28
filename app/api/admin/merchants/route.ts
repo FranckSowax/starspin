@@ -1,20 +1,39 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Create admin client with service role key (bypasses RLS)
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+// Lazy initialization of admin client to avoid build-time errors
+let supabaseAdmin: SupabaseClient | null = null;
+
+function getSupabaseAdmin(): SupabaseClient | null {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return null;
   }
-);
+  
+  if (!supabaseAdmin) {
+    supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    );
+  }
+  
+  return supabaseAdmin;
+}
 
 export async function GET(request: NextRequest) {
   try {
+    // Get admin client - returns null if env vars not configured
+    const adminClient = getSupabaseAdmin();
+    
+    if (!adminClient) {
+      return NextResponse.json({ error: 'Service not configured' }, { status: 500 });
+    }
+
     // Verify the user is authenticated via the regular client
     const authHeader = request.headers.get('authorization');
     
@@ -23,7 +42,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch all merchants using admin client (bypasses RLS)
-    const { data: merchants, error: merchantsError } = await supabaseAdmin
+    const { data: merchants, error: merchantsError } = await adminClient
       .from('merchants')
       .select('*')
       .order('created_at', { ascending: false });
@@ -37,19 +56,19 @@ export async function GET(request: NextRequest) {
     const merchantsWithStats = await Promise.all(
       (merchants || []).map(async (merchant) => {
         // Get feedback stats
-        const { data: feedbackData } = await supabaseAdmin
+        const { data: feedbackData } = await adminClient
           .from('feedback')
           .select('rating, is_positive')
           .eq('merchant_id', merchant.id);
 
         // Get spins count
-        const { count: spinsCount } = await supabaseAdmin
+        const { count: spinsCount } = await adminClient
           .from('spins')
           .select('*', { count: 'exact', head: true })
           .eq('merchant_id', merchant.id);
 
         // Get coupons stats
-        const { data: couponsData } = await supabaseAdmin
+        const { data: couponsData } = await adminClient
           .from('coupons')
           .select('used')
           .eq('merchant_id', merchant.id);
