@@ -69,8 +69,8 @@ export default function AdminDashboard() {
   // Estimated monthly revenue per tier
   const TIER_PRICING = {
     'free': 0,
-    'starter': 29, // Example price, adjust as needed
-    'premium': 99, // Example price, adjust as needed
+    'starter': 0, // Essai Gratuit (Découverte)
+    'premium': 1000, // Pro Plan
   };
 
   const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <p className="text-slate-400 text-sm mb-2">Revenue Estimé (MRR)</p>
-              <p className="text-4xl font-bold text-white mb-1">${stats.totalRevenue.toFixed(0)}</p>
+              <p className="text-4xl font-bold text-white mb-1">{stats.totalRevenue.toFixed(0)}฿</p>
               <p className="text-xs text-slate-500">Basé sur abonnements</p>
             </div>
           </div>

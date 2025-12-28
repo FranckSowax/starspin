@@ -35,7 +35,7 @@ export default function LandingPage() {
             <img 
               src="/LOGO-STARSPIN-WHITE_web.png" 
               alt="StarSpin Logo" 
-              className="h-10 w-auto"
+              className="h-20 w-auto"
             />
           </div>
           
@@ -581,9 +581,9 @@ export default function LandingPage() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">Découverte</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-gray-900">0€</span>
+                  <span className="text-5xl font-black text-gray-900">0฿</span>
                 </div>
-                <p className="text-gray-600">Pour tester gratuitement</p>
+                <p className="text-gray-600">Gratuit 15 jours</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
@@ -628,9 +628,9 @@ export default function LandingPage() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-4">Pro</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-white">1,490฿</span>
+                  <span className="text-5xl font-black text-white">1,000฿</span>
                 </div>
-                <p className="text-white/80">par mois (~40€)</p>
+                <p className="text-white/80">par mois</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
@@ -734,7 +734,7 @@ export default function LandingPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
                 <div className="text-left">
-                  <h4 className="text-xl font-bold text-gray-900 mb-1">Garantie satisfait ou remboursé</h4>
+                  <h4 className="text-xl font-bold text-gray-900 mb-1">Sans Engagement</h4>
                   <p className="text-gray-600">14 jours d'essai gratuit, sans engagement. Annulez à tout moment.</p>
                 </div>
               </div>
