@@ -47,5 +47,15 @@
     "avgRating": "متوسط التقييم",
     "conversion": "معدل التحويل",
     "rewards": "المكافآت الموزعة"
+  },
+  "languageSelect": {
+    "title": "اختر لغتك",
+    "continue": "متابعة"
+  },
+  "form": {
+    "yourEmail": "بريدك الإلكتروني",
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "emailInvalid": "يرجى إدخال بريد إلكتروني صالح",
+    "emailPlaceholder": "example@email.com"
   }
 }

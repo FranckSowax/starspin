@@ -47,5 +47,15 @@
     "avgRating": "Calificación promedio",
     "conversion": "Tasa de conversión",
     "rewards": "Recompensas distribuidas"
+  },
+  "languageSelect": {
+    "title": "Selecciona tu idioma",
+    "continue": "Continuar"
+  },
+  "form": {
+    "yourEmail": "Tu correo electrónico",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "emailInvalid": "Por favor ingresa un correo válido",
+    "emailPlaceholder": "ejemplo@email.com"
   }
 }

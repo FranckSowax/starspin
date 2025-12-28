@@ -47,5 +47,15 @@
     "avgRating": "平均评分",
     "conversion": "转化率",
     "rewards": "已分发奖励"
+  },
+  "languageSelect": {
+    "title": "选择您的语言",
+    "continue": "继续"
+  },
+  "form": {
+    "yourEmail": "您的邮箱",
+    "emailRequired": "邮箱为必填项",
+    "emailInvalid": "请输入有效的邮箱地址",
+    "emailPlaceholder": "example@email.com"
   }
 }

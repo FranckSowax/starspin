@@ -47,5 +47,15 @@
     "avgRating": "คะแนนเฉลี่ย",
     "conversion": "อัตราการแปลง",
     "rewards": "รางวัลที่แจกจ่าย"
+  },
+  "languageSelect": {
+    "title": "เลือกภาษาของคุณ",
+    "continue": "ดำเนินการต่อ"
+  },
+  "form": {
+    "yourEmail": "อีเมลของคุณ",
+    "emailRequired": "ต้องระบุอีเมล",
+    "emailInvalid": "กรุณากรอกอีเมลที่ถูกต้อง",
+    "emailPlaceholder": "example@email.com"
   }
 }

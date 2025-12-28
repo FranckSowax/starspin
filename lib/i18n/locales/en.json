@@ -47,5 +47,15 @@
     "avgRating": "Average Rating",
     "conversion": "Conversion Rate",
     "rewards": "Rewards Distributed"
+  },
+  "languageSelect": {
+    "title": "Select Your Language",
+    "continue": "Continue"
+  },
+  "form": {
+    "yourEmail": "Your email",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email",
+    "emailPlaceholder": "example@email.com"
   }
 }

@@ -10,6 +10,7 @@ import { SpinningWheel } from '@/components/animations/SpinningWheel';
 import { FloatingParticles } from '@/components/animations/FloatingParticles';
 import { GradientText } from '@/components/animations/GradientText';
 import { ShineBorder } from '@/components/animations/ShineBorder';
+import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 
 // Static assets
 import step1 from '@/app/assets/images/step1.jpg';
@@ -46,6 +47,7 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-4">
+            <LanguageSwitcher variant="light" />
             <Link href="/auth/signup">
               <Button variant="outline" className="border-2 border-white rounded-full text-white hover:bg-white hover:text-[#1B4332]">
                 Get Started

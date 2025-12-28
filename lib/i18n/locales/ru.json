@@ -1,0 +1,61 @@
+{
+  "common": {
+    "welcome": "Добро пожаловать",
+    "submit": "Отправить",
+    "cancel": "Отмена",
+    "done": "Готово",
+    "loading": "Загрузка...",
+    "error": "Произошла ошибка"
+  },
+  "rating": {
+    "title": "Как вам понравилось?",
+    "subtitle": "Оцените ваш визит",
+    "stars": "звёзд"
+  },
+  "feedback": {
+    "title": "Расскажите, что пошло не так",
+    "placeholder": "Ваш отзыв поможет нам стать лучше...",
+    "thankYou": "Спасибо за ваш отзыв!",
+    "submitted": "Ваш отзыв отправлен"
+  },
+  "social": {
+    "title": "Поделитесь впечатлениями",
+    "googleReview": "Оставить отзыв в Google",
+    "followInstagram": "Подписаться в Instagram",
+    "followTikTok": "Подписаться в TikTok"
+  },
+  "wheel": {
+    "title": "Крутите и выигрывайте!",
+    "spin": "Крутить колесо",
+    "congratulations": "Поздравляем!",
+    "youWon": "Вы выиграли",
+    "alreadySpun": "Вы уже крутили колесо сегодня",
+    "tryAgainTomorrow": "Возвращайтесь завтра!"
+  },
+  "coupon": {
+    "title": "Ваша награда",
+    "code": "Код купона",
+    "expiresIn": "Истекает через",
+    "expired": "Срок действия купона истёк",
+    "redeemed": "Купон уже использован",
+    "terms": "Применяются условия и положения"
+  },
+  "dashboard": {
+    "title": "Панель управления",
+    "stats": "Статистика",
+    "scans": "Всего сканирований",
+    "avgRating": "Средний рейтинг",
+    "conversion": "Конверсия",
+    "rewards": "Выдано наград"
+  },
+  "languageSelect": {
+    "title": "Выберите язык",
+    "continue": "Продолжить"
+  },
+  "form": {
+    "yourEmail": "Ваш email",
+    "emailRequired": "Email обязателен",
+    "emailInvalid": "Введите корректный email",
+    "emailPlaceholder": "example@email.com"
+  }
+}

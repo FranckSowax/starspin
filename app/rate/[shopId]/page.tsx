@@ -6,8 +6,9 @@ import { StarRating } from '@/components/molecules/StarRating';
 import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslation } from 'react-i18next';
-import '@/lib/i18n/config';
-import { Star, Mail } from 'lucide-react';
+import i18n from '@/lib/i18n/config';
+import { Star, Mail, Globe } from 'lucide-react';
+import { ALL_LANGUAGES } from '@/components/ui/LanguageSwitcher';
 
 export default function RatingPage() {
   const params = useParams();
@@ -63,11 +64,11 @@ export default function RatingPage() {
 
     // Validate email
     if (!email.trim()) {
-      setEmailError('L\'email est obligatoire');
+      setEmailError(t('form.emailRequired'));
       return;
     }
     if (!validateEmail(email)) {
-      setEmailError('Veuillez entrer un email valide');
+      setEmailError(t('form.emailInvalid'));
       return;
     }
 
@@ -141,6 +142,18 @@ export default function RatingPage() {
           </div>
         )}
 
+        {/* Language Switcher */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => router.push(`/rate/${shopId}/select-language`)}
+            className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all backdrop-blur-sm"
+          >
+            <Globe className="w-4 h-4" />
+            <span className="text-xl">{ALL_LANGUAGES.find(l => l.code === i18n.language)?.flag || '🇬🇧'}</span>
+            <span className="text-sm font-medium">{i18n.language.toUpperCase()}</span>
+          </button>
+        </div>
+
         {/* Rating Card */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -165,7 +178,7 @@ export default function RatingPage() {
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Mail className="w-4 h-4 text-teal-600" />
-                  Votre email <span className="text-red-500">*</span>
+                  {t('form.yourEmail')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -175,7 +188,7 @@ export default function RatingPage() {
                       setEmail(e.target.value);
                       setEmailError('');
                     }}
-                    placeholder="exemple@email.com"
+                    placeholder={t('form.emailPlaceholder')}
                     className={`w-full p-4 pl-11 border-2 ${
                       emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
                     } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
@@ -208,7 +221,7 @@ export default function RatingPage() {
               <div className="space-y-2">
                 <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   <Mail className="w-4 h-4 text-teal-600" />
-                  Votre email <span className="text-red-500">*</span>
+                  {t('form.yourEmail')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -218,7 +231,7 @@ export default function RatingPage() {
                       setEmail(e.target.value);
                       setEmailError('');
                     }}
-                    placeholder="exemple@email.com"
+                    placeholder={t('form.emailPlaceholder')}
                     className={`w-full p-4 pl-11 border-2 ${
                       emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
                     } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}

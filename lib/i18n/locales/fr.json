@@ -47,5 +47,15 @@
     "avgRating": "Note moyenne",
     "conversion": "Taux de conversion",
     "rewards": "Récompenses distribuées"
+  },
+  "languageSelect": {
+    "title": "Choisissez votre langue",
+    "continue": "Continuer"
+  },
+  "form": {
+    "yourEmail": "Votre email",
+    "emailRequired": "L'email est obligatoire",
+    "emailInvalid": "Veuillez entrer un email valide",
+    "emailPlaceholder": "exemple@email.com"
   }
 }
