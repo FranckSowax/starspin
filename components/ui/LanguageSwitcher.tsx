@@ -41,9 +41,13 @@ export function LanguageSwitcher({
 }: LanguageSwitcherProps) {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+  // Prevent hydration mismatch by only rendering after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,6 +59,27 @@ export function LanguageSwitcher({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const currentLanguage = languages.find(lang => lang.code === i18n.language) || languages[0];
+
+  // Return a placeholder during SSR to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-all ${
+          variant === 'light' 
+            ? 'bg-white/10 text-white border-white/20' 
+            : 'bg-gray-100 text-gray-900 border-gray-200'
+        }`}>
+          <span className="text-xl">🇬🇧</span>
+          <span className="text-sm font-medium hidden sm:inline">EN</span>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+      </div>
+    );
+  }
 
   const handleLanguageChange = (langCode: string) => {
     i18n.changeLanguage(langCode);
