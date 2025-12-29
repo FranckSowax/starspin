@@ -38,6 +38,67 @@ const PRIZE_COLORS = [
   '#9575CD', // Light Purple
 ];
 
+// Distribute segments evenly so same-type segments are not adjacent
+function distributeSegments(segments: WheelSegment[]): WheelSegment[] {
+  if (segments.length <= 2) return segments;
+  
+  // Group segments by their base ID (without the index suffix)
+  const groups: Map<string, WheelSegment[]> = new Map();
+  segments.forEach(seg => {
+    // Extract base ID (e.g., "prize-abc" from "prize-abc-0")
+    const baseId = seg.id.replace(/-\d+$/, '');
+    if (!groups.has(baseId)) {
+      groups.set(baseId, []);
+    }
+    groups.get(baseId)!.push(seg);
+  });
+  
+  // Sort groups by size (largest first) for better distribution
+  const sortedGroups = Array.from(groups.values()).sort((a, b) => b.length - a.length);
+  
+  // Interleave segments from different groups
+  const result: WheelSegment[] = [];
+  const totalSegments = segments.length;
+  const groupPointers = sortedGroups.map(() => 0);
+  
+  for (let i = 0; i < totalSegments; i++) {
+    // Find a group that has remaining segments and won't create adjacency
+    let placed = false;
+    
+    for (let g = 0; g < sortedGroups.length; g++) {
+      const group = sortedGroups[g];
+      const pointer = groupPointers[g];
+      
+      if (pointer >= group.length) continue;
+      
+      // Check if placing this segment would create adjacency
+      const lastSegment = result[result.length - 1];
+      const candidateBaseId = group[pointer].id.replace(/-\d+$/, '');
+      const lastBaseId = lastSegment?.id.replace(/-\d+$/, '');
+      
+      if (!lastSegment || candidateBaseId !== lastBaseId) {
+        result.push(group[pointer]);
+        groupPointers[g]++;
+        placed = true;
+        break;
+      }
+    }
+    
+    // If no non-adjacent placement found, just place the next available
+    if (!placed) {
+      for (let g = 0; g < sortedGroups.length; g++) {
+        if (groupPointers[g] < sortedGroups[g].length) {
+          result.push(sortedGroups[g][groupPointers[g]]);
+          groupPointers[g]++;
+          break;
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+
 export function WheelPreview({ 
   prizeQuantities, 
   unluckyQuantity, 
@@ -87,7 +148,8 @@ export function WheelPreview({
       });
     }
     
-    return allSegments;
+    // Distribute segments to avoid adjacency of same types
+    return distributeSegments(allSegments);
   }, [prizeQuantities, unluckyQuantity, retryQuantity]);
 
   const totalSegments = segments.length;
