@@ -3,19 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Store, 
-  QrCode, 
-  Download, 
-  ExternalLink, 
+import {
+  Store,
+  QrCode,
+  Download,
+  ExternalLink,
   Search,
   TrendingUp,
   Users,
   DollarSign,
-  BarChart3,
   Eye,
   Copy,
   CheckCircle2,
@@ -23,7 +21,6 @@ import {
   LayoutDashboard,
   Filter,
   Calendar,
-  ChevronRight,
   RotateCw
 } from 'lucide-react';
 import QRCode from 'qrcode';
