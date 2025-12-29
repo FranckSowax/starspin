@@ -19,6 +19,8 @@ CREATE TABLE merchants (
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
   subscription_tier TEXT DEFAULT 'starter',
+  unlucky_probability INTEGER DEFAULT 20,
+  retry_probability INTEGER DEFAULT 10,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

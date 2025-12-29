@@ -36,6 +36,7 @@ export default function PrizesPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
+  const [migrationNeeded, setMigrationNeeded] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -212,8 +213,14 @@ export default function PrizesPage() {
         .eq('id', user.id);
       
       if (error) throw error;
+      // If successful, clear any previous migration warning
+      setMigrationNeeded(false);
     } catch (error: any) {
       console.error('Error saving special probabilities:', error);
+      // Check for schema mismatch error (column not found)
+      if (error.code === 'PGRST204' || error.message?.includes('retry_probability') || error.message?.includes('unlucky_probability')) {
+        setMigrationNeeded(true);
+      }
     }
   };
   
@@ -249,6 +256,24 @@ export default function PrizesPage() {
   return (
     <DashboardLayout merchant={merchant}>
       <div className="space-y-6">
+        {/* Migration Warning */}
+        {migrationNeeded && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-amber-800">Mise à jour de la base de données requise</h3>
+              <p className="text-sm text-amber-700 mt-1">
+                Les colonnes pour les probabilités spéciales manquent dans la base de données. 
+                Veuillez exécuter la commande SQL suivante dans votre tableau de bord Supabase :
+              </p>
+              <pre className="mt-2 bg-amber-100 p-2 rounded text-xs overflow-x-auto text-amber-900 border border-amber-200">
+                ALTER TABLE merchants ADD COLUMN IF NOT EXISTS unlucky_probability INTEGER DEFAULT 20;{'\n'}
+                ALTER TABLE merchants ADD COLUMN IF NOT EXISTS retry_probability INTEGER DEFAULT 10;
+              </pre>
+            </div>
+          </div>
+        )}
+
         {/* Header with Probability Overview */}
         <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
           <div>

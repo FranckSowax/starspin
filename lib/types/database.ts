@@ -11,6 +11,8 @@ export interface Merchant {
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   subscription_tier: string;
+  unlucky_probability?: number;
+  retry_probability?: number;
   created_at: string;
   updated_at: string;
 }
