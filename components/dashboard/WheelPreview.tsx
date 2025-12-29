@@ -11,11 +11,17 @@ interface WheelSegment {
   type: 'prize' | 'unlucky' | 'retry';
 }
 
+export interface PrizeWithQuantity {
+  prize: Prize;
+  quantity: number;
+}
+
 interface WheelPreviewProps {
-  prizes: Prize[];
-  unluckyProbability: number;
-  retryProbability: number;
+  prizeQuantities: PrizeWithQuantity[];
+  unluckyQuantity: number;
+  retryQuantity: number;
   size?: number;
+  maxSegments?: number;
 }
 
 // Color palette for prize segments
@@ -33,47 +39,56 @@ const PRIZE_COLORS = [
 ];
 
 export function WheelPreview({ 
-  prizes, 
-  unluckyProbability, 
-  retryProbability, 
-  size = 300 
+  prizeQuantities, 
+  unluckyQuantity, 
+  retryQuantity, 
+  size = 300,
+  maxSegments = 8
 }: WheelPreviewProps) {
   
-  // Build segments array with all prizes + special segments
+  // Build segments array based on quantities
   const segments = useMemo(() => {
     const allSegments: WheelSegment[] = [];
+    let colorIndex = 0;
     
-    // Add prize segments
-    prizes.forEach((prize, index) => {
+    // Add prize segments based on quantity
+    prizeQuantities.forEach(({ prize, quantity }) => {
+      for (let i = 0; i < quantity; i++) {
+        allSegments.push({
+          id: `${prize.id}-${i}`,
+          name: prize.name.length > 10 ? prize.name.substring(0, 10) + '...' : prize.name,
+          color: PRIZE_COLORS[colorIndex % PRIZE_COLORS.length],
+          textColor: '#FFFFFF',
+          type: 'prize',
+        });
+      }
+      if (quantity > 0) colorIndex++;
+    });
+    
+    // Add UNLUCKY segments based on quantity
+    for (let i = 0; i < unluckyQuantity; i++) {
       allSegments.push({
-        id: prize.id,
-        name: prize.name.length > 12 ? prize.name.substring(0, 12) + '...' : prize.name,
-        color: PRIZE_COLORS[index % PRIZE_COLORS.length],
+        id: `unlucky-${i}`,
+        name: '#UNLUCKY#',
+        color: '#DC2626', // Red
         textColor: '#FFFFFF',
-        type: 'prize',
+        type: 'unlucky',
       });
-    });
+    }
     
-    // Add UNLUCKY segment
-    allSegments.push({
-      id: 'unlucky',
-      name: '#UNLUCKY#',
-      color: '#DC2626', // Red
-      textColor: '#FFFFFF',
-      type: 'unlucky',
-    });
-    
-    // Add RETRY segment
-    allSegments.push({
-      id: 'retry',
-      name: '#RÉESSAYER#',
-      color: '#F59E0B', // Yellow/Amber
-      textColor: '#1F2937',
-      type: 'retry',
-    });
+    // Add RETRY segments based on quantity
+    for (let i = 0; i < retryQuantity; i++) {
+      allSegments.push({
+        id: `retry-${i}`,
+        name: '#RÉESSAYER#',
+        color: '#F59E0B', // Yellow/Amber
+        textColor: '#1F2937',
+        type: 'retry',
+      });
+    }
     
     return allSegments;
-  }, [prizes]);
+  }, [prizeQuantities, unluckyQuantity, retryQuantity]);
 
   const totalSegments = segments.length;
   const segmentAngle = 360 / totalSegments;

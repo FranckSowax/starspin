@@ -9,7 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
 import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock } from 'lucide-react';
-import { WheelPreview } from '@/components/dashboard/WheelPreview';
+import { WheelPreview, PrizeWithQuantity } from '@/components/dashboard/WheelPreview';
 
 // Special segment types that are always present on the wheel
 const SPECIAL_SEGMENTS = {
@@ -29,9 +29,11 @@ export default function PrizesPage() {
     probability: 10,
   });
   
-  // Special segments probabilities (stored in merchant settings or localStorage)
-  const [unluckyProbability, setUnluckyProbability] = useState(20);
-  const [retryProbability, setRetryProbability] = useState(10);
+  // Segment quantities for the wheel (max 8 total segments)
+  const MAX_SEGMENTS = 8;
+  const [prizeQuantities, setPrizeQuantities] = useState<Record<string, number>>({});
+  const [unluckyQuantity, setUnluckyQuantity] = useState(1);
+  const [retryQuantity, setRetryQuantity] = useState(1);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -58,12 +60,15 @@ export default function PrizesPage() {
 
       setMerchant(merchantData);
       
-      // Load special segment probabilities from merchant data
-      if (merchantData?.unlucky_probability !== undefined) {
-        setUnluckyProbability(merchantData.unlucky_probability);
+      // Load segment quantities from merchant data (or use defaults)
+      if (merchantData?.unlucky_quantity !== undefined) {
+        setUnluckyQuantity(merchantData.unlucky_quantity);
       }
-      if (merchantData?.retry_probability !== undefined) {
-        setRetryProbability(merchantData.retry_probability);
+      if (merchantData?.retry_quantity !== undefined) {
+        setRetryQuantity(merchantData.retry_quantity);
+      }
+      if (merchantData?.prize_quantities) {
+        setPrizeQuantities(merchantData.prize_quantities);
       }
       
       fetchPrizes(user.id);
@@ -196,44 +201,79 @@ export default function PrizesPage() {
     fetchPrizes(user.id);
   };
 
-  const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0) + unluckyProbability + retryProbability;
-
-  const remainingProbability = 100 - totalProbability;
+  // Calculate total segments used
+  const totalPrizeSegments = Object.values(prizeQuantities).reduce((sum, qty) => sum + qty, 0);
+  const totalSegments = totalPrizeSegments + unluckyQuantity + retryQuantity;
+  const remainingSegments = MAX_SEGMENTS - totalSegments;
   
-  // Save special segment probabilities to merchant
-  const saveSpecialProbabilities = async () => {
+  // Build prize quantities array for WheelPreview
+  const prizeQuantitiesArray: PrizeWithQuantity[] = prizes.map(prize => ({
+    prize,
+    quantity: prizeQuantities[prize.id] || 0
+  }));
+  
+  // Update prize quantity
+  const updatePrizeQuantity = (prizeId: string, delta: number) => {
+    const currentQty = prizeQuantities[prizeId] || 0;
+    const newQty = Math.max(0, currentQty + delta);
+    
+    // Check if we can add more segments
+    if (delta > 0 && totalSegments >= MAX_SEGMENTS) {
+      return; // Can't add more
+    }
+    
+    setPrizeQuantities(prev => ({
+      ...prev,
+      [prizeId]: newQty
+    }));
+  };
+  
+  // Update special segment quantity
+  const updateUnluckyQuantity = (delta: number) => {
+    const newQty = Math.max(0, unluckyQuantity + delta);
+    if (delta > 0 && totalSegments >= MAX_SEGMENTS) return;
+    setUnluckyQuantity(newQty);
+  };
+  
+  const updateRetryQuantity = (delta: number) => {
+    const newQty = Math.max(0, retryQuantity + delta);
+    if (delta > 0 && totalSegments >= MAX_SEGMENTS) return;
+    setRetryQuantity(newQty);
+  };
+  
+  // Save segment quantities to merchant
+  const saveSegmentQuantities = async () => {
     if (!user) return;
     
     try {
       const { error } = await supabase
         .from('merchants')
         .update({
-          unlucky_probability: unluckyProbability,
-          retry_probability: retryProbability,
+          unlucky_quantity: unluckyQuantity,
+          retry_quantity: retryQuantity,
+          prize_quantities: prizeQuantities,
         })
         .eq('id', user.id);
       
       if (error) throw error;
-      // If successful, clear any previous migration warning
       setMigrationNeeded(false);
     } catch (error: any) {
-      console.error('Error saving special probabilities:', error);
-      // Check for schema mismatch error (column not found)
-      if (error.code === 'PGRST204' || error.message?.includes('retry_probability') || error.message?.includes('unlucky_probability')) {
+      console.error('Error saving segment quantities:', error);
+      if (error.code === 'PGRST204' || error.message?.includes('quantity')) {
         setMigrationNeeded(true);
       }
     }
   };
   
-  // Auto-save when probabilities change
+  // Auto-save when quantities change
   useEffect(() => {
     if (user) {
       const timer = setTimeout(() => {
-        saveSpecialProbabilities();
+        saveSegmentQuantities();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [unluckyProbability, retryProbability, user]);
+  }, [unluckyQuantity, retryQuantity, prizeQuantities, user]);
 
   const getChanceDescription = (prob: number) => {
     if (prob >= 50) return { text: 'Très fréquent', color: 'text-green-600', bg: 'bg-green-50' };
@@ -300,83 +340,56 @@ export default function PrizesPage() {
           </Button>
         </div>
 
-        {/* Probability Calculator Card */}
+        {/* Segment Counter Card */}
         <Card className="p-6 bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200">
           <div className="flex items-start gap-4">
             <div className="w-16 h-16 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <Percent className="w-8 h-8 text-white" />
+              <span className="text-2xl">🎡</span>
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Calculateur de Probabilités</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Composition de la Roue</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="bg-white rounded-lg p-4 border-2 border-teal-200">
-                  <p className="text-sm text-gray-600 mb-1">Total configuré</p>
-                  <p className="text-3xl font-bold text-teal-600">{totalProbability}%</p>
+                  <p className="text-sm text-gray-600 mb-1">Segments utilisés</p>
+                  <p className="text-3xl font-bold text-teal-600">{totalSegments}/{MAX_SEGMENTS}</p>
                 </div>
                 <div className={`rounded-lg p-4 border-2 ${
-                  remainingProbability === 0 ? 'bg-green-50 border-green-200' : 
-                  remainingProbability > 0 ? 'bg-yellow-50 border-yellow-200' : 
+                  remainingSegments === 0 ? 'bg-green-50 border-green-200' : 
+                  remainingSegments > 0 ? 'bg-yellow-50 border-yellow-200' : 
                   'bg-red-50 border-red-200'
                 }`}>
-                  <p className="text-sm text-gray-600 mb-1">Restant</p>
+                  <p className="text-sm text-gray-600 mb-1">Segments restants</p>
                   <p className={`text-3xl font-bold ${
-                    remainingProbability === 0 ? 'text-green-600' : 
-                    remainingProbability > 0 ? 'text-yellow-600' : 
+                    remainingSegments === 0 ? 'text-green-600' : 
+                    remainingSegments > 0 ? 'text-yellow-600' : 
                     'text-red-600'
-                  }`}>{remainingProbability}%</p>
+                  }`}>{remainingSegments}</p>
                 </div>
                 <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
-                  <p className="text-sm text-gray-600 mb-1">Nombre de prix</p>
+                  <p className="text-sm text-gray-600 mb-1">Prix disponibles</p>
                   <p className="text-3xl font-bold text-gray-900">{prizes.length}</p>
                 </div>
               </div>
               
-              {/* Probability Examples */}
+              {/* Segment Info */}
               <div className="bg-white rounded-lg p-4 border border-teal-200">
                 <div className="flex items-center gap-2 mb-3">
                   <Info className="w-5 h-5 text-teal-600" />
-                  <h4 className="font-semibold text-gray-900">💡 Exemples de probabilités</h4>
+                  <h4 className="font-semibold text-gray-900">💡 Comment ça marche</h4>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center font-bold text-green-700">50%</div>
-                    <div>
-                      <p className="font-medium text-gray-900">1 chance sur 2</p>
-                      <p className="text-gray-600">Gagné tous les 2 tours en moyenne</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center font-bold text-blue-700">25%</div>
-                    <div>
-                      <p className="font-medium text-gray-900">1 chance sur 4</p>
-                      <p className="text-gray-600">Gagné tous les 4 tours en moyenne</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center font-bold text-yellow-700">10%</div>
-                    <div>
-                      <p className="font-medium text-gray-900">1 chance sur 10</p>
-                      <p className="text-gray-600">Gagné tous les 10 tours en moyenne</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center font-bold text-red-700">5%</div>
-                    <div>
-                      <p className="font-medium text-gray-900">1 chance sur 20</p>
-                      <p className="text-gray-600">Gagné tous les 20 tours en moyenne</p>
-                    </div>
-                  </div>
+                <div className="text-sm text-gray-600 space-y-2">
+                  <p>• La roue peut contenir <strong>maximum {MAX_SEGMENTS} segments</strong></p>
+                  <p>• Ajoutez des segments pour chaque prix en cliquant sur <strong>+</strong></p>
+                  <p>• Plus un prix a de segments, plus il a de chances d'être gagné</p>
+                  <p>• Les segments spéciaux (#UNLUCKY#, #RÉESSAYER#) sont configurables</p>
                 </div>
               </div>
 
-              {totalProbability !== 100 && (
+              {totalSegments === 0 && (
                 <div className="mt-4 flex items-center gap-2 text-orange-700 bg-orange-50 border border-orange-200 rounded-lg p-3">
                   <AlertCircle className="w-5 h-5" />
                   <span className="font-medium">
-                    {remainingProbability > 0 
-                      ? `Il reste ${remainingProbability}% à distribuer pour atteindre 100%` 
-                      : `Vous avez dépassé de ${Math.abs(remainingProbability)}% ! Ajustez vos probabilités.`
-                    }
+                    Ajoutez des segments à la roue pour la configurer !
                   </span>
                 </div>
               )}
@@ -537,21 +550,28 @@ export default function PrizesPage() {
               
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">Probabilité</label>
-                  <span className="text-xl font-bold text-red-400">{unluckyProbability}%</span>
+                  <label className="text-sm font-medium text-gray-300">Segments sur la roue</label>
                 </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="50"
-                  step="1"
-                  value={unluckyProbability}
-                  onChange={(e) => setUnluckyProbability(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>5%</span>
-                  <span>50%</span>
+                <div className="flex items-center justify-center gap-4">
+                  <Button
+                    onClick={() => updateUnluckyQuantity(-1)}
+                    disabled={unluckyQuantity <= 0}
+                    variant="outline"
+                    size="sm"
+                    className="w-10 h-10 rounded-full bg-red-900/50 border-red-500 text-red-400 hover:bg-red-800 disabled:opacity-50"
+                  >
+                    -
+                  </Button>
+                  <span className="text-3xl font-bold text-red-400 w-12 text-center">{unluckyQuantity}</span>
+                  <Button
+                    onClick={() => updateUnluckyQuantity(1)}
+                    disabled={totalSegments >= MAX_SEGMENTS}
+                    variant="outline"
+                    size="sm"
+                    className="w-10 h-10 rounded-full bg-red-900/50 border-red-500 text-red-400 hover:bg-red-800 disabled:opacity-50"
+                  >
+                    +
+                  </Button>
                 </div>
               </div>
               
@@ -576,21 +596,28 @@ export default function PrizesPage() {
               
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">Probabilité</label>
-                  <span className="text-xl font-bold text-yellow-400">{retryProbability}%</span>
+                  <label className="text-sm font-medium text-gray-300">Segments sur la roue</label>
                 </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="30"
-                  step="1"
-                  value={retryProbability}
-                  onChange={(e) => setRetryProbability(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>5%</span>
-                  <span>30%</span>
+                <div className="flex items-center justify-center gap-4">
+                  <Button
+                    onClick={() => updateRetryQuantity(-1)}
+                    disabled={retryQuantity <= 0}
+                    variant="outline"
+                    size="sm"
+                    className="w-10 h-10 rounded-full bg-yellow-900/50 border-yellow-500 text-yellow-400 hover:bg-yellow-800 disabled:opacity-50"
+                  >
+                    -
+                  </Button>
+                  <span className="text-3xl font-bold text-yellow-400 w-12 text-center">{retryQuantity}</span>
+                  <Button
+                    onClick={() => updateRetryQuantity(1)}
+                    disabled={totalSegments >= MAX_SEGMENTS}
+                    variant="outline"
+                    size="sm"
+                    className="w-10 h-10 rounded-full bg-yellow-900/50 border-yellow-500 text-yellow-400 hover:bg-yellow-800 disabled:opacity-50"
+                  >
+                    +
+                  </Button>
                 </div>
               </div>
               
@@ -608,10 +635,11 @@ export default function PrizesPage() {
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="flex-shrink-0">
               <WheelPreview 
-                prizes={prizes}
-                unluckyProbability={unluckyProbability}
-                retryProbability={retryProbability}
+                prizeQuantities={prizeQuantitiesArray}
+                unluckyQuantity={unluckyQuantity}
+                retryQuantity={retryQuantity}
                 size={320}
+                maxSegments={MAX_SEGMENTS}
               />
             </div>
             <div className="flex-1 text-center lg:text-left">
@@ -623,21 +651,21 @@ export default function PrizesPage() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-white rounded-lg p-3 border">
                   <p className="text-gray-500">Segments totaux</p>
-                  <p className="text-2xl font-bold text-teal-600">{prizes.length + 2}</p>
+                  <p className="text-2xl font-bold text-teal-600">{totalSegments}/{MAX_SEGMENTS}</p>
                 </div>
                 <div className="bg-white rounded-lg p-3 border">
-                  <p className="text-gray-500">Prix personnalisés</p>
-                  <p className="text-2xl font-bold text-blue-600">{prizes.length}</p>
+                  <p className="text-gray-500">Prix sur la roue</p>
+                  <p className="text-2xl font-bold text-blue-600">{totalPrizeSegments}</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
                   <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  #UNLUCKY# ({unluckyProbability}%)
+                  #UNLUCKY# × {unluckyQuantity}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
                   <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                  #RÉESSAYER# ({retryProbability}%)
+                  #RÉESSAYER# × {retryQuantity}
                 </span>
               </div>
             </div>
@@ -654,63 +682,87 @@ export default function PrizesPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {prizes.map((prize) => {
-            const chanceInfo = getChanceDescription(prize.probability);
+            const quantity = prizeQuantities[prize.id] || 0;
             return (
-              <Card key={prize.id} className="overflow-hidden hover:shadow-xl transition-all border-2 hover:border-teal-300">
+              <Card key={prize.id} className={`overflow-hidden hover:shadow-xl transition-all border-2 ${quantity > 0 ? 'border-teal-400 bg-teal-50/30' : 'hover:border-teal-300'}`}>
                 {/* Prize Image */}
                 {prize.image_url ? (
-                  <div className="relative h-48 bg-gradient-to-br from-teal-100 to-blue-100">
+                  <div className="relative h-40 bg-gradient-to-br from-teal-100 to-blue-100">
                     <img 
                       src={prize.image_url} 
                       alt={prize.name} 
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute top-3 right-3">
-                      <div className={`px-3 py-1.5 ${chanceInfo.bg} ${chanceInfo.color} rounded-full font-bold text-sm shadow-lg`}>
-                        {prize.probability}%
+                      <div className={`px-3 py-1.5 ${quantity > 0 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'} rounded-full font-bold text-sm shadow-lg`}>
+                        × {quantity}
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="h-48 bg-gradient-to-br from-teal-100 to-blue-100 flex items-center justify-center relative">
-                    <span className="text-6xl">🎁</span>
+                  <div className="h-40 bg-gradient-to-br from-teal-100 to-blue-100 flex items-center justify-center relative">
+                    <span className="text-5xl">🎁</span>
                     <div className="absolute top-3 right-3">
-                      <div className={`px-3 py-1.5 ${chanceInfo.bg} ${chanceInfo.color} rounded-full font-bold text-sm shadow-lg`}>
-                        {prize.probability}%
+                      <div className={`px-3 py-1.5 ${quantity > 0 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'} rounded-full font-bold text-sm shadow-lg`}>
+                        × {quantity}
                       </div>
                     </div>
                   </div>
                 )}
                 
-                <div className="p-5">
+                <div className="p-4">
                   <div className="mb-3">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{prize.name}</h3>
-                    <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${chanceInfo.bg} ${chanceInfo.color}`}>
-                      <TrendingUp className="w-3 h-3" />
-                      {chanceInfo.text} • 1/{Math.round(100 / prize.probability)}
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{prize.name}</h3>
+                    {prize.description && (
+                      <p className="text-gray-500 text-xs line-clamp-1">{prize.description}</p>
+                    )}
+                  </div>
+                  
+                  {/* Quantity Controls */}
+                  <div className="mb-4">
+                    <label className="text-xs font-medium text-gray-500 block mb-2">Segments sur la roue</label>
+                    <div className="flex items-center justify-center gap-3">
+                      <Button
+                        onClick={() => updatePrizeQuantity(prize.id, -1)}
+                        disabled={quantity <= 0}
+                        variant="outline"
+                        size="sm"
+                        className="w-9 h-9 rounded-full border-teal-400 text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+                      >
+                        -
+                      </Button>
+                      <span className="text-2xl font-bold text-teal-600 w-10 text-center">{quantity}</span>
+                      <Button
+                        onClick={() => updatePrizeQuantity(prize.id, 1)}
+                        disabled={totalSegments >= MAX_SEGMENTS}
+                        variant="outline"
+                        size="sm"
+                        className="w-9 h-9 rounded-full border-teal-400 text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+                      >
+                        +
+                      </Button>
                     </div>
                   </div>
                   
-                  {prize.description && (
-                    <p className="text-gray-600 mb-4 text-sm line-clamp-2">{prize.description}</p>
-                  )}
-                  
-                  <Button
-                    onClick={() => handleEdit(prize)}
-                    variant="outline"
-                    className="flex-1 text-teal-600 border-teal-600 hover:bg-teal-50 gap-2"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Modifier
-                  </Button>
-                  <Button
-                    onClick={() => handleDelete(prize.id)}
-                    variant="outline"
-                    className="flex-1 text-red-600 border-red-600 hover:bg-red-50 gap-2"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Supprimer
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleEdit(prize)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-gray-600 border-gray-300 hover:bg-gray-50 gap-1"
+                    >
+                      <Pencil className="w-3 h-3" />
+                      Modifier
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(prize.id)}
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 border-red-300 hover:bg-red-50"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             );
