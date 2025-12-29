@@ -103,11 +103,11 @@ export default function RedirectPage() {
           icon: '🗺️',
           name: 'Google Reviews',
           message: 'Merci, votre avis compte pour nous. Pouvez-vous le partager ici ?',
-          bg: 'bg-red-50',
-          border: 'border-red-200',
-          text_color: 'text-red-800',
-          button_bg: 'bg-red-600',
-          button_hover: 'hover:bg-red-700'
+          bg: 'bg-green-50',
+          border: 'border-green-200',
+          text_color: 'text-green-800',
+          button_bg: 'bg-green-600',
+          button_hover: 'hover:bg-green-700'
         };
       case 'tripadvisor':
         return {
