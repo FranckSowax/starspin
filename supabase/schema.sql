@@ -140,6 +140,9 @@ CREATE POLICY "Merchants can update own data" ON merchants
 CREATE POLICY "Merchants can view own prizes" ON prizes
   FOR SELECT USING (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
 
+CREATE POLICY "Public can view prizes" ON prizes
+  FOR SELECT USING (true);
+
 CREATE POLICY "Merchants can insert own prizes" ON prizes
   FOR INSERT WITH CHECK (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
 
@@ -153,13 +156,31 @@ CREATE POLICY "Merchants can delete own prizes" ON prizes
 CREATE POLICY "Merchants can view own feedback" ON feedback
   FOR SELECT USING (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
 
+CREATE POLICY "Public can insert feedback" ON feedback
+  FOR INSERT WITH CHECK (true);
+
 -- RLS Policies for spins
 CREATE POLICY "Merchants can view own spins" ON spins
   FOR SELECT USING (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
 
+CREATE POLICY "Public can insert spins" ON spins
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Public can view spins" ON spins
+  FOR SELECT USING (true);
+
 -- RLS Policies for coupons
 CREATE POLICY "Merchants can view own coupons" ON coupons
   FOR SELECT USING (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
+
+CREATE POLICY "Public can insert coupons" ON coupons
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Public can view own coupons" ON coupons
+  FOR SELECT USING (true);
+
+CREATE POLICY "Public can update coupons" ON coupons
+  FOR UPDATE USING (true) WITH CHECK (true);
 
 -- RLS Policies for qr_codes
 CREATE POLICY "Merchants can view own qr_codes" ON qr_codes
