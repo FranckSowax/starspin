@@ -20,6 +20,7 @@ export default function RatingPage() {
   const [feedback, setFeedback] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -30,23 +31,33 @@ export default function RatingPage() {
 
   useEffect(() => {
     const fetchMerchant = async () => {
-      const { data, error } = await supabase
-        .from('merchants')
-        .select('*')
-        .eq('id', shopId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('merchants')
+          .select('*')
+          .eq('id', shopId)
+          .single();
 
-      if (error) {
-        console.error('Error fetching merchant:', error);
-        return;
-      }
+        if (error) {
+          console.error('Error fetching merchant:', error);
+          return;
+        }
 
-      if (data) {
-        setMerchant(data);
+        if (data) {
+          setMerchant(data);
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      } finally {
+        setFetching(false);
       }
     };
 
-    fetchMerchant();
+    if (shopId) {
+      fetchMerchant();
+    } else {
+      setFetching(false);
+    }
   }, [shopId]);
 
   const handleRating = (selectedRating: number) => {
@@ -102,11 +113,25 @@ export default function RatingPage() {
     }
   };
 
-  if (!isClient || !merchant) {
+  if (!isClient || fetching) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 to-teal-700">
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8">
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!merchant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 to-teal-700 p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center max-w-md w-full">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Commerce introuvable</h1>
+          <p className="text-gray-600 mb-6">Désolé, nous n'avons pas pu trouver ce commerce. Veuillez vérifier le lien.</p>
+          <Button onClick={() => router.push('/')} className="w-full">
+            Retour à l'accueil
+          </Button>
         </div>
       </div>
     );
