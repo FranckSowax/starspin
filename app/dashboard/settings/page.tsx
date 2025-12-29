@@ -159,8 +159,14 @@ export default function SettingsPage() {
           sql: `
 -- Run this in your Supabase SQL Editor:
 INSERT INTO storage.buckets (id, name, public) VALUES ('merchant-assets', 'merchant-assets', true) ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Public Access" ON storage.objects;
 CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING ( bucket_id = 'merchant-assets' );
+
+DROP POLICY IF EXISTS "Auth Upload" ON storage.objects;
 CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK ( bucket_id = 'merchant-assets' AND auth.role() = 'authenticated' );
+
+DROP POLICY IF EXISTS "Auth Update" ON storage.objects;
 CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'merchant-assets' AND auth.role() = 'authenticated' );`
         });
       } else {
