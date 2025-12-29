@@ -196,17 +196,6 @@ export default function PrizesPage() {
 
   const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0) + unluckyProbability + retryProbability;
 
-  if (!user || !merchant) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   const remainingProbability = 100 - totalProbability;
   
   // Save special segment probabilities to merchant
@@ -237,6 +226,7 @@ export default function PrizesPage() {
       return () => clearTimeout(timer);
     }
   }, [unluckyProbability, retryProbability, user]);
+
   const getChanceDescription = (prob: number) => {
     if (prob >= 50) return { text: 'Très fréquent', color: 'text-green-600', bg: 'bg-green-50' };
     if (prob >= 25) return { text: 'Fréquent', color: 'text-blue-600', bg: 'bg-blue-50' };
@@ -244,6 +234,17 @@ export default function PrizesPage() {
     if (prob >= 5) return { text: 'Rare', color: 'text-orange-600', bg: 'bg-orange-50' };
     return { text: 'Très rare', color: 'text-red-600', bg: 'bg-red-50' };
   };
+
+  if (!user || !merchant) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout merchant={merchant}>
