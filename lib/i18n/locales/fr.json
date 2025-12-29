@@ -31,7 +31,11 @@
     "congratulations": "Félicitations!",
     "youWon": "Vous avez gagné",
     "alreadySpun": "Vous avez déjà tourné la roue aujourd'hui",
-    "tryAgainTomorrow": "Revenez demain pour une autre chance!"
+    "tryAgainTomorrow": "Revenez demain pour une autre chance!",
+    "retry": "Réessayez !",
+    "unlucky": "Dommage...",
+    "spinsRemaining": "Tours restants",
+    "showCoupon": "Afficher mon coupon"
   },
   "coupon": {
     "title": "Votre récompense",

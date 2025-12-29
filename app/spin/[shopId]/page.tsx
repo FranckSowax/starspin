@@ -317,11 +317,11 @@ export default function SpinPage() {
         setIsSaving(false);
       }
     } else if (type === 'retry') {
-      setResult('Réessayez !');
+      setResult(t('wheel.retry'));
       // Grant an extra spin for RETRY
       setSpinsRemaining(prev => prev + 1);
     } else {
-      setResult('Dommage...');
+      setResult(t('wheel.unlucky'));
       // UNLUCKY is eliminatory - mark as spun to prevent further spins
       setHasSpun(true);
     }
