@@ -17,6 +17,11 @@ ALTER TABLE merchants ADD COLUMN IF NOT EXISTS tiktok_url TEXT;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS weekly_schedule TEXT;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS qr_code_url TEXT;
 
+-- Ajouter les colonnes de quantités (segments de la roue)
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS unlucky_quantity INTEGER DEFAULT 1;
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS retry_quantity INTEGER DEFAULT 1;
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS prize_quantities JSONB DEFAULT '{}'::jsonb;
+
 -- Vérifier les colonnes existantes
 SELECT column_name, data_type 
 FROM information_schema.columns 

@@ -4,6 +4,8 @@ export interface Merchant {
   name: string | null;
   business_name: string | null;
   logo_url: string | null;
+  background_url: string | null;
+  qr_code_url: string | null;
   branding: Record<string, any>;
   google_review_link: string | null;
   google_maps_url: string | null;

@@ -12,6 +12,8 @@ CREATE TABLE merchants (
   name TEXT,
   business_name TEXT,
   logo_url TEXT,
+  background_url TEXT,
+  qr_code_url TEXT,
   branding JSONB DEFAULT '{}',
   google_review_link TEXT,
   google_maps_url TEXT,
