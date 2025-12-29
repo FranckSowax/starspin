@@ -6,6 +6,7 @@ export interface Merchant {
   logo_url: string | null;
   branding: Record<string, any>;
   google_review_link: string | null;
+  google_maps_url: string | null;
   instagram_handle: string | null;
   tiktok_handle: string | null;
   stripe_customer_id: string | null;

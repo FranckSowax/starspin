@@ -14,6 +14,7 @@ CREATE TABLE merchants (
   logo_url TEXT,
   branding JSONB DEFAULT '{}',
   google_review_link TEXT,
+  google_maps_url TEXT,
   instagram_handle TEXT,
   tiktok_handle TEXT,
   stripe_customer_id TEXT,
