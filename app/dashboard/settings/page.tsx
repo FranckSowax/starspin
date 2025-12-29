@@ -18,7 +18,7 @@ export default function SettingsPage() {
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [backgroundPreview, setBackgroundPreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'warning', text: string, sql?: string } | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -152,7 +152,20 @@ export default function SettingsPage() {
         setMerchant(merchantData);
       }
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Failed to upload images' });
+      if (error.message && (error.message.includes('row-level security') || error.message.includes('StorageApiError'))) {
+        setMessage({
+          type: 'warning',
+          text: 'Database configuration required: Storage policies are missing.',
+          sql: `
+-- Run this in your Supabase SQL Editor:
+INSERT INTO storage.buckets (id, name, public) VALUES ('merchant-assets', 'merchant-assets', true) ON CONFLICT (id) DO NOTHING;
+CREATE POLICY "Public Access" ON storage.objects FOR SELECT USING ( bucket_id = 'merchant-assets' );
+CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK ( bucket_id = 'merchant-assets' AND auth.role() = 'authenticated' );
+CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'merchant-assets' AND auth.role() = 'authenticated' );`
+        });
+      } else {
+        setMessage({ type: 'error', text: error.message || 'Failed to upload images' });
+      }
     } finally {
       setUploading(false);
     }
@@ -178,16 +191,33 @@ export default function SettingsPage() {
         </div>
 
         {message && (
-          <Card className={`p-4 ${message.type === 'success' ? 'bg-teal-50 border-teal-200' : 'bg-red-50 border-red-200'}`}>
-            <div className="flex items-center gap-2">
+          <Card className={`p-4 ${
+            message.type === 'success' ? 'bg-teal-50 border-teal-200' : 
+            message.type === 'warning' ? 'bg-amber-50 border-amber-200' :
+            'bg-red-50 border-red-200'
+          }`}>
+            <div className="flex items-start gap-2">
               {message.type === 'success' ? (
-                <Check className="w-5 h-5 text-teal-600" />
+                <Check className="w-5 h-5 text-teal-600 mt-0.5" />
+              ) : message.type === 'warning' ? (
+                <div className="w-5 h-5 text-amber-600 mt-0.5">⚠️</div>
               ) : (
-                <X className="w-5 h-5 text-red-600" />
+                <X className="w-5 h-5 text-red-600 mt-0.5" />
               )}
-              <p className={message.type === 'success' ? 'text-teal-700' : 'text-red-700'}>
-                {message.text}
-              </p>
+              <div className="flex-1">
+                <p className={`font-medium ${
+                  message.type === 'success' ? 'text-teal-700' : 
+                  message.type === 'warning' ? 'text-amber-800' :
+                  'text-red-700'
+                }`}>
+                  {message.text}
+                </p>
+                {message.sql && (
+                  <pre className="mt-2 p-3 bg-white/50 rounded border text-xs font-mono overflow-x-auto">
+                    {message.sql}
+                  </pre>
+                )}
+              </div>
             </div>
           </Card>
         )}
