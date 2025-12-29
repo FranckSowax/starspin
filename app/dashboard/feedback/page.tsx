@@ -7,8 +7,12 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Pagination, PaginationInfo } from '@/components/ui/pagination';
+import { usePagination } from '@/hooks/usePagination';
 import { Feedback } from '@/lib/types/database';
 import { ThumbsUp, ThumbsDown, MessageSquare, Calendar } from 'lucide-react';
+
+const PAGE_SIZE = 10;
 
 export default function FeedbackPage() {
   const router = useRouter();
@@ -20,14 +24,14 @@ export default function FeedbackPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         router.push('/auth/login');
         return;
       }
 
       setUser(user);
-      
+
       const { data: merchantData } = await supabase
         .from('merchants')
         .select('*')
@@ -57,6 +61,21 @@ export default function FeedbackPage() {
     return true;
   });
 
+  // Pagination
+  const {
+    currentPage,
+    totalPages,
+    paginatedData,
+    setPage,
+    totalItems,
+    pageSize,
+  } = usePagination(filteredFeedback, { pageSize: PAGE_SIZE });
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setPage(1);
+  }, [filter, setPage]);
+
   if (!user || !merchant) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -75,7 +94,7 @@ export default function FeedbackPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Customer Feedback</h1>
           <p className="text-gray-600">View and manage all customer reviews and feedback</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Button
             onClick={() => setFilter('all')}
             variant={filter === 'all' ? 'default' : 'outline'}
@@ -102,8 +121,17 @@ export default function FeedbackPage() {
           </Button>
         </div>
 
+        {/* Pagination Info */}
+        {filteredFeedback.length > 0 && (
+          <PaginationInfo
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={totalItems}
+          />
+        )}
+
         <div className="grid gap-4">
-          {filteredFeedback.map((f) => (
+          {paginatedData.map((f) => (
             <Card
               key={f.id}
               className={`p-6 hover:shadow-lg transition-shadow ${
@@ -146,6 +174,16 @@ export default function FeedbackPage() {
           ))}
         </div>
 
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            className="mt-6"
+          />
+        )}
+
         {filteredFeedback.length === 0 && (
           <Card className="p-12">
             <div className="text-center">
@@ -154,7 +192,7 @@ export default function FeedbackPage() {
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">No feedback yet</h3>
               <p className="text-gray-600 mb-6">
-                {filter === 'all' 
+                {filter === 'all'
                   ? 'Start collecting customer feedback by sharing your QR code!'
                   : `No ${filter} feedback found.`
                 }
