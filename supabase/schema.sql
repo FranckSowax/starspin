@@ -135,6 +135,9 @@ ALTER TABLE qr_codes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Merchants can view own data" ON merchants
   FOR SELECT USING (auth.uid()::text = id::text);
 
+CREATE POLICY "Public can view merchants" ON merchants
+  FOR SELECT USING (true);
+
 CREATE POLICY "Merchants can update own data" ON merchants
   FOR UPDATE USING (auth.uid()::text = id::text);
 
