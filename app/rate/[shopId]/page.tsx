@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '@/lib/i18n/config';
 import { Star, Mail, Globe } from 'lucide-react';
 import { ALL_LANGUAGES } from '@/components/ui/LanguageSwitcher';
+import { feedbackSchema, sanitizeString, isValidUUID } from '@/lib/utils/validation';
 
 export default function RatingPage() {
   const params = useParams();
@@ -65,37 +66,53 @@ export default function RatingPage() {
   };
 
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
   const handleFeedbackSubmit = async () => {
     if (!rating) return;
 
-    // Validate email
-    if (!email.trim()) {
-      setEmailError(t('form.emailRequired'));
+    // Validate shopId is a valid UUID
+    if (!isValidUUID(shopId)) {
+      console.error('Invalid shop ID');
       return;
     }
-    if (!validateEmail(email)) {
-      setEmailError(t('form.emailInvalid'));
+
+    // Get or create user token
+    const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
+    localStorage.setItem('user_token', userToken);
+
+    // Validate and sanitize all input data using Zod schema
+    const validationResult = feedbackSchema.safeParse({
+      merchant_id: shopId,
+      rating,
+      comment: feedback || undefined,
+      customer_email: email,
+      user_token: userToken,
+    });
+
+    if (!validationResult.success) {
+      // Extract first error message
+      const formErrors = validationResult.error.flatten().fieldErrors;
+      if (formErrors.customer_email) {
+        const emailErr = formErrors.customer_email[0];
+        setEmailError(emailErr === 'Email requis' ? t('form.emailRequired') : t('form.emailInvalid'));
+      } else {
+        console.error('Validation errors:', validationResult.error.flatten());
+      }
       return;
     }
 
     setEmailError('');
     setLoading(true);
 
-    const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
-    localStorage.setItem('user_token', userToken);
+    // Use sanitized data from validation
+    const sanitizedData = validationResult.data;
 
     const { error } = await supabase.from('feedback').insert({
-      merchant_id: shopId,
-      rating,
-      comment: feedback,
-      customer_email: email,
-      is_positive: rating >= 4,
-      user_token: userToken,
+      merchant_id: sanitizedData.merchant_id,
+      rating: sanitizedData.rating,
+      comment: sanitizedData.comment ? sanitizeString(sanitizedData.comment, 2000) : null,
+      customer_email: sanitizedData.customer_email,
+      is_positive: sanitizedData.rating >= 4,
+      user_token: sanitizedData.user_token,
     });
 
     setLoading(false);

@@ -132,16 +132,23 @@ export default function AdminDashboard() {
 
   const checkAdminAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       router.push('/auth/login');
       return;
     }
 
-    // TODO: Add admin check here
-    // For now, any authenticated user can access
-    // In production, check if user.email is in admin list or has is_admin flag
-    
+    // Admin authorization check
+    // The middleware already validates admin access, but we double-check here
+    const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || [];
+    const userEmail = user.email?.toLowerCase();
+
+    if (adminEmails.length > 0 && (!userEmail || !adminEmails.includes(userEmail))) {
+      console.warn('Unauthorized admin access attempt');
+      router.push('/dashboard');
+      return;
+    }
+
     setUser(user);
     await loadMerchants();
     setLoading(false);

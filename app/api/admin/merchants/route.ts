@@ -29,16 +29,38 @@ export async function GET(request: NextRequest) {
   try {
     // Get admin client - returns null if env vars not configured
     const adminClient = getSupabaseAdmin();
-    
+
     if (!adminClient) {
       return NextResponse.json({ error: 'Service not configured' }, { status: 500 });
     }
 
     // Verify the user is authenticated via the regular client
     const authHeader = request.headers.get('authorization');
-    
+
     if (!authHeader) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Extract token and verify user
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    // Verify admin authorization
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || [];
+    const userEmail = user.email?.toLowerCase();
+
+    if (adminEmails.length === 0) {
+      console.warn('No admin emails configured');
+      return NextResponse.json({ error: 'Admin access not configured' }, { status: 403 });
+    }
+
+    if (!userEmail || !adminEmails.includes(userEmail)) {
+      console.warn(`Unauthorized admin API access attempt by: ${userEmail}`);
+      return NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 });
     }
 
     // Fetch all related data in parallel to avoid N+1 problem
