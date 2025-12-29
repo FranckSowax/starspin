@@ -49,6 +49,7 @@ CREATE TABLE feedback (
   merchant_id UUID REFERENCES merchants(id) ON DELETE CASCADE,
   rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment TEXT,
+  customer_email TEXT,
   is_positive BOOLEAN NOT NULL,
   user_token TEXT,
   ip_hash TEXT,
