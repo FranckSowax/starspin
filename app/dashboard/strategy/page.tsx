@@ -10,7 +10,7 @@ import { Check, X, Loader2, Calendar, MapPin, Star, Music, Instagram as Instagra
 
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const PLATFORMS = [
-  { value: 'google_maps', label: 'Google Maps', icon: MapPin, color: 'bg-red-500' },
+  { value: 'google_maps', label: 'Google Reviews', icon: MapPin, color: 'bg-red-500' },
   { value: 'tripadvisor', label: 'TripAdvisor', icon: Star, color: 'bg-green-500' },
   { value: 'tiktok', label: 'TikTok', icon: Music, color: 'bg-black' },
   { value: 'instagram', label: 'Instagram', icon: InstagramIcon, color: 'bg-pink-500' },
@@ -165,11 +165,11 @@ export default function StrategyPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Google Maps URL */}
+            {/* Google Reviews URL */}
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <MapPin className="w-4 h-4 text-red-500" />
-                Google Maps
+                Google Reviews
               </label>
               <input
                 type="url"

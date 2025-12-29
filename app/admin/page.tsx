@@ -699,7 +699,7 @@ export default function AdminDashboard() {
                                 </div>
                                 {merchant.google_maps_url && (
                                   <div className="bg-slate-800/50 p-2 rounded">
-                                    <span className="text-xs text-slate-300 block mb-1">Google Maps:</span>
+                                    <span className="text-xs text-slate-300 block mb-1">Google Reviews:</span>
                                     <a href={merchant.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.google_maps_url}
                                     </a>

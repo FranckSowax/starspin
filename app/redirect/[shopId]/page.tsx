@@ -101,7 +101,7 @@ export default function RedirectPage() {
       case 'google_maps':
         return {
           icon: '🗺️',
-          name: 'Google Maps',
+          name: 'Google Reviews',
           message: 'Merci, votre avis compte pour nous. Pouvez-vous le partager ici ?',
           bg: 'bg-red-50',
           border: 'border-red-200',
