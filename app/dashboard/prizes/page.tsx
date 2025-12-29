@@ -8,7 +8,13 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
-import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock } from 'lucide-react';
+
+// Special segment types that are always present on the wheel
+const SPECIAL_SEGMENTS = {
+  UNLUCKY: 'unlucky',
+  RETRY: 'retry',
+} as const;
 
 export default function PrizesPage() {
   const router = useRouter();
@@ -21,6 +27,10 @@ export default function PrizesPage() {
     description: '',
     probability: 10,
   });
+  
+  // Special segments probabilities (stored in merchant settings or localStorage)
+  const [unluckyProbability, setUnluckyProbability] = useState(20);
+  const [retryProbability, setRetryProbability] = useState(10);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -45,6 +55,15 @@ export default function PrizesPage() {
         .single();
 
       setMerchant(merchantData);
+      
+      // Load special segment probabilities from merchant data
+      if (merchantData?.unlucky_probability !== undefined) {
+        setUnluckyProbability(merchantData.unlucky_probability);
+      }
+      if (merchantData?.retry_probability !== undefined) {
+        setRetryProbability(merchantData.retry_probability);
+      }
+      
       fetchPrizes(user.id);
     };
 
@@ -175,7 +194,7 @@ export default function PrizesPage() {
     fetchPrizes(user.id);
   };
 
-  const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0);
+  const totalProbability = prizes.reduce((sum, p) => sum + p.probability, 0) + unluckyProbability + retryProbability;
 
   if (!user || !merchant) {
     return (
@@ -189,6 +208,35 @@ export default function PrizesPage() {
   }
 
   const remainingProbability = 100 - totalProbability;
+  
+  // Save special segment probabilities to merchant
+  const saveSpecialProbabilities = async () => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('merchants')
+        .update({
+          unlucky_probability: unluckyProbability,
+          retry_probability: retryProbability,
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error saving special probabilities:', error);
+    }
+  };
+  
+  // Auto-save when probabilities change
+  useEffect(() => {
+    if (user) {
+      const timer = setTimeout(() => {
+        saveSpecialProbabilities();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [unluckyProbability, retryProbability, user]);
   const getChanceDescription = (prob: number) => {
     if (prob >= 50) return { text: 'Très fréquent', color: 'text-green-600', bg: 'bg-green-50' };
     if (prob >= 25) return { text: 'Fréquent', color: 'text-blue-600', bg: 'bg-blue-50' };
@@ -435,6 +483,107 @@ export default function PrizesPage() {
           </Card>
         )}
 
+        {/* Special Segments Section */}
+        <Card className="p-6 bg-gradient-to-r from-gray-900 to-gray-800 border-gray-700">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
+              <Lock className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">Segments Spéciaux (Permanents)</h3>
+              <p className="text-gray-400 text-sm">Ces segments sont toujours présents sur la roue</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* UNLUCKY Card */}
+            <div className="bg-gray-800 rounded-xl p-5 border-2 border-red-500/50">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-14 h-14 bg-red-900 rounded-full flex items-center justify-center">
+                  <Ban className="w-8 h-8 text-red-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-red-400">#UNLUCKY#</h4>
+                  <p className="text-gray-400 text-xs">Éliminatoire - Fin du jeu</p>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-300">Probabilité</label>
+                  <span className="text-xl font-bold text-red-400">{unluckyProbability}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="50"
+                  step="1"
+                  value={unluckyProbability}
+                  onChange={(e) => setUnluckyProbability(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-red-500"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>5%</span>
+                  <span>50%</span>
+                </div>
+              </div>
+              
+              <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-3">
+                <p className="text-xs text-red-300">
+                  ⚠️ Si la roue s'arrête sur ce segment, le joueur perd et ne peut plus rejouer.
+                </p>
+              </div>
+            </div>
+            
+            {/* RETRY Card */}
+            <div className="bg-gray-800 rounded-xl p-5 border-2 border-yellow-500/50">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-14 h-14 bg-yellow-900 rounded-full flex items-center justify-center">
+                  <RefreshCw className="w-8 h-8 text-yellow-400" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-yellow-400">#REESSAYER#</h4>
+                  <p className="text-gray-400 text-xs">Tour supplémentaire gratuit</p>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-300">Probabilité</label>
+                  <span className="text-xl font-bold text-yellow-400">{retryProbability}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="5"
+                  max="30"
+                  step="1"
+                  value={retryProbability}
+                  onChange={(e) => setRetryProbability(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>5%</span>
+                  <span>30%</span>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-900/30 border border-yellow-500/30 rounded-lg p-3">
+                <p className="text-xs text-yellow-300">
+                  🔄 Si la roue s'arrête sur ce segment, le joueur peut tourner à nouveau !
+                </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Merchant Prizes Grid */}
+        <div>
+          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            🎁 Vos Prix Personnalisés
+            <span className="text-sm font-normal text-gray-500">({prizes.length} prix)</span>
+          </h3>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {prizes.map((prize) => {
             const chanceInfo = getChanceDescription(prize.probability);

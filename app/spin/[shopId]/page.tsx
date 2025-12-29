@@ -16,6 +16,7 @@ export default function SpinPage() {
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
   const [hasSpun, setHasSpun] = useState(false);
+  const [spinsRemaining, setSpinsRemaining] = useState(1); // Start with 1 spin, can increase with RETRY
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
@@ -24,8 +25,18 @@ export default function SpinPage() {
   const [couponCode, setCouponCode] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [unluckyProbability, setUnluckyProbability] = useState(20);
+  const [retryProbability, setRetryProbability] = useState(10);
   const wheelRef = useRef<HTMLDivElement>(null);
   const currentRotationRef = useRef(0);
+
+  // Segment types
+  type SegmentType = 'prize' | 'unlucky' | 'retry';
+  interface WheelSegment {
+    type: SegmentType;
+    prize?: Prize;
+    label: string;
+  }
 
   useEffect(() => {
     setIsClient(true);
@@ -60,6 +71,13 @@ export default function SpinPage() {
 
       if (merchantData) {
         setMerchant(merchantData);
+        // Load special segment probabilities
+        if (merchantData.unlucky_probability !== undefined) {
+          setUnluckyProbability(merchantData.unlucky_probability);
+        }
+        if (merchantData.retry_probability !== undefined) {
+          setRetryProbability(merchantData.retry_probability);
+        }
       }
 
       const { data: prizesData } = await supabase
@@ -77,60 +95,134 @@ export default function SpinPage() {
     checkSpinEligibility();
   }, [shopId]);
 
-  // Create interleaved segments: Prize -> UNLUCKY -> Prize -> UNLUCKY...
-  const allSegments = prizes.flatMap((prize, i) => [
-    { type: 'prize' as const, prize, index: i },
-    { type: 'unlucky' as const, index: i }
-  ]);
+  // Generate wheel segments with 6-8 segments total
+  // Rules:
+  // 1. Always include #UNLUCKY# and #REESSAYER# segments
+  // 2. If merchant has <3 prizes, duplicate them to fill
+  // 3. Total segments should be between 6-8
+  const generateWheelSegments = (): WheelSegment[] => {
+    const segments: WheelSegment[] = [];
+    
+    // Always add UNLUCKY and RETRY segments
+    segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
+    segments.push({ type: 'retry', label: '#REESSAYER#' });
+    
+    if (prizes.length === 0) {
+      // No prizes - fill with more unlucky/retry
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
+      segments.push({ type: 'retry', label: '#REESSAYER#' });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
+      segments.push({ type: 'retry', label: '#REESSAYER#' });
+      return segments;
+    }
+    
+    // Add prize segments
+    let prizeSegments: WheelSegment[] = prizes.map(prize => ({
+      type: 'prize' as const,
+      prize,
+      label: prize.name
+    }));
+    
+    // If less than 3 prizes, duplicate them
+    if (prizes.length < 3) {
+      const duplicated = [...prizeSegments];
+      while (duplicated.length < 4) {
+        duplicated.push(...prizeSegments.slice(0, Math.min(prizeSegments.length, 4 - duplicated.length)));
+      }
+      prizeSegments = duplicated;
+    }
+    
+    // Add prize segments
+    segments.push(...prizeSegments);
+    
+    // Ensure we have between 6-8 segments
+    // If we have more than 8, trim prizes (keep special segments)
+    if (segments.length > 8) {
+      const specialSegments = segments.filter(s => s.type !== 'prize');
+      const prizeSegs = segments.filter(s => s.type === 'prize').slice(0, 8 - specialSegments.length);
+      return [...specialSegments, ...prizeSegs];
+    }
+    
+    // If we have less than 6, add more unlucky segments
+    while (segments.length < 6) {
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
+    }
+    
+    // Shuffle segments to distribute them evenly (but keep some structure)
+    // Interleave: prize, special, prize, special...
+    const prizeSegs = segments.filter(s => s.type === 'prize');
+    const specialSegs = segments.filter(s => s.type !== 'prize');
+    const interleaved: WheelSegment[] = [];
+    
+    const maxLen = Math.max(prizeSegs.length, specialSegs.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (i < prizeSegs.length) interleaved.push(prizeSegs[i]);
+      if (i < specialSegs.length) interleaved.push(specialSegs[i]);
+    }
+    
+    return interleaved;
+  };
 
+  const allSegments = generateWheelSegments();
   const totalSegments = allSegments.length;
   const segmentAngle = totalSegments > 0 ? 360 / totalSegments : 0;
   
   const selectWinningSegment = () => {
-    // Sum of prize probabilities
+    // Calculate total probability
     const totalPrizeProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 0), 0);
+    const totalProbability = totalPrizeProbability + unluckyProbability + retryProbability;
     
-    // Random number between 0 and 100
-    const random = Math.random() * 100;
+    // Random number between 0 and total probability
+    const random = Math.random() * totalProbability;
     
-    if (random <= totalPrizeProbability) {
-      // Won a prize
-      let currentProb = 0;
-      for (let i = 0; i < prizes.length; i++) {
-        currentProb += (prizes[i].probability || 0);
-        if (random <= currentProb) return i * 2; // Return even index (Prize)
+    // Check if landed on a prize
+    let currentProb = 0;
+    for (let i = 0; i < allSegments.length; i++) {
+      const segment = allSegments[i];
+      
+      if (segment.type === 'prize' && segment.prize) {
+        currentProb += (segment.prize.probability || 0);
+        if (random <= currentProb) return i;
+      } else if (segment.type === 'unlucky') {
+        // Distribute unlucky probability among unlucky segments
+        const unluckyCount = allSegments.filter(s => s.type === 'unlucky').length;
+        currentProb += unluckyProbability / unluckyCount;
+        if (random <= currentProb) return i;
+      } else if (segment.type === 'retry') {
+        // Distribute retry probability among retry segments
+        const retryCount = allSegments.filter(s => s.type === 'retry').length;
+        currentProb += retryProbability / retryCount;
+        if (random <= currentProb) return i;
       }
-      return 0;
-    } else {
-      // Landed on Unlucky/Retry (Odd indices)
-      const unluckyIndices = Array.from({ length: prizes.length }, (_, i) => i * 2 + 1);
-      const randomUnluckyIndex = unluckyIndices[Math.floor(Math.random() * unluckyIndices.length)];
-      return randomUnluckyIndex;
     }
+    
+    // Fallback to first segment
+    return 0;
   };
 
   const spinWheel = async () => {
-    if (isSpinning || prizes.length === 0) return;
+    if (isSpinning || spinsRemaining <= 0) return;
     
     setIsSpinning(true);
+    setSpinsRemaining(prev => prev - 1); // Consume one spin
     setResult('');
     setResultType(null);
     setCouponCode('');
 
     const winningSegmentIndex = selectWinningSegment();
+    const winningSegment = allSegments[winningSegmentIndex];
     
-    // Identify type of result
-    const isPrize = winningSegmentIndex % 2 === 0;
-    const prizeIndex = Math.floor(winningSegmentIndex / 2);
-    const selectedPrize = isPrize ? prizes[prizeIndex] : undefined;
+    // Determine result type based on segment
+    let type: 'win' | 'retry' | 'lost' = 'lost';
+    let selectedPrize: Prize | undefined = undefined;
     
-    // Determine specific Unlucky type (Retry vs Lost)
-    // Based on the text logic in rendering:
-    // index % 3 === 0 ? 'Réessayez' : 'UNLUCKY'
-    // Here index refers to the prize index (0, 1, 2...)
-    let type: 'win' | 'retry' | 'lost' = 'win';
-    if (!isPrize) {
-      type = prizeIndex % 3 === 0 ? 'retry' : 'lost';
+    if (winningSegment.type === 'prize' && winningSegment.prize) {
+      type = 'win';
+      selectedPrize = winningSegment.prize;
+    } else if (winningSegment.type === 'retry') {
+      type = 'retry';
+    } else {
+      type = 'lost';
     }
 
     // Calculate segment center for alignment
@@ -226,8 +318,12 @@ export default function SpinPage() {
       }
     } else if (type === 'retry') {
       setResult('Réessayez !');
+      // Grant an extra spin for RETRY
+      setSpinsRemaining(prev => prev + 1);
     } else {
       setResult('Dommage...');
+      // UNLUCKY is eliminatory - mark as spun to prevent further spins
+      setHasSpun(true);
     }
   };
 
@@ -421,21 +517,18 @@ export default function SpinPage() {
                   const prize = segment.prize;
                   const isHighValue = prize && (prize.probability || 0) <= 10;
                   
-                  // Color logic: UNLUCKY = black, high value prize = yellow, normal prize = green
+                  // Color logic: UNLUCKY = black/red, RETRY = yellow, high value prize = yellow, normal prize = green
                   let segmentColor = 'green';
-                  if (isUnlucky) {
+                  if (segment.type === 'unlucky') {
                     segmentColor = 'black';
+                  } else if (segment.type === 'retry') {
+                    segmentColor = 'yellow';
                   } else if (isHighValue) {
                     segmentColor = 'yellow';
                   }
                   
-                  // Alternate unlucky segment text: 1/3 Réessayez, 2/3 UNLUCKY
-                  let segmentText = '';
-                  if (isUnlucky) {
-                    segmentText = segment.index % 3 === 0 ? 'Réessayez' : 'UNLUCKY';
-                  } else {
-                    segmentText = prize?.name || '';
-                  }
+                  // Use segment label directly
+                  const segmentText = segment.label;
                   
                   // Calculate clip-path for pie slice
                   // Each segment is a triangle from center to edge
