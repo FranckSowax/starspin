@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
 import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock } from 'lucide-react';
+import { WheelPreview } from '@/components/dashboard/WheelPreview';
 
 // Special segment types that are always present on the wheel
 const SPECIAL_SEGMENTS = {
@@ -597,6 +598,47 @@ export default function PrizesPage() {
                 <p className="text-xs text-yellow-300">
                   🔄 Si la roue s'arrête sur ce segment, le joueur peut tourner à nouveau !
                 </p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Wheel Preview Section */}
+        <Card className="p-6 bg-gradient-to-br from-slate-50 to-gray-100 border-2 border-gray-200">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            <div className="flex-shrink-0">
+              <WheelPreview 
+                prizes={prizes}
+                unluckyProbability={unluckyProbability}
+                retryProbability={retryProbability}
+                size={320}
+              />
+            </div>
+            <div className="flex-1 text-center lg:text-left">
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">🎡 Aperçu de la Roue</h3>
+              <p className="text-gray-600 mb-4">
+                Voici un aperçu de votre roue avec tous les segments configurés. 
+                Chaque segment représente un prix ou un segment spécial.
+              </p>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-white rounded-lg p-3 border">
+                  <p className="text-gray-500">Segments totaux</p>
+                  <p className="text-2xl font-bold text-teal-600">{prizes.length + 2}</p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border">
+                  <p className="text-gray-500">Prix personnalisés</p>
+                  <p className="text-2xl font-bold text-blue-600">{prizes.length}</p>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-red-600 rounded-full"></span>
+                  #UNLUCKY# ({unluckyProbability}%)
+                </span>
+                <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                  #RÉESSAYER# ({retryProbability}%)
+                </span>
               </div>
             </div>
           </div>
