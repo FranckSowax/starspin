@@ -21,6 +21,9 @@ CREATE TABLE merchants (
   subscription_tier TEXT DEFAULT 'starter',
   unlucky_probability INTEGER DEFAULT 20,
   retry_probability INTEGER DEFAULT 10,
+  unlucky_quantity INTEGER DEFAULT 1,
+  retry_quantity INTEGER DEFAULT 1,
+  prize_quantities JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

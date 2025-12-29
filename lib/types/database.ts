@@ -13,6 +13,9 @@ export interface Merchant {
   subscription_tier: string;
   unlucky_probability?: number;
   retry_probability?: number;
+  unlucky_quantity?: number;
+  retry_quantity?: number;
+  prize_quantities?: Record<string, number>;
   created_at: string;
   updated_at: string;
 }
