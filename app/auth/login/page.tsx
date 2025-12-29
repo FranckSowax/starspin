@@ -1,18 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [redirectUrl, setRedirectUrl] = useState('/dashboard');
+
+  useEffect(() => {
+    // Récupérer l'URL de redirection depuis les paramètres
+    const redirect = searchParams.get('redirect');
+    if (redirect) {
+      // Sécurité : s'assurer que la redirection est locale
+      if (redirect.startsWith('/')) {
+        setRedirectUrl(redirect);
+      }
+    }
+  }, [searchParams]);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +42,7 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else {
-      router.push('/dashboard');
+      router.push(redirectUrl);
     }
   };
 
@@ -41,7 +54,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}${redirectUrl}`,
       },
     });
 
@@ -132,5 +145,24 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function LoginLoading() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#FF6F61] to-[#FFC107] flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
+        <div className="w-12 h-12 border-4 border-gray-300 border-t-[#FF6F61] rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginForm />
+    </Suspense>
   );
 }
