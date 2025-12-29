@@ -7,8 +7,12 @@ export interface Merchant {
   branding: Record<string, any>;
   google_review_link: string | null;
   google_maps_url: string | null;
+  tripadvisor_url: string | null;
   instagram_handle: string | null;
+  instagram_url: string | null;
   tiktok_handle: string | null;
+  tiktok_url: string | null;
+  weekly_schedule: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   subscription_tier: string;
