@@ -423,7 +423,7 @@ export default function SpinPage() {
 
         .segment-text {
           color: #ffd700;
-          font-family: 'Russo One', 'Arial Black', Arial, sans-serif;
+          font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
           font-size: clamp(0.55rem, 2.2vw, 0.9rem);
           font-weight: 900;
           text-shadow: 1px 1px 3px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.9);
