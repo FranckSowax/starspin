@@ -1,7 +1,6 @@
 "use client";
 import type React from "react";
-import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
+import { useEffect, useState, useRef, useId } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -22,6 +21,9 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
   className,
   ...props
 }) => {
+  // Generate unique ID for clipPath to avoid conflicts with multiple instances
+  const clipId = useId();
+
   return (
     <div className={cn("relative", className)}>
       <svg
@@ -73,33 +75,18 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
           className="dark:fill-[#F5F5F5] fill-[#404040] dark:stroke-[#E0E0E0] stroke-[#404040] stroke-[0.5]"
           filter="drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))"
         />
+        {/* Image clipped to screen area using SVG clipPath */}
         {src && (
-          <foreignObject
-            x="21.25"
-            y="19.25"
-            width="389.5"
-            height="843.5"
-            clipPath="url(#roundedCorners)"
-          >
-            <div
-              style={{
-                width: "100%",
-                height: "100%",
-                position: "relative",
-                overflow: "hidden",
-                borderRadius: "55.75px"
-              }}
-            >
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                style={{ objectFit: "cover" }}
-                sizes="(max-width: 768px) 50vw, 33vw"
-                priority
-              />
-            </div>
-          </foreignObject>
+          <g clipPath={`url(#${clipId})`}>
+            <image
+              href={typeof src === 'string' ? src : src.src}
+              x="21.25"
+              y="19.25"
+              width="389.5"
+              height="843.5"
+              preserveAspectRatio="xMidYMid slice"
+            />
+          </g>
         )}
         {/* notch area */}
         <path
@@ -120,7 +107,7 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
           className="fill-transparent dark:stroke-white/20 stroke-[0.5] stroke-transparent"
         />
         <defs>
-          <clipPath id="roundedCorners">
+          <clipPath id={clipId}>
             <rect
               x="21.25"
               y="19.25"
