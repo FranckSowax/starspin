@@ -31,6 +31,30 @@
 **Fichier modifié :**
 - `lib/supabase/client.ts`
 
+### 3. Restauration Complète de la Base de Données
+**Problème :** Perte de données et de structure suite à l'exécution accidentelle de `schema.sql`.
+**Symptômes :** 
+- Erreurs 400 Bad Request (colonnes manquantes)
+- Erreurs 403 Forbidden (RLS manquantes)
+- Erreurs 406 Not Acceptable (Cache schema obsolète)
+- "Commerce introuvable" sur mobile
+
+**Solution :**
+Création d'un script maître `supabase/CHECK_AND_FIX_ALL.sql` qui :
+1. **Restaure les colonnes manquantes :**
+   - `merchants`: social links, `google_maps_url`, `unlucky_probability`, `prize_quantities`, etc.
+   - `feedback`: `customer_email`, `user_token`
+   - `spins`: `user_token`, `ip_hash`
+2. **Réinitialise la sécurité (RLS) :**
+   - Accès public pour la lecture (merchants, prizes, spins)
+   - Accès public pour l'insertion (feedback, spins, coupons)
+   - Accès marchand sécurisé pour leurs données
+3. **Corrige les permissions de stockage :** Bucket `merchant-assets`
+4. **Recharge le cache Schema :** `NOTIFY pgrst, 'reload schema'`
+
+**Fichier à exécuter :**
+- `supabase/CHECK_AND_FIX_ALL.sql`
+
 ## ✅ Code Corrigé
 
 ### Pattern utilisé pour toutes les pages
@@ -109,3 +133,31 @@ export const supabase = createClient(
 
 **Date des corrections :** 27 décembre 2025  
 **Version :** 1.0.0
+
+---
+
+## 🔧 Maintenance Base de Données (30 Décembre 2025)
+
+### 3. Restauration Complète de la Base de Données
+**Problème :** Perte de données et de structure suite à l'exécution accidentelle de `schema.sql`.
+**Symptômes :** 
+- Erreurs 400 Bad Request (colonnes manquantes)
+- Erreurs 403 Forbidden (RLS manquantes)
+- Erreurs 406 Not Acceptable (Cache schema obsolète)
+- "Commerce introuvable" sur mobile
+
+**Solution :**
+Création d'un script maître `supabase/CHECK_AND_FIX_ALL.sql` qui :
+1. **Restaure les colonnes manquantes :**
+   - `merchants`: social links, `google_maps_url`, `unlucky_probability`, `prize_quantities`, etc.
+   - `feedback`: `customer_email`, `user_token`
+   - `spins`: `user_token`, `ip_hash`
+2. **Réinitialise la sécurité (RLS) :**
+   - Accès public pour la lecture (merchants, prizes, spins)
+   - Accès public pour l'insertion (feedback, spins, coupons)
+   - Accès marchand sécurisé pour leurs données
+3. **Corrige les permissions de stockage :** Bucket `merchant-assets`
+4. **Recharge le cache Schema :** `NOTIFY pgrst, 'reload schema'`
+
+**Fichier à exécuter :**
+- `supabase/CHECK_AND_FIX_ALL.sql`

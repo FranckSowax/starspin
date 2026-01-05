@@ -23,19 +23,57 @@ import {
   BarChart3
 } from 'lucide-react';
 
+interface DashboardUser {
+  id: string;
+  email?: string;
+}
+
+interface DashboardMerchant {
+  id: string;
+  business_name?: string;
+  email: string;
+}
+
+interface ActivityItem {
+  id: number;
+  type: 'positive' | 'negative';
+  rating: number;
+  comment: string | null;
+  date: string;
+}
+
+interface ChartDataItem {
+  date: string;
+  positive: number;
+  negative: number;
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const { t, i18n } = useTranslation(undefined, { useSuspense: false });
-  const [user, setUser] = useState<any>(null);
-  const [merchant, setMerchant] = useState<any>(null);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [user, setUser] = useState<DashboardUser | null>(null);
+  const [merchant, setMerchant] = useState<DashboardMerchant | null>(null);
+  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
+  const [chartData, setChartData] = useState<ChartDataItem[]>([]);
+  const [currentDate, setCurrentDate] = useState<string>('');
   const [stats, setStats] = useState({
     totalReviews: 0,
     avgRating: 0,
     totalSpins: 0,
     rewardsRedeemed: 0,
+    reviewsTrend: 0, // Percentage change from last period
+    positiveRatio: 0, // Percentage of positive reviews
   });
+
+  // Set current date on client-side only to avoid hydration mismatch
+  useEffect(() => {
+    setCurrentDate(new Date().toLocaleDateString(i18n.language, {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }));
+  }, [i18n.language]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -81,22 +119,43 @@ export default function DashboardPage() {
       const totalSpins = spinsCount || 0;
       const rewardsRedeemed = couponsData?.filter(c => c.used).length || 0;
 
+      // Calculate trend: compare last 30 days vs previous 30 days
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+      const recentReviews = feedbackData?.filter(f => new Date(f.created_at) >= thirtyDaysAgo).length || 0;
+      const previousReviews = feedbackData?.filter(f => {
+        const date = new Date(f.created_at);
+        return date >= sixtyDaysAgo && date < thirtyDaysAgo;
+      }).length || 0;
+
+      const reviewsTrend = previousReviews > 0
+        ? Math.round(((recentReviews - previousReviews) / previousReviews) * 100)
+        : (recentReviews > 0 ? 100 : 0);
+
+      // Calculate positive review ratio
+      const positiveReviews = feedbackData?.filter(f => f.is_positive).length || 0;
+      const positiveRatio = totalReviews > 0 ? Math.round((positiveReviews / totalReviews) * 100) : 0;
+
       setStats({
         totalReviews,
         avgRating: Math.round(avgRating * 10) / 10,
         totalSpins,
         rewardsRedeemed,
+        reviewsTrend,
+        positiveRatio,
       });
 
       // Recent activity from feedback
-      const activity = feedbackData?.slice(0, 5).map((f: any, idx: number) => ({
+      const activity: ActivityItem[] = feedbackData?.slice(0, 5).map((f: { is_positive: boolean; rating: number; comment: string | null; created_at: string }, idx: number) => ({
         id: idx,
-        type: f.is_positive ? 'positive' : 'negative',
+        type: f.is_positive ? 'positive' as const : 'negative' as const,
         rating: f.rating,
         comment: f.comment,
         date: f.created_at,
       })) || [];
-      
+
       setRecentActivity(activity);
 
       // Process chart data (last 90 days)
@@ -155,9 +214,11 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-              {new Date().toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-            </span>
+            {currentDate && (
+              <span className="text-sm text-slate-500 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                {currentDate}
+              </span>
+            )}
           </div>
         </div>
 
@@ -169,9 +230,12 @@ export default function DashboardPage() {
               <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-green-100">
-                <TrendingUp className="w-3 h-3 mr-1" /> +12%
-              </Badge>
+              {stats.reviewsTrend !== 0 && (
+                <Badge className={`${stats.reviewsTrend > 0 ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'} hover:opacity-80`}>
+                  <TrendingUp className={`w-3 h-3 mr-1 ${stats.reviewsTrend < 0 ? 'rotate-180' : ''}`} />
+                  {stats.reviewsTrend > 0 ? '+' : ''}{stats.reviewsTrend}%
+                </Badge>
+              )}
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">{t('dashboard.totalReviews')}</p>
@@ -185,9 +249,11 @@ export default function DashboardPage() {
               <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
                 <Star className="w-6 h-6" />
               </div>
-              <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-green-100">
-                Top 5%
-              </Badge>
+              {stats.avgRating >= 4.5 && (
+                <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-green-100">
+                  ⭐ Excellent
+                </Badge>
+              )}
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">{t('dashboard.avgRating')}</p>
@@ -204,9 +270,11 @@ export default function DashboardPage() {
               <div className="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
                 <RotateCw className="w-6 h-6" />
               </div>
-              <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-100">
-                Actif
-              </Badge>
+              {stats.totalSpins > 0 && (
+                <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-100">
+                  {t('dashboard.common.online')}
+                </Badge>
+              )}
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">{t('dashboard.totalSpins')}</p>
@@ -220,9 +288,11 @@ export default function DashboardPage() {
               <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                 <Gift className="w-6 h-6" />
               </div>
-              <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100">
-                Revenus
-              </Badge>
+              {stats.positiveRatio > 0 && (
+                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100">
+                  {stats.positiveRatio}% positifs
+                </Badge>
+              )}
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">{t('dashboard.rewards')}</p>

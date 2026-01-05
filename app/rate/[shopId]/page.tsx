@@ -40,15 +40,14 @@ export default function RatingPage() {
           .single();
 
         if (error) {
-          console.error('Error fetching merchant:', error);
           return;
         }
 
         if (data) {
           setMerchant(data);
         }
-      } catch (err) {
-        console.error('Unexpected error:', err);
+      } catch {
+        // Handle silently
       } finally {
         setFetching(false);
       }
@@ -71,7 +70,6 @@ export default function RatingPage() {
 
     // Validate shopId is a valid UUID
     if (!isValidUUID(shopId)) {
-      console.error('Invalid shop ID');
       return;
     }
 
@@ -94,8 +92,6 @@ export default function RatingPage() {
       if (formErrors.customer_email) {
         const emailErr = formErrors.customer_email[0];
         setEmailError(emailErr === 'Email requis' ? t('form.emailRequired') : t('form.emailInvalid'));
-      } else {
-        console.error('Validation errors:', validationResult.error.flatten());
       }
       return;
     }

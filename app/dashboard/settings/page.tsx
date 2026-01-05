@@ -101,7 +101,6 @@ export default function SettingsPage() {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
       throw new Error(uploadError.message || 'Failed to upload image');
     }
 

@@ -66,8 +66,8 @@ export default function StrategyPage() {
           if (Array.isArray(schedule) && schedule.length === 7) {
             setWeeklySchedule(schedule);
           }
-        } catch (e) {
-          console.error('Error parsing weekly schedule:', e);
+        } catch {
+          // Invalid schedule format, use defaults
         }
       }
     };

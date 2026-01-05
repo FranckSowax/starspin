@@ -47,7 +47,7 @@ export default function ScanPage() {
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+        scannerRef.current.clear().catch(() => {});
       }
     };
   }, [router]);
@@ -72,7 +72,7 @@ export default function ScanPage() {
 
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch((error) => console.error("Failed to clear scanner", error));
+        scannerRef.current.clear().catch(() => {});
       }
     };
   }, [merchant, scanStatus]);
@@ -140,8 +140,7 @@ export default function ScanPage() {
         setScanStatus('valid');
       }
 
-    } catch (err) {
-      console.error('Verification error:', err);
+    } catch {
       setScanStatus('invalid');
       setErrorMessage(t('common.error') || 'Une erreur est survenue lors de la vérification.');
     }
@@ -173,8 +172,7 @@ export default function ScanPage() {
       setCouponDetails(updatedCoupon);
       setSessionHistory(prev => [updatedCoupon, ...prev]);
 
-    } catch (err) {
-      console.error('Redemption error:', err);
+    } catch {
       setErrorMessage('Impossible de valider le coupon. Veuillez réessayer.');
     }
   };

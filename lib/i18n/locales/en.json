@@ -25,6 +25,20 @@
     "followInstagram": "Follow us on Instagram",
     "followTikTok": "Follow us on TikTok"
   },
+  "redirect": {
+    "thankYou": "Thank you for your review!",
+    "yourReviewMatters": "Your review means a lot to us",
+    "reviewMessage": "Thanks, your review matters to us. Can you share it here?",
+    "socialMessage": "Thanks, your support matters to us. Can you follow us here?",
+    "defaultMessage": "Thank you for your feedback!",
+    "reward": "Reward",
+    "leaveReviewOn": "Leave my review on {{platform}}",
+    "clickToOpen": "Click to open {{platform}} and leave your review",
+    "iDone": "I'm done",
+    "iDoneLaunchWheel": "I'm done - Spin the wheel",
+    "buttonActiveIn": "Button will be active in {{seconds}} second(s)",
+    "clickToSpinAndWin": "Click to spin the wheel and win!"
+  },
   "wheel": {
     "title": "Spin to Win!",
     "spin": "Spin the Wheel",

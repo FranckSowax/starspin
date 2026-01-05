@@ -46,11 +46,36 @@ interface MerchantStats {
   positiveReviews: number;
   avgRating: number;
   totalSpins: number;
+  couponsRedeemed?: number;
 }
+
+interface AuthUser {
+  id: string;
+  email?: string;
+}
+
+interface MerchantWithStats extends Merchant {
+  stats: MerchantStats;
+}
+
+interface ApiResponse {
+  merchants: MerchantWithStats[];
+  globalStats: {
+    totalMerchants: number;
+    activeMerchants: number;
+    totalReviews: number;
+    totalSpins: number;
+    totalCouponsRedeemed: number;
+  };
+}
+
+type TierPricing = {
+  [key: string]: number;
+};
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [filteredMerchants, setFilteredMerchants] = useState<Merchant[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,7 +90,7 @@ export default function AdminDashboard() {
   });
 
   // Estimated monthly revenue per tier
-  const TIER_PRICING = {
+  const TIER_PRICING: TierPricing = {
     'free': 0,
     'starter': 0, // Essai Gratuit (Découverte)
     'premium': 1000, // Pro Plan
@@ -175,24 +200,23 @@ export default function AdminDashboard() {
         throw new Error(errorData.error || `Erreur API: ${response.status}`);
       }
 
-      const data = await response.json();
-      
+      const data: ApiResponse = await response.json();
+
       if (data.merchants) {
         setMerchants(data.merchants);
         setFilteredMerchants(data.merchants);
 
         // Build stats map from API response
         const statsMap: Record<string, MerchantStats> = {};
-        data.merchants.forEach((merchant: any) => {
+        data.merchants.forEach((merchant: MerchantWithStats) => {
           statsMap[merchant.id] = merchant.stats;
         });
         setMerchantStats(statsMap);
 
         // Calculate revenue
-        const totalRevenue = data.merchants.reduce((sum: number, m: any) => {
+        const totalRevenue = data.merchants.reduce((sum: number, m: MerchantWithStats) => {
           if (m.is_active === false) return sum;
           const tier = m.subscription_tier?.toLowerCase() || 'free';
-          // @ts-ignore
           const price = TIER_PRICING[tier] || 0;
           return sum + price;
         }, 0);
@@ -207,9 +231,9 @@ export default function AdminDashboard() {
         
         setLastUpdated(new Date());
       }
-    } catch (error: any) {
-      console.error('Error loading merchants:', error);
-      setError(error.message || 'Impossible de charger les données marchands');
+    } catch (error: unknown) {
+      const err = error as Error;
+      setError(err.message || 'Impossible de charger les données marchands');
     }
   };
 
@@ -272,9 +296,9 @@ export default function AdminDashboard() {
 
       alert(`QR Code généré et enregistré pour ${businessName}!`);
       await loadMerchants(); // Reload to show updated data
-    } catch (error: any) {
-      console.error('Error generating QR code:', error);
-      alert(`Erreur: ${error.message}`);
+    } catch (error: unknown) {
+      const err = error as Error;
+      alert(`Erreur: ${err.message}`);
     }
   };
 

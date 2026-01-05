@@ -310,8 +310,7 @@ export default function SpinPage() {
 
           setCouponCode(generatedCode);
         }
-      } catch (err) {
-        console.error('Error saving spin/coupon:', err);
+      } catch {
         setSaveError(true);
       } finally {
         setIsSaving(false);

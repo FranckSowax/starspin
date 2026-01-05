@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
 import { Star, ExternalLink } from 'lucide-react';
+import '@/lib/i18n/config';
 
 export default function RedirectPage() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const shopId = params.shopId as string;
@@ -32,7 +35,6 @@ export default function RedirectPage() {
         .single();
 
       if (error) {
-        console.error('Error fetching merchant:', error);
         return;
       }
 
@@ -102,7 +104,7 @@ export default function RedirectPage() {
         return {
           icon: '🗺️',
           name: 'Google Reviews',
-          message: 'Merci, votre avis compte pour nous. Pouvez-vous le partager ici ?',
+          message: t('redirect.reviewMessage'),
           bg: 'bg-green-50',
           border: 'border-green-200',
           text_color: 'text-green-800',
@@ -113,7 +115,7 @@ export default function RedirectPage() {
         return {
           icon: '⭐',
           name: 'TripAdvisor',
-          message: 'Merci, votre avis compte pour nous. Pouvez-vous le partager ici ?',
+          message: t('redirect.reviewMessage'),
           bg: 'bg-green-50',
           border: 'border-green-200',
           text_color: 'text-green-800',
@@ -124,7 +126,7 @@ export default function RedirectPage() {
         return {
           icon: '🎵',
           name: 'TikTok',
-          message: 'Merci, votre soutien compte pour nous. Pouvez-vous nous rejoindre ici ?',
+          message: t('redirect.socialMessage'),
           bg: 'bg-gray-50',
           border: 'border-gray-300',
           text_color: 'text-gray-800',
@@ -135,7 +137,7 @@ export default function RedirectPage() {
         return {
           icon: '📸',
           name: 'Instagram',
-          message: 'Merci, votre soutien compte pour nous. Pouvez-vous nous rejoindre ici ?',
+          message: t('redirect.socialMessage'),
           bg: 'bg-pink-50',
           border: 'border-pink-200',
           text_color: 'text-pink-800',
@@ -145,8 +147,8 @@ export default function RedirectPage() {
       default:
         return {
           icon: '🎁',
-          name: 'Récompense',
-          message: 'Merci pour votre avis !',
+          name: t('redirect.reward'),
+          message: t('redirect.defaultMessage'),
           bg: 'bg-teal-50',
           border: 'border-teal-200',
           text_color: 'text-teal-800',
@@ -214,12 +216,12 @@ export default function RedirectPage() {
           <div className="flex items-center justify-center gap-2 mb-4">
             <Star className="w-6 h-6 text-teal-600 fill-teal-600" />
             <h1 className="text-2xl font-bold text-gray-900">
-              Merci pour votre avis !
+              {t('redirect.thankYou')}
             </h1>
           </div>
 
           <p className="text-center text-gray-600 mb-6">
-            Votre avis compte énormément pour nous
+            {t('redirect.yourReviewMatters')}
           </p>
 
           {/* Strategy Message Card */}
@@ -243,10 +245,10 @@ export default function RedirectPage() {
                 className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
               >
                 <ExternalLink className="w-5 h-5" />
-                Déposer mon avis sur {strategyInfo.name}
+                {t('redirect.leaveReviewOn', { platform: strategyInfo.name })}
               </Button>
               <p className="text-xs text-center text-gray-500">
-                Cliquez pour ouvrir {strategyInfo.name} et laisser votre avis
+                {t('redirect.clickToOpen', { platform: strategyInfo.name })}
               </p>
             </div>
           ) : !canProceed ? (
@@ -256,7 +258,7 @@ export default function RedirectPage() {
                   disabled
                   className="w-full bg-gray-300 text-gray-500 cursor-not-allowed py-3 rounded-xl font-semibold"
                 >
-                  J'ai fait
+                  {t('redirect.iDone')}
                 </Button>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="bg-white/90 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
@@ -265,7 +267,7 @@ export default function RedirectPage() {
                 </div>
               </div>
               <p className="text-sm text-gray-500">
-                Le bouton sera actif dans {countdown} seconde{countdown > 1 ? 's' : ''}
+                {t('redirect.buttonActiveIn', { seconds: countdown })}
               </p>
             </div>
           ) : (
@@ -275,10 +277,10 @@ export default function RedirectPage() {
                 className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
               >
                 <ExternalLink className="w-5 h-5" />
-                J'ai fait - Lancer la roue
+                {t('redirect.iDoneLaunchWheel')}
               </Button>
               <p className="text-xs text-center text-gray-500">
-                Cliquez pour tourner la roue et gagner !
+                {t('redirect.clickToSpinAndWin')}
               </p>
             </div>
           )}

@@ -44,8 +44,6 @@ function CouponContent() {
 
     const fetchData = async () => {
       try {
-        console.log('Fetching coupon:', code, 'for shop:', shopId);
-        
         const { data: couponData, error: couponError } = await supabase
           .from('coupons')
           .select('*')
@@ -53,7 +51,6 @@ function CouponContent() {
           .single();
 
         if (couponError) {
-          console.error('Coupon fetch error:', couponError);
           setError('Erreur lors de la récupération du coupon');
           setLoading(false);
           return;
@@ -72,7 +69,6 @@ function CouponContent() {
           .single();
 
         if (merchantError || !merchantData) {
-          console.error('Merchant fetch error:', merchantError);
           setError('Commerçant introuvable');
           setLoading(false);
           return;
@@ -105,12 +101,11 @@ function CouponContent() {
           try {
             const qr = await QRCode.toDataURL(code);
             setQrCodeUrl(qr);
-          } catch (e) {
-            console.error('Error generating QR code:', e);
+          } catch {
+            // QR code generation failed silently
           }
         }
       } catch (err: any) {
-        console.error('Error fetching data:', err);
         setError(err.message || 'Une erreur est survenue');
       } finally {
         setLoading(false);

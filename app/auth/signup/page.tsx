@@ -64,7 +64,6 @@ export default function SignUpPage() {
         });
 
         if (merchantError) {
-          console.error('Merchant creation error:', merchantError);
           // Si l'erreur est liée à RLS, afficher un message plus clair
           if (merchantError.message.includes('row-level security') || merchantError.code === '42501') {
             setError('Erreur de configuration. Veuillez contacter le support.');
@@ -81,8 +80,7 @@ export default function SignUpPage() {
 
         router.push('/dashboard');
       }
-    } catch (err) {
-      console.error('Signup error:', err);
+    } catch {
       setError('Une erreur inattendue s\'est produite. Veuillez réessayer.');
     }
 

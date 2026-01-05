@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/utils/security';
 
 // Lazy initialization of admin client to avoid build-time errors
 let supabaseAdmin: SupabaseClient | null = null;
@@ -27,6 +28,27 @@ function getSupabaseAdmin(): SupabaseClient | null {
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientIP = getClientIP(request.headers);
+    const rateLimit = checkRateLimit(
+      `admin:${clientIP}`,
+      RATE_LIMITS.API_DEFAULT.limit,
+      RATE_LIMITS.API_DEFAULT.windowMs
+    );
+
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(Math.ceil(rateLimit.resetIn / 1000)),
+            'X-RateLimit-Remaining': '0',
+          }
+        }
+      );
+    }
+
     // Get admin client - returns null if env vars not configured
     const adminClient = getSupabaseAdmin();
 

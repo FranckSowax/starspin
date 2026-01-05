@@ -25,6 +25,20 @@
     "followInstagram": "ติดตามเราบน Instagram",
     "followTikTok": "ติดตามเราบน TikTok"
   },
+  "redirect": {
+    "thankYou": "ขอบคุณสำหรับรีวิวของคุณ!",
+    "yourReviewMatters": "รีวิวของคุณมีความหมายมากสำหรับเรา",
+    "reviewMessage": "ขอบคุณ รีวิวของคุณสำคัญสำหรับเรา คุณสามารถแชร์ที่นี่ได้ไหม?",
+    "socialMessage": "ขอบคุณ การสนับสนุนของคุณสำคัญสำหรับเรา คุณสามารถติดตามเราที่นี่ได้ไหม?",
+    "defaultMessage": "ขอบคุณสำหรับความคิดเห็นของคุณ!",
+    "reward": "รางวัล",
+    "leaveReviewOn": "ให้รีวิวบน {{platform}}",
+    "clickToOpen": "คลิกเพื่อเปิด {{platform}} และให้รีวิวของคุณ",
+    "iDone": "เสร็จแล้ว",
+    "iDoneLaunchWheel": "เสร็จแล้ว - หมุนวงล้อ",
+    "buttonActiveIn": "ปุ่มจะใช้งานได้ใน {{seconds}} วินาที",
+    "clickToSpinAndWin": "คลิกเพื่อหมุนวงล้อและชนะ!"
+  },
   "wheel": {
     "title": "หมุนเพื่อชนะ!",
     "spin": "หมุนวงล้อ",

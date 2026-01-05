@@ -19,8 +19,18 @@ ALTER TABLE merchants ADD COLUMN IF NOT EXISTS weekly_schedule TEXT;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS qr_code_url TEXT;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS unlucky_quantity INTEGER DEFAULT 1;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS retry_quantity INTEGER DEFAULT 1;
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS unlucky_probability INTEGER DEFAULT 20;
+ALTER TABLE merchants ADD COLUMN IF NOT EXISTS retry_probability INTEGER DEFAULT 10;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS prize_quantities JSONB DEFAULT '{}'::jsonb;
 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS subscription_tier TEXT DEFAULT 'starter';
+
+-- 1.1 COLONNES MANQUANTES (AUTRES TABLES)
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS customer_email TEXT;
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS user_token TEXT;
+ALTER TABLE feedback ADD COLUMN IF NOT EXISTS ip_hash TEXT;
+
+ALTER TABLE spins ADD COLUMN IF NOT EXISTS user_token TEXT;
+ALTER TABLE spins ADD COLUMN IF NOT EXISTS ip_hash TEXT;
 
 -- 2. SECURITE (RLS POLICIES) - Réinitialisation propre
 -- On active RLS partout
@@ -85,7 +95,9 @@ DROP POLICY IF EXISTS "Public can view own coupons" ON coupons;
 CREATE POLICY "Public can view own coupons" ON coupons FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Public can update coupons" ON coupons;
-CREATE POLICY "Public can update coupons" ON coupons FOR UPDATE USING (true);
+-- Correction: Seuls les marchands doivent pouvoir mettre à jour les coupons (pour les valider)
+DROP POLICY IF EXISTS "Merchants can update own coupons" ON coupons;
+CREATE POLICY "Merchants can update own coupons" ON coupons FOR UPDATE USING (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
 
 -- 3. PERMISSIONS GLOBALES (GRANTS)
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
@@ -105,5 +117,22 @@ CREATE POLICY "Auth Upload" ON storage.objects FOR INSERT WITH CHECK ( bucket_id
 DROP POLICY IF EXISTS "Auth Update" ON storage.objects;
 CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'merchant-assets' AND auth.role() = 'authenticated' );
 
--- 5. RECHARGEMENT DU CACHE (Vital)
+-- 5. TRIGGERS (MAINTENANCE)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_merchants_updated_at ON merchants;
+CREATE TRIGGER update_merchants_updated_at BEFORE UPDATE ON merchants
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_prizes_updated_at ON prizes;
+CREATE TRIGGER update_prizes_updated_at BEFORE UPDATE ON prizes
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- 6. RECHARGEMENT DU CACHE (Vital)
 NOTIFY pgrst, 'reload schema';

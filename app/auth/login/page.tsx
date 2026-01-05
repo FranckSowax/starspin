@@ -53,8 +53,7 @@ function LoginForm() {
         setError('Connexion échouée. Veuillez réessayer.');
         setLoading(false);
       }
-    } catch (err) {
-      console.error('Login error:', err);
+    } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
     }

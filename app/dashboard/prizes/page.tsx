@@ -100,7 +100,6 @@ export default function PrizesPage() {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
       throw new Error(uploadError.message || 'Failed to upload image');
     }
 
@@ -257,9 +256,9 @@ export default function PrizesPage() {
       
       if (error) throw error;
       setMigrationNeeded(false);
-    } catch (error: any) {
-      console.error('Error saving segment quantities:', error);
-      if (error.code === 'PGRST204' || error.message?.includes('quantity')) {
+    } catch (error: unknown) {
+      const err = error as { code?: string; message?: string };
+      if (err.code === 'PGRST204' || err.message?.includes('quantity')) {
         setMigrationNeeded(true);
       }
     }
