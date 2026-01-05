@@ -193,42 +193,47 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
     const activeImage = featuresData[active].images[0];
     const nextImage = featuresData[next].images[0];
 
+    // Responsive phone width - smaller on mobile to prevent overflow
+    const phoneWidth = isMobile ? 180 : 350;
+
     return (
       <section
         className={cn(
-          "relative w-full py-6 md:py-10 overflow-visible",
+          "relative w-full py-4 md:py-10 overflow-hidden",
           className
         )}
         aria-label="iPhone product showcase in feature mode"
       >
-        <div className="relative h-[600px] sm:h-[650px] lg:h-[700px] w-full">
+        <div className="relative h-[420px] sm:h-[550px] md:h-[650px] lg:h-[700px] w-full flex items-center justify-center">
           {/* Center the phone stack */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
-            {/* 1) Back phone (prev) */}
+          <div className="relative">
+            {/* 1) Back phone (prev) - hidden on small mobile */}
             <div
-              className="absolute opacity-60"
+              className="absolute left-1/2 opacity-40 hidden sm:block"
               style={{
-                transform: "translateY(-20px) scale(0.92)",
+                transform: "translateX(-50%) translateY(-15px) scale(0.88)",
                 zIndex: 10,
               }}
             >
               <IphoneFrame
-                width={isMobile ? 280 : 350}
+                width={phoneWidth}
                 src={prevImage.src}
                 alt={prevImage.alt}
               />
             </div>
 
-            {/* 2) Middle phone (next) */}
+            {/* 2) Middle phone (next) - reduced opacity on mobile */}
             <div
-              className="absolute opacity-80"
+              className="absolute left-1/2 opacity-50 sm:opacity-70"
               style={{
-                transform: "translateY(25px) scale(0.96)",
+                transform: isMobile
+                  ? "translateX(-50%) translateY(10px) scale(0.92)"
+                  : "translateX(-50%) translateY(20px) scale(0.94)",
                 zIndex: 20,
               }}
             >
               <IphoneFrame
-                width={isMobile ? 280 : 350}
+                width={phoneWidth}
                 src={nextImage.src}
                 alt={nextImage.alt}
               />
@@ -236,14 +241,16 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
 
             {/* 3) Front phone (active) */}
             <div
-              className="relative"
+              className="relative left-1/2"
               style={{
-                transform: "translateY(70px) scale(1)",
+                transform: isMobile
+                  ? "translateX(-50%) translateY(40px) scale(1)"
+                  : "translateX(-50%) translateY(60px) scale(1)",
                 zIndex: 30,
               }}
             >
               <IphoneFrame
-                width={isMobile ? 280 : 350}
+                width={phoneWidth}
                 src={activeImage.src}
                 alt={activeImage.alt}
               />
@@ -269,9 +276,9 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
     setIsPaused((prev) => !prev);
   };
 
-  // Get phone width based on screen size
+  // Get phone width based on screen size - smaller on mobile
   const getPhoneWidth = () => {
-    if (isMobile) return 200;
+    if (isMobile) return 160;
     return 280;
   };
 
@@ -285,7 +292,7 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
           {/* Main carousel container - responsive height */}
           <div
             ref={carouselRef}
-            className="flex justify-center items-center h-[380px] sm:h-[450px] md:h-[520px] lg:h-[560px]"
+            className="flex justify-center items-center h-[320px] sm:h-[400px] md:h-[520px] lg:h-[560px]"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
@@ -299,8 +306,8 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
                   index === currentIndex + 1 ||
                   (currentIndex === images.length - 1 && index === 0);
 
-                // Calculate responsive offsets
-                const mobileOffset = 35;
+                // Calculate responsive offsets - smaller on mobile to fit screen
+                const mobileOffset = 30;
                 const desktopOffset = 55;
                 const offset = isMobile ? mobileOffset : desktopOffset;
 
