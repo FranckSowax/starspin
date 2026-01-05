@@ -34,12 +34,12 @@ export default function LandingPage() {
     <div className="min-h-screen bg-[#E8EDE8]">
       {/* Header */}
       <header className="fixed top-0 w-full bg-[#1B4332]/95 backdrop-blur-sm z-50">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="container mx-auto px-4 sm:px-6 py-2 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img 
-              src="/LOGO-STARSPIN-WHITE_web.png" 
-              alt="StarSpin Logo" 
-              className="h-20 w-auto"
+            <img
+              src="/LOGO-STARSPIN-WHITE_web.png"
+              alt="StarSpin Logo"
+              className="h-12 sm:h-16 md:h-20 w-auto"
             />
           </div>
           
@@ -74,12 +74,12 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-[#0A2F23]/95 via-[#1B4332]/90 to-[#2D6A4F]/85"></div>
         </div>
 
-        <div className="container mx-auto px-6 pt-24 pb-12 relative z-10">
-          <div className="grid md:grid-cols-3 gap-12 items-center min-h-[calc(100vh-8rem)]">
+        <div className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-8 sm:pb-12 relative z-10">
+          <div className="grid md:grid-cols-3 gap-6 sm:gap-12 items-center min-h-[calc(100vh-6rem)] sm:min-h-[calc(100vh-8rem)]">
             {/* Left column - Text Content (1/3) */}
             <div className="text-left space-y-6">
               {/* Main Title */}
-              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-white leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
                 {t('landing.hero.title')}
                 <span className="block mt-3 text-[#FFD700]">
                   {t('landing.hero.titleHighlight')}
