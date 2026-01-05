@@ -424,13 +424,13 @@ export default function SpinPage() {
         .segment-text {
           color: #ffd700;
           font-family: 'Russo One', 'Arial Black', Arial, sans-serif;
-          font-size: clamp(0.8rem, 3.2vw, 1.4rem);
+          font-size: clamp(0.55rem, 2.2vw, 0.9rem);
           font-weight: 900;
-          text-shadow: 2px 2px 4px rgba(0, 0, 0, 1), 0 0 10px rgba(0, 0, 0, 0.9);
+          text-shadow: 1px 1px 3px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.9);
           white-space: nowrap;
           text-transform: uppercase;
-          letter-spacing: 1.5px;
-          -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.5);
+          letter-spacing: 1px;
+          -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.5);
         }
 
         .segment-text.yellow-text {
