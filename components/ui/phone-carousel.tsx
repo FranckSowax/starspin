@@ -269,21 +269,27 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
     setIsPaused((prev) => !prev);
   };
 
+  // Get phone width based on screen size
+  const getPhoneWidth = () => {
+    if (isMobile) return 200;
+    return 280;
+  };
+
   return (
     <section
-      className="relative w-full py-6 md:py-10 overflow-hidden"
+      className="relative w-full py-4 md:py-8 overflow-hidden"
       aria-label="iPhone product showcase"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="relative">
-          {/* Main carousel container */}
+          {/* Main carousel container - responsive height */}
           <div
             ref={carouselRef}
-            className="flex justify-center items-start h-[410px] md:h-[510px] lg:h-[520px]"
+            className="flex justify-center items-center h-[380px] sm:h-[450px] md:h-[520px] lg:h-[560px]"
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <div className="relative flex justify-center w-full">
+            <div className="relative flex justify-center items-center w-full">
               {images.map((image, index) => {
                 const isActive = index === currentIndex;
                 const isPrevious =
@@ -293,34 +299,40 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
                   index === currentIndex + 1 ||
                   (currentIndex === images.length - 1 && index === 0);
 
+                // Calculate responsive offsets
+                const mobileOffset = 35;
+                const desktopOffset = 55;
+                const offset = isMobile ? mobileOffset : desktopOffset;
+
                 return (
                   <div
                     key={index}
                     className={cn(
-                      "absolute transition-all duration-700 ease-in-out transform",
-                      isActive ? "z-20 scale-100" : "opacity-0 scale-90",
-                      isPrevious ? "-translate-x-[10%] opacity-30 z-10" : "",
-                      isNext ? "translate-x-[10%] opacity-30 z-10" : "",
-                      !isActive && !isPrevious && !isNext ? "opacity-0" : ""
+                      "absolute transition-all duration-500 ease-out",
+                      isActive ? "z-20" : "z-10",
+                      !isActive && !isPrevious && !isNext ? "opacity-0 pointer-events-none" : ""
                     )}
                     style={{
-                      top: "0",
-                      transform: `translateY(0px) ${
-                        isPrevious
-                          ? "translateX(-60%)"
-                          : isNext
-                          ? "translateX(60%)"
-                          : "translateX(0)"
-                      } ${isActive ? "scale(1)" : "scale(0.9)"}`,
+                      transform: isActive
+                        ? "translateX(0) scale(1)"
+                        : isPrevious
+                        ? `translateX(-${offset}%) scale(0.85)`
+                        : isNext
+                        ? `translateX(${offset}%) scale(0.85)`
+                        : "translateX(0) scale(0.8)",
+                      opacity: isActive ? 1 : isPrevious || isNext ? 0.5 : 0,
                     }}
                     aria-hidden={!isActive}
                   >
                     <div className="group">
                       <IphoneFrame
-                        width={isMobile ? 280 : 350}
+                        width={getPhoneWidth()}
                         src={image.src}
                         alt={image.alt}
-                        className="transition-all duration-100 hover:scale-105 hover:-rotate-6"
+                        className={cn(
+                          "transition-all duration-300",
+                          isActive && "hover:scale-[1.02]"
+                        )}
                       />
                     </div>
                   </div>
@@ -329,13 +341,13 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
             </div>
           </div>
 
-          {/* Controls */}
-          <div className="absolute bottom-8 left-0 right-0 flex justify-center items-center gap-4 z-30">
+          {/* Controls - responsive positioning */}
+          <div className="flex justify-center items-center gap-3 md:gap-4 mt-4 md:mt-6">
             <Button
               variant="outline"
               size="icon"
               onClick={handlePrevious}
-              className="rounded-full bg-black/60 backdrop-blur-sm border-white/20 hover:bg-black/80 shadow-md"
+              className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#2D6A4F] hover:bg-[#1B4332] border-0 shadow-lg"
               aria-label="Previous image"
             >
               <ChevronLeft className="h-5 w-5 text-white" />
@@ -344,7 +356,7 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
               variant="outline"
               size="icon"
               onClick={togglePause}
-              className="rounded-full bg-black/60 backdrop-blur-sm border-white/20 hover:bg-black/80 shadow-md"
+              className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#2D6A4F] hover:bg-[#1B4332] border-0 shadow-lg"
               aria-label={isPaused ? "Play slideshow" : "Pause slideshow"}
             >
               {isPaused ? (
@@ -357,11 +369,28 @@ export const PhoneCarousel: React.FC<PhoneCarouselProps> = ({
               variant="outline"
               size="icon"
               onClick={handleNext}
-              className="rounded-full bg-black/60 backdrop-blur-sm border-white/20 hover:bg-black/80 shadow-md"
+              className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-[#2D6A4F] hover:bg-[#1B4332] border-0 shadow-lg"
               aria-label="Next image"
             >
               <ChevronRight className="h-5 w-5 text-white" />
             </Button>
+          </div>
+
+          {/* Dots indicator */}
+          <div className="flex justify-center items-center gap-2 mt-4">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={cn(
+                  "w-2 h-2 rounded-full transition-all duration-300",
+                  index === currentIndex
+                    ? "bg-[#2D6A4F] w-6"
+                    : "bg-gray-300 hover:bg-gray-400"
+                )}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>

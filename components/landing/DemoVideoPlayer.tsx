@@ -85,58 +85,58 @@ export function DemoVideoPlayer({ className = '' }: DemoVideoPlayerProps) {
         Your browser does not support the video tag.
       </video>
 
-      {/* Custom Controls Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-end">
-        <div className="w-full p-6 flex items-center justify-between">
+      {/* Custom Controls Overlay - Always visible */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent rounded-2xl flex items-end pointer-events-none">
+        <div className="w-full p-4 md:p-6 flex items-center justify-between pointer-events-auto">
           {/* Play/Pause Button */}
           <button
             onClick={togglePlay}
-            className="w-12 h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
+            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all transform hover:scale-110 shadow-lg"
             aria-label={isPlaying ? 'Pause' : 'Play'}
           >
             {isPlaying ? (
-              <Pause className="w-6 h-6 text-[#2D6A4F]" />
+              <Pause className="w-5 h-5 md:w-6 md:h-6 text-[#2D6A4F]" />
             ) : (
-              <Play className="w-6 h-6 text-[#2D6A4F] ml-1" />
+              <Play className="w-5 h-5 md:w-6 md:h-6 text-[#2D6A4F] ml-0.5" />
             )}
           </button>
 
           {/* Right Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             {/* Mute/Unmute */}
             <button
               onClick={toggleMute}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/30 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center transition-all"
               aria-label={isMuted ? 'Unmute' : 'Mute'}
             >
               {isMuted ? (
-                <VolumeX className="w-5 h-5 text-white" />
+                <VolumeX className="w-4 h-4 md:w-5 md:h-5 text-white" />
               ) : (
-                <Volume2 className="w-5 h-5 text-white" />
+                <Volume2 className="w-4 h-4 md:w-5 md:h-5 text-white" />
               )}
             </button>
 
             {/* Fullscreen */}
             <button
               onClick={toggleFullscreen}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-all"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-white/30 hover:bg-white/40 backdrop-blur-sm flex items-center justify-center transition-all"
               aria-label="Fullscreen"
             >
-              <Maximize className="w-5 h-5 text-white" />
+              <Maximize className="w-4 h-4 md:w-5 md:h-5 text-white" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Play Button Overlay (when paused) */}
+      {/* Large Play Button Overlay (when paused and not started) */}
       {!isPlaying && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <button
             onClick={togglePlay}
-            className="w-20 h-20 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl"
+            className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all transform hover:scale-110 shadow-2xl pointer-events-auto"
             aria-label="Play video"
           >
-            <Play className="w-10 h-10 text-[#2D6A4F] ml-2" />
+            <Play className="w-8 h-8 md:w-10 md:h-10 text-[#2D6A4F] ml-1 md:ml-2" />
           </button>
         </div>
       )}
