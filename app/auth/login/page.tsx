@@ -32,17 +32,31 @@ function LoginForm() {
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    setLoading(false);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push(redirectUrl);
+      if (data.session) {
+        // Rafraîchir le router et rediriger
+        router.refresh();
+        // Utiliser window.location pour une redirection garantie
+        window.location.href = redirectUrl;
+      } else {
+        setError('Connexion échouée. Veuillez réessayer.');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Une erreur est survenue. Veuillez réessayer.');
+      setLoading(false);
     }
   };
 
