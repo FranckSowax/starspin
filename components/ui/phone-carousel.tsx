@@ -22,41 +22,12 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
   className,
   ...props
 }) => {
-  // Calculate the scale factor based on width
-  const numericWidth = typeof width === 'number' ? width : 280;
-  const scale = numericWidth / 433; // Base viewBox width is 433
-  const screenWidth = Math.round(389.5 * scale);
-
   return (
-    <div className={cn("relative", className)} style={{ width: numericWidth }}>
-      {/* Image layer - positioned behind the frame */}
-      {src && (
-        <div
-          className="absolute overflow-hidden"
-          style={{
-            left: `${(21.25 / 433) * 100}%`,
-            top: `${(19.25 / 882) * 100}%`,
-            width: `${(389.5 / 433) * 100}%`,
-            height: `${(843.5 / 882) * 100}%`,
-            borderRadius: `${55.75 * scale}px`,
-            zIndex: 1,
-          }}
-        >
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            style={{ objectFit: "cover" }}
-            sizes={`${screenWidth}px`}
-            priority
-          />
-        </div>
-      )}
-      {/* SVG Frame layer - on top */}
+    <div className={cn("relative", className)}>
       <svg
-        width="100%"
+        width={width}
         viewBox="0 0 433 882"
-        style={{ height: "auto", position: "relative", zIndex: 2 }}
+        style={{ height: "auto" }}
         data-version="v3"
         preserveAspectRatio="xMidYMid meet"
         fill="none"
@@ -96,11 +67,40 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
           d="M174 5H258V5.5C258 6.60457 257.105 7.5 256 7.5H176C174.895 7.5 174 6.60457 174 5.5V5Z"
           className="dark:fill-[#DADADA] fill-[#404040]"
         />
-        {/* screen area - now transparent to show image behind */}
+        {/* screen area */}
         <path
           d="M21.25 75C21.25 44.2101 46.2101 19.25 77 19.25H355C385.79 19.25 410.75 44.2101 410.75 75V807C410.75 837.79 385.79 862.75 355 862.75H77C46.2101 862.75 21.25 837.79 21.25 807V75Z"
-          className="fill-transparent"
+          className="dark:fill-[#F5F5F5] fill-[#404040] dark:stroke-[#E0E0E0] stroke-[#404040] stroke-[0.5]"
+          filter="drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1))"
         />
+        {src && (
+          <foreignObject
+            x="21.25"
+            y="19.25"
+            width="389.5"
+            height="843.5"
+            clipPath="url(#roundedCorners)"
+          >
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                position: "relative",
+                overflow: "hidden",
+                borderRadius: "55.75px"
+              }}
+            >
+              <Image
+                src={src}
+                alt={alt}
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 50vw, 33vw"
+                priority
+              />
+            </div>
+          </foreignObject>
+        )}
         {/* notch area */}
         <path
           d="M154 48.5C154 38.2827 162.283 30 172.5 30H259.5C269.717 30 278 38.2827 278 48.5C278 58.7173 269.717 67 259.5 67H172.5C162.283 67 154 58.7173 154 48.5Z"
@@ -119,6 +119,18 @@ const IphoneFrame: React.FC<IphoneFrameProps> = ({
           d="M76 4C37.3401 4 6 35.3401 6 74V808C6 846.66 37.3401 878 76 878H356C394.66 878 426 846.66 426 808V74C426 35.3401 394.66 4 356 4H76Z"
           className="fill-transparent dark:stroke-white/20 stroke-[0.5] stroke-transparent"
         />
+        <defs>
+          <clipPath id="roundedCorners">
+            <rect
+              x="21.25"
+              y="19.25"
+              width="389.5"
+              height="843.5"
+              rx="55.75"
+              ry="55.75"
+            />
+          </clipPath>
+        </defs>
       </svg>
     </div>
   );
