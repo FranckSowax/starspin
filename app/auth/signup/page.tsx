@@ -35,13 +35,23 @@ export default function SignUpPage() {
 
       if (signUpError) {
         // Gérer les erreurs spécifiques
-        if (signUpError.message.includes('already registered')) {
-          setError('Cet email est déjà utilisé. Essayez de vous connecter.');
+        if (signUpError.message.includes('already registered') || signUpError.message.includes('already exists')) {
+          setError('🚫 Ce compte existe déjà ! Connectez-vous ou utilisez "Mot de passe oublié" si nécessaire.');
         } else if (signUpError.message.includes('password')) {
           setError('Le mot de passe doit contenir au moins 6 caractères.');
+        } else if (signUpError.message.includes('valid email')) {
+          setError('Veuillez entrer une adresse email valide.');
         } else {
           setError(signUpError.message);
         }
+        setLoading(false);
+        return;
+      }
+
+      // Supabase peut retourner un user existant sans erreur (identities vides)
+      // Cela arrive quand l'email existe déjà mais n'est pas confirmé
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        setError('🚫 Ce compte existe déjà ! Si vous n\'avez pas reçu l\'email de confirmation, connectez-vous et demandez un nouvel envoi.');
         setLoading(false);
         return;
       }
@@ -193,7 +203,15 @@ export default function SignUpPage() {
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-            {error}
+            <p>{error}</p>
+            {error.includes('existe déjà') && (
+              <a
+                href="/auth/login"
+                className="inline-block mt-2 text-sm font-semibold text-[#4CAF50] hover:underline"
+              >
+                → Se connecter maintenant
+              </a>
+            )}
           </div>
         )}
 

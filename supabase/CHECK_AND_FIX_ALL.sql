@@ -51,6 +51,14 @@ CREATE POLICY "Merchants can update own data" ON merchants FOR UPDATE USING (aut
 DROP POLICY IF EXISTS "Public can view merchants" ON merchants;
 CREATE POLICY "Public can view merchants" ON merchants FOR SELECT USING (true);
 
+-- IMPORTANT: Permettre aux utilisateurs de créer leur profil merchant
+DROP POLICY IF EXISTS "Users can create their own merchant profile" ON merchants;
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON merchants;
+CREATE POLICY "Users can create their own merchant profile" ON merchants
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = id);
+
 -- 2.2 PRIZES
 DROP POLICY IF EXISTS "Merchants can view own prizes" ON prizes;
 CREATE POLICY "Merchants can view own prizes" ON prizes FOR SELECT USING (merchant_id IN (SELECT id FROM merchants WHERE auth.uid()::text = id::text));
