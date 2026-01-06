@@ -229,8 +229,11 @@ export default function RedirectPage() {
   };
 
   const handleLaunchWheel = () => {
-    // Redirect to wheel/spin page (to be created)
-    router.push(`/spin/${shopId}`);
+    // Redirect to wheel/spin page with phone number for WhatsApp workflow
+    const spinUrl = phoneNumber
+      ? `/spin/${shopId}?phone=${encodeURIComponent(phoneNumber)}`
+      : `/spin/${shopId}`;
+    router.push(spinUrl);
   };
 
   if (!isClient || !merchant) {

@@ -122,9 +122,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 8. Generate spin URL
+    // 8. Generate spin URL with phone number for congratulation message
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
-    const spinUrl = `${baseUrl}/spin/${merchantId}`;
+    const spinUrl = `${baseUrl}/spin/${merchantId}?phone=${encodeURIComponent(phoneNumber)}`;
 
     // 9. Prepare message body (without URL since it's in the button)
     const defaultTemplate = 'Merci pour votre avis ! 🎉 Cliquez sur le bouton ci-dessous pour tourner la roue et gagner un cadeau.';

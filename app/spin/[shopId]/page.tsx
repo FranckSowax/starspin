@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Prize } from '@/lib/types/database';
 import { useTranslation } from 'react-i18next';
@@ -10,8 +10,12 @@ import '@/lib/i18n/config';
 export default function SpinPage() {
   const params = useParams();
   const router = useRouter();
-  const { t } = useTranslation();
+  const searchParams = useSearchParams();
+  const { t, i18n } = useTranslation();
   const shopId = params.shopId as string;
+
+  // Get phone number from URL params (passed from redirect page for WhatsApp workflow)
+  const phoneFromUrl = searchParams.get('phone');
 
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
@@ -322,6 +326,21 @@ export default function SpinPage() {
               data: { prizeName: prize.name, couponCode: generatedCode },
             }),
           }).catch(() => {}); // Fire and forget
+
+          // Send WhatsApp congratulation message if phone number is available (WhatsApp workflow)
+          if (phoneFromUrl && merchant?.workflow_mode === 'whatsapp') {
+            fetch('/api/whatsapp/congratulate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                merchantId: shopId,
+                phoneNumber: phoneFromUrl,
+                prizeName: prize.name,
+                couponCode: generatedCode,
+                language: i18n.language || 'fr',
+              }),
+            }).catch(() => {}); // Fire and forget
+          }
         }
       } catch {
         setSaveError(true);
