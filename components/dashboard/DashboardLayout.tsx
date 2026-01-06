@@ -24,7 +24,9 @@ import {
   Target,
   ScanLine,
   ChevronRight,
-  Store
+  Store,
+  Megaphone,
+  Send
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -59,6 +61,10 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
     { name: t('dashboard.nav.customers'), href: '/dashboard/customers', icon: Users },
     { name: t('dashboard.nav.billing'), href: '/dashboard/billing', icon: CreditCard },
     { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
+  ];
+
+  const marketingNavigation = [
+    { name: t('dashboard.nav.whatsappCampaign'), href: '/dashboard/marketing/whatsapp-campaign', icon: Send },
   ];
 
   if (!mounted) {
@@ -125,7 +131,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
-              
+
               return (
                 <Link
                   key={item.name}
@@ -133,8 +139,42 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                   onClick={() => setSidebarOpen(false)}
                   className={`
                     group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                    ${isActive 
-                      ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20' 
+                    ${isActive
+                      ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20'
+                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                    }
+                  `}
+                >
+                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
+                  {item.name}
+                  {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white/50" />}
+                </Link>
+              );
+            })}
+
+            {/* Marketing Section Separator */}
+            <div className="my-6 px-4">
+              <div className="border-t border-slate-700/50"></div>
+            </div>
+
+            {/* Marketing Section */}
+            <div className="flex items-center gap-2 px-4 mb-4">
+              <Megaphone className="w-4 h-4 text-teal-500" />
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('dashboard.nav.marketing')}</p>
+            </div>
+            {marketingNavigation.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`
+                    group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
+                    ${isActive
+                      ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20'
                       : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
                     }
                   `}

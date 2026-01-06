@@ -135,7 +135,9 @@
       "customers": "Клиенты",
       "billing": "Подписка",
       "settings": "Настройки",
-      "signOut": "Выйти"
+      "signOut": "Выйти",
+      "marketing": "Маркетинг",
+      "whatsappCampaign": "WhatsApp Кампания"
     },
     "common": {
       "loading": "Загрузка...",
@@ -176,5 +178,42 @@
     "retry": "Повторить",
     "preparingMessage": "Подготовка сообщения...",
     "sendingIn": "Отправка через {{seconds}} секунд"
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "Карусельная кампания WhatsApp",
+      "subtitle": "Создавайте карусельные кампании для привлечения клиентов",
+      "campaignDetails": "Детали кампании",
+      "campaignName": "Название кампании",
+      "campaignNamePlaceholder": "Пример: Летняя акция 2024",
+      "mainMessage": "Основное сообщение",
+      "mainMessagePlaceholder": "Пример: Привет, у нас сегодня отличная акция!",
+      "carouselCards": "Карточки карусели",
+      "addCard": "Добавить карточку",
+      "card": "Карточка",
+      "media": "Изображение или видео",
+      "uploadMedia": "Нажмите для загрузки",
+      "mediaFormats": "JPG, PNG, MP4 (макс. 5МБ)",
+      "cardText": "Текст карточки",
+      "cardTextPlaceholder": "Описание товара или услуги...",
+      "buttonType": "Тип кнопки",
+      "urlButton": "Ссылка URL",
+      "quickReply": "Быстрый ответ",
+      "buttonTitle": "Текст кнопки",
+      "buttonTitlePlaceholder": "Пример: Посмотреть товар",
+      "buttonUrl": "URL кнопки",
+      "preview": "Превью WhatsApp",
+      "showPreview": "Показать превью",
+      "hidePreview": "Скрыть превью",
+      "jsonPayload": "JSON Payload",
+      "copy": "Копировать",
+      "copyJSON": "Копировать JSON",
+      "copied": "Скопировано!",
+      "fillAllFields": "Заполните все обязательные поля для генерации полного JSON.",
+      "nextStep": "Следующий шаг",
+      "nextStepDescription": "После настройки кампании вы сможете выбрать получателей из собранных контактов WhatsApp.",
+      "selectRecipients": "Выбрать получателей",
+      "comingSoon": "Скоро"
+    }
   }
 }

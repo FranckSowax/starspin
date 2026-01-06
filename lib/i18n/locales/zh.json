@@ -135,7 +135,9 @@
       "customers": "客户",
       "billing": "订阅",
       "settings": "设置",
-      "signOut": "退出"
+      "signOut": "退出",
+      "marketing": "营销",
+      "whatsappCampaign": "WhatsApp 活动"
     },
     "common": {
       "loading": "加载中...",
@@ -176,5 +178,42 @@
     "retry": "重试",
     "preparingMessage": "正在准备消息...",
     "sendingIn": "将在 {{seconds}} 秒后发送"
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "WhatsApp 轮播活动",
+      "subtitle": "创建轮播活动来吸引您的客户",
+      "campaignDetails": "活动详情",
+      "campaignName": "活动名称",
+      "campaignNamePlaceholder": "例如：2024夏季促销",
+      "mainMessage": "主要消息",
+      "mainMessagePlaceholder": "例如：嗨，我们今天有很棒的促销活动！",
+      "carouselCards": "轮播卡片",
+      "addCard": "添加卡片",
+      "card": "卡片",
+      "media": "图片或视频",
+      "uploadMedia": "点击上传",
+      "mediaFormats": "JPG、PNG、MP4（最大5MB）",
+      "cardText": "卡片文字",
+      "cardTextPlaceholder": "产品或服务描述...",
+      "buttonType": "按钮类型",
+      "urlButton": "URL链接",
+      "quickReply": "快速回复",
+      "buttonTitle": "按钮文字",
+      "buttonTitlePlaceholder": "例如：查看产品",
+      "buttonUrl": "按钮URL",
+      "preview": "WhatsApp 预览",
+      "showPreview": "显示预览",
+      "hidePreview": "隐藏预览",
+      "jsonPayload": "JSON 负载",
+      "copy": "复制",
+      "copyJSON": "复制JSON",
+      "copied": "已复制！",
+      "fillAllFields": "填写所有必填字段以生成完整的JSON。",
+      "nextStep": "下一步",
+      "nextStepDescription": "配置活动后，您可以从收集的WhatsApp客户中选择收件人。",
+      "selectRecipients": "选择收件人",
+      "comingSoon": "即将推出"
+    }
   }
 }

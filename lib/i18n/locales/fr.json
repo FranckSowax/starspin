@@ -136,7 +136,9 @@
       "customers": "Clients",
       "billing": "Abonnement",
       "settings": "Paramètres",
-      "signOut": "Déconnexion"
+      "signOut": "Déconnexion",
+      "marketing": "Marketing",
+      "whatsappCampaign": "Campagne WhatsApp"
     },
     "common": {
       "loading": "Chargement...",
@@ -326,6 +328,43 @@
       "feature2Desc": "Prêt en moins de 5 minutes",
       "feature3": "Résultats réels",
       "feature3Desc": "Augmentation prouvée des avis positifs"
+    }
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "Campagne WhatsApp Carrousel",
+      "subtitle": "Créez des campagnes carrousel pour engager vos clients",
+      "campaignDetails": "Détails de la campagne",
+      "campaignName": "Nom de la campagne",
+      "campaignNamePlaceholder": "Ex: Promo été 2024",
+      "mainMessage": "Message principal",
+      "mainMessagePlaceholder": "Ex: Hey, nous avons une grande promo aujourd'hui !",
+      "carouselCards": "Cartes du carrousel",
+      "addCard": "Ajouter une carte",
+      "card": "Carte",
+      "media": "Image ou vidéo",
+      "uploadMedia": "Cliquez pour uploader",
+      "mediaFormats": "JPG, PNG, MP4 (max 5MB)",
+      "cardText": "Texte de la carte",
+      "cardTextPlaceholder": "Description du produit ou service...",
+      "buttonType": "Type de bouton",
+      "urlButton": "Lien URL",
+      "quickReply": "Réponse rapide",
+      "buttonTitle": "Texte du bouton",
+      "buttonTitlePlaceholder": "Ex: Voir le produit",
+      "buttonUrl": "URL du bouton",
+      "preview": "Aperçu WhatsApp",
+      "showPreview": "Voir l'aperçu",
+      "hidePreview": "Masquer l'aperçu",
+      "jsonPayload": "Payload JSON",
+      "copy": "Copier",
+      "copyJSON": "Copier le JSON",
+      "copied": "Copié !",
+      "fillAllFields": "Remplissez tous les champs obligatoires pour générer le JSON complet.",
+      "nextStep": "Prochaine étape",
+      "nextStepDescription": "Une fois votre campagne configurée, vous pourrez sélectionner les destinataires parmi vos clients WhatsApp collectés.",
+      "selectRecipients": "Sélectionner les destinataires",
+      "comingSoon": "Bientôt"
     }
   }
 }

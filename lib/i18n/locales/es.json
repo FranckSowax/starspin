@@ -135,7 +135,9 @@
       "customers": "Clientes",
       "billing": "Facturación",
       "settings": "Configuración",
-      "signOut": "Cerrar Sesión"
+      "signOut": "Cerrar Sesión",
+      "marketing": "Marketing",
+      "whatsappCampaign": "Campaña WhatsApp"
     },
     "common": {
       "loading": "Cargando...",
@@ -176,5 +178,42 @@
     "retry": "Reintentar",
     "preparingMessage": "Preparando mensaje...",
     "sendingIn": "Enviando en {{seconds}} segundo(s)"
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "Campaña Carrusel WhatsApp",
+      "subtitle": "Crea campañas de carrusel para conectar con tus clientes",
+      "campaignDetails": "Detalles de la campaña",
+      "campaignName": "Nombre de la campaña",
+      "campaignNamePlaceholder": "Ej: Promo verano 2024",
+      "mainMessage": "Mensaje principal",
+      "mainMessagePlaceholder": "Ej: ¡Hola, tenemos una gran promo hoy!",
+      "carouselCards": "Tarjetas del carrusel",
+      "addCard": "Agregar tarjeta",
+      "card": "Tarjeta",
+      "media": "Imagen o video",
+      "uploadMedia": "Clic para subir",
+      "mediaFormats": "JPG, PNG, MP4 (máx 5MB)",
+      "cardText": "Texto de la tarjeta",
+      "cardTextPlaceholder": "Descripción del producto o servicio...",
+      "buttonType": "Tipo de botón",
+      "urlButton": "Enlace URL",
+      "quickReply": "Respuesta rápida",
+      "buttonTitle": "Texto del botón",
+      "buttonTitlePlaceholder": "Ej: Ver producto",
+      "buttonUrl": "URL del botón",
+      "preview": "Vista previa de WhatsApp",
+      "showPreview": "Ver vista previa",
+      "hidePreview": "Ocultar vista previa",
+      "jsonPayload": "Payload JSON",
+      "copy": "Copiar",
+      "copyJSON": "Copiar JSON",
+      "copied": "¡Copiado!",
+      "fillAllFields": "Completa todos los campos obligatorios para generar el JSON completo.",
+      "nextStep": "Siguiente paso",
+      "nextStepDescription": "Una vez configurada tu campaña, podrás seleccionar destinatarios de tus clientes de WhatsApp recopilados.",
+      "selectRecipients": "Seleccionar destinatarios",
+      "comingSoon": "Próximamente"
+    }
   }
 }

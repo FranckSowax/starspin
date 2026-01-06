@@ -131,7 +131,9 @@
       "customers": "ลูกค้า",
       "billing": "การสมัครสมาชิก",
       "settings": "การตั้งค่า",
-      "signOut": "ออกจากระบบ"
+      "signOut": "ออกจากระบบ",
+      "marketing": "การตลาด",
+      "whatsappCampaign": "แคมเปญ WhatsApp"
     },
     "common": {
       "loading": "กำลังโหลด...",
@@ -304,6 +306,43 @@
       "feature2Desc": "พร้อมใช้งานในเวลาไม่ถึง 5 นาที",
       "feature3": "ผลลัพธ์จริง",
       "feature3Desc": "การเพิ่มขึ้นของรีวิวเชิงบวกที่พิสูจน์แล้ว"
+    }
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "แคมเปญ WhatsApp Carousel",
+      "subtitle": "สร้างแคมเปญ carousel เพื่อดึงดูดลูกค้าของคุณ",
+      "campaignDetails": "รายละเอียดแคมเปญ",
+      "campaignName": "ชื่อแคมเปญ",
+      "campaignNamePlaceholder": "เช่น: โปรโมชั่นหน้าร้อน 2024",
+      "mainMessage": "ข้อความหลัก",
+      "mainMessagePlaceholder": "เช่น: สวัสดี เรามีโปรโมชั่นดีๆ วันนี้!",
+      "carouselCards": "การ์ด Carousel",
+      "addCard": "เพิ่มการ์ด",
+      "card": "การ์ด",
+      "media": "รูปภาพหรือวิดีโอ",
+      "uploadMedia": "คลิกเพื่ออัปโหลด",
+      "mediaFormats": "JPG, PNG, MP4 (สูงสุด 5MB)",
+      "cardText": "ข้อความการ์ด",
+      "cardTextPlaceholder": "คำอธิบายสินค้าหรือบริการ...",
+      "buttonType": "ประเภทปุ่ม",
+      "urlButton": "ลิงก์ URL",
+      "quickReply": "ตอบกลับด่วน",
+      "buttonTitle": "ข้อความปุ่ม",
+      "buttonTitlePlaceholder": "เช่น: ดูสินค้า",
+      "buttonUrl": "URL ของปุ่ม",
+      "preview": "ตัวอย่าง WhatsApp",
+      "showPreview": "แสดงตัวอย่าง",
+      "hidePreview": "ซ่อนตัวอย่าง",
+      "jsonPayload": "JSON Payload",
+      "copy": "คัดลอก",
+      "copyJSON": "คัดลอก JSON",
+      "copied": "คัดลอกแล้ว!",
+      "fillAllFields": "กรอกข้อมูลทุกช่องที่จำเป็นเพื่อสร้าง JSON ที่สมบูรณ์",
+      "nextStep": "ขั้นตอนถัดไป",
+      "nextStepDescription": "เมื่อกำหนดค่าแคมเปญแล้ว คุณสามารถเลือกผู้รับจากลูกค้า WhatsApp ที่รวบรวมไว้",
+      "selectRecipients": "เลือกผู้รับ",
+      "comingSoon": "เร็วๆ นี้"
     }
   }
 }

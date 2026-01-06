@@ -135,7 +135,9 @@
       "customers": "العملاء",
       "billing": "الاشتراك",
       "settings": "الإعدادات",
-      "signOut": "تسجيل الخروج"
+      "signOut": "تسجيل الخروج",
+      "marketing": "التسويق",
+      "whatsappCampaign": "حملة واتساب"
     },
     "common": {
       "loading": "جار التحميل...",
@@ -176,5 +178,42 @@
     "retry": "إعادة المحاولة",
     "preparingMessage": "جاري تحضير الرسالة...",
     "sendingIn": "سيتم الإرسال خلال {{seconds}} ثانية"
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "حملة واتساب كاروسيل",
+      "subtitle": "إنشاء حملات كاروسيل للتواصل مع عملائك",
+      "campaignDetails": "تفاصيل الحملة",
+      "campaignName": "اسم الحملة",
+      "campaignNamePlaceholder": "مثال: عرض الصيف 2024",
+      "mainMessage": "الرسالة الرئيسية",
+      "mainMessagePlaceholder": "مثال: مرحبًا، لدينا عرض رائع اليوم!",
+      "carouselCards": "بطاقات الكاروسيل",
+      "addCard": "إضافة بطاقة",
+      "card": "بطاقة",
+      "media": "صورة أو فيديو",
+      "uploadMedia": "انقر للرفع",
+      "mediaFormats": "JPG، PNG، MP4 (الحد الأقصى 5 ميجابايت)",
+      "cardText": "نص البطاقة",
+      "cardTextPlaceholder": "وصف المنتج أو الخدمة...",
+      "buttonType": "نوع الزر",
+      "urlButton": "رابط URL",
+      "quickReply": "رد سريع",
+      "buttonTitle": "نص الزر",
+      "buttonTitlePlaceholder": "مثال: عرض المنتج",
+      "buttonUrl": "رابط الزر",
+      "preview": "معاينة واتساب",
+      "showPreview": "عرض المعاينة",
+      "hidePreview": "إخفاء المعاينة",
+      "jsonPayload": "حمولة JSON",
+      "copy": "نسخ",
+      "copyJSON": "نسخ JSON",
+      "copied": "تم النسخ!",
+      "fillAllFields": "املأ جميع الحقول المطلوبة لإنشاء JSON الكامل.",
+      "nextStep": "الخطوة التالية",
+      "nextStepDescription": "بمجرد تكوين حملتك، يمكنك اختيار المستلمين من عملاء واتساب المجمعين.",
+      "selectRecipients": "اختيار المستلمين",
+      "comingSoon": "قريبًا"
+    }
   }
 }

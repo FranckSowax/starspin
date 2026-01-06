@@ -136,7 +136,9 @@
       "customers": "Customers",
       "billing": "Subscription",
       "settings": "Settings",
-      "signOut": "Sign Out"
+      "signOut": "Sign Out",
+      "marketing": "Marketing",
+      "whatsappCampaign": "WhatsApp Campaign"
     },
     "common": {
       "loading": "Loading...",
@@ -326,6 +328,43 @@
       "feature2Desc": "Ready in less than 5 minutes",
       "feature3": "Real Results",
       "feature3Desc": "Proven increase in positive reviews"
+    }
+  },
+  "marketing": {
+    "whatsappCampaign": {
+      "title": "WhatsApp Carousel Campaign",
+      "subtitle": "Create carousel campaigns to engage your customers",
+      "campaignDetails": "Campaign Details",
+      "campaignName": "Campaign Name",
+      "campaignNamePlaceholder": "Ex: Summer Promo 2024",
+      "mainMessage": "Main Message",
+      "mainMessagePlaceholder": "Ex: Hey, we have a great promo today!",
+      "carouselCards": "Carousel Cards",
+      "addCard": "Add a card",
+      "card": "Card",
+      "media": "Image or video",
+      "uploadMedia": "Click to upload",
+      "mediaFormats": "JPG, PNG, MP4 (max 5MB)",
+      "cardText": "Card Text",
+      "cardTextPlaceholder": "Product or service description...",
+      "buttonType": "Button Type",
+      "urlButton": "URL Link",
+      "quickReply": "Quick Reply",
+      "buttonTitle": "Button Text",
+      "buttonTitlePlaceholder": "Ex: View product",
+      "buttonUrl": "Button URL",
+      "preview": "WhatsApp Preview",
+      "showPreview": "Show preview",
+      "hidePreview": "Hide preview",
+      "jsonPayload": "JSON Payload",
+      "copy": "Copy",
+      "copyJSON": "Copy JSON",
+      "copied": "Copied!",
+      "fillAllFields": "Fill all required fields to generate the complete JSON.",
+      "nextStep": "Next Step",
+      "nextStepDescription": "Once your campaign is configured, you can select recipients from your collected WhatsApp customers.",
+      "selectRecipients": "Select Recipients",
+      "comingSoon": "Coming Soon"
     }
   }
 }
