@@ -141,11 +141,11 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                     group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
                     ${isActive
                       ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20'
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                      : 'text-white hover:bg-slate-800/50'
                     }
                   `}
                 >
-                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
+                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
                   {item.name}
                   {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white/50" />}
                 </Link>
@@ -175,11 +175,11 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                     group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
                     ${isActive
                       ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20'
-                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                      : 'text-white hover:bg-slate-800/50'
                     }
                   `}
                 >
-                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-white'}`} />
+                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
                   {item.name}
                   {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white/50" />}
                 </Link>
