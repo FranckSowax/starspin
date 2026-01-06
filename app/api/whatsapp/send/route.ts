@@ -147,7 +147,9 @@ export async function POST(request: NextRequest) {
 
     // 10. Get translated texts
     const buttonText = BUTTON_TEXTS[language] || BUTTON_TEXTS['fr'];
-    const bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
+    // Get body text and remove {{spin_url}} placeholder (URL is now in the button)
+    let bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
+    bodyText = bodyText.replace(/\{\{spin_url\}\}/gi, '').trim();
 
     // 11. Try sending interactive message with URL button first
     const interactivePayload = {
