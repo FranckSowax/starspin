@@ -121,6 +121,19 @@ export default function RatingPage() {
       setLoading(false);
 
       if (!error) {
+        // Send notification to merchant
+        fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            merchantId: sanitizedData.merchant_id,
+            type: 'feedback',
+            title: sanitizedData.rating >= 4 ? '⭐ Nouvel avis positif' : '📝 Nouvel avis',
+            message: `${sanitizedPhone} a laissé un avis de ${sanitizedData.rating} étoile${sanitizedData.rating > 1 ? 's' : ''}.`,
+            data: { rating: sanitizedData.rating, customerPhone: sanitizedPhone, isPositive: sanitizedData.rating >= 4 },
+          }),
+        }).catch(() => {}); // Fire and forget
+
         if (rating >= 4) {
           // Redirect to intermediate page with phone number for WhatsApp workflow
           router.push(`/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}`);
@@ -167,6 +180,19 @@ export default function RatingPage() {
       setLoading(false);
 
       if (!error) {
+        // Send notification to merchant
+        fetch('/api/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            merchantId: sanitizedData.merchant_id,
+            type: 'feedback',
+            title: sanitizedData.rating >= 4 ? '⭐ Nouvel avis positif' : '📝 Nouvel avis',
+            message: `${sanitizedData.customer_email} a laissé un avis de ${sanitizedData.rating} étoile${sanitizedData.rating > 1 ? 's' : ''}.`,
+            data: { rating: sanitizedData.rating, customerEmail: sanitizedData.customer_email, isPositive: sanitizedData.rating >= 4 },
+          }),
+        }).catch(() => {}); // Fire and forget
+
         if (rating >= 4) {
           // Redirect to intermediate page for positive ratings
           router.push(`/redirect/${shopId}`);

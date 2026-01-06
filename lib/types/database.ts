@@ -90,3 +90,16 @@ export interface SubscriptionTier {
   price: number;
   features: Record<string, any>;
 }
+
+export type NotificationType = 'feedback' | 'spin' | 'coupon_used' | 'new_customer';
+
+export interface Notification {
+  id: string;
+  merchant_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  data: Record<string, any>;
+  read: boolean;
+  created_at: string;
+}

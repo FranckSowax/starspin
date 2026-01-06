@@ -6,20 +6,20 @@ import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import { NotificationDropdown } from '@/components/dashboard/NotificationDropdown';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
-import { 
-  LayoutDashboard, 
-  Gift, 
-  QrCode, 
-  MessageSquare, 
-  Settings, 
+import {
+  LayoutDashboard,
+  Gift,
+  QrCode,
+  MessageSquare,
+  Settings,
   LogOut,
   Menu,
   X,
   BarChart3,
   Users,
-  Bell,
   CreditCard,
   Target,
   ScanLine,
@@ -193,10 +193,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                 </span>
                 {t('dashboard.common.online')}
               </div>
-              <button className="p-2.5 rounded-full hover:bg-slate-100 relative transition-colors">
-                <Bell className="w-5 h-5 text-slate-600" />
-                <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-              </button>
+              {merchant && <NotificationDropdown merchantId={merchant.id} />}
               <button
                 onClick={handleSignOut}
                 className="p-2.5 rounded-full hover:bg-red-50 text-slate-600 hover:text-red-600 transition-colors"

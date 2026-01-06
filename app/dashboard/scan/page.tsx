@@ -161,16 +161,29 @@ export default function ScanPage() {
       if (error) throw error;
 
       setScanStatus('redeemed');
-      
+
       // Update local state to reflect change immediately
-      const updatedCoupon = { 
-        ...couponDetails, 
-        used: true, 
-        used_at: new Date().toISOString() 
+      const updatedCoupon = {
+        ...couponDetails,
+        used: true,
+        used_at: new Date().toISOString()
       };
-      
+
       setCouponDetails(updatedCoupon);
       setSessionHistory(prev => [updatedCoupon, ...prev]);
+
+      // Send coupon used notification
+      fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          merchantId: merchant.id,
+          type: 'coupon_used',
+          title: '✅ Coupon utilisé',
+          message: `Le coupon "${couponDetails.code}" pour "${couponDetails.prize_name}" a été validé.`,
+          data: { couponCode: couponDetails.code, prizeName: couponDetails.prize_name },
+        }),
+      }).catch(() => {}); // Fire and forget
 
     } catch {
       setErrorMessage('Impossible de valider le coupon. Veuillez réessayer.');

@@ -309,6 +309,19 @@ export default function SpinPage() {
           if (couponError) throw couponError;
 
           setCouponCode(generatedCode);
+
+          // Send spin notification to merchant
+          fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              merchantId: shopId,
+              type: 'spin',
+              title: '🎰 Nouveau gain !',
+              message: `Un client a gagné "${prize.name}" !`,
+              data: { prizeName: prize.name, couponCode: generatedCode },
+            }),
+          }).catch(() => {}); // Fire and forget
         }
       } catch {
         setSaveError(true);
