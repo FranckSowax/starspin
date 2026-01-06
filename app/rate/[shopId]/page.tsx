@@ -7,9 +7,9 @@ import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/lib/i18n/config';
-import { Star, Mail, Globe } from 'lucide-react';
+import { Star, Mail, Globe, Phone } from 'lucide-react';
 import { ALL_LANGUAGES } from '@/components/ui/LanguageSwitcher';
-import { feedbackSchema, sanitizeString, isValidUUID } from '@/lib/utils/validation';
+import { feedbackSchema, feedbackSchemaWhatsApp, sanitizeString, sanitizePhone, isValidUUID } from '@/lib/utils/validation';
 
 export default function RatingPage() {
   const params = useParams();
@@ -20,11 +20,17 @@ export default function RatingPage() {
   const [rating, setRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+
+  // Determine workflow mode from merchant settings
+  const workflowMode = merchant?.workflow_mode || 'web';
+  const isWhatsAppMode = workflowMode === 'whatsapp';
 
   useEffect(() => {
     setIsClient(true);
@@ -77,51 +83,99 @@ export default function RatingPage() {
     const userToken = localStorage.getItem('user_token') || crypto.randomUUID();
     localStorage.setItem('user_token', userToken);
 
-    // Validate and sanitize all input data using Zod schema
-    const validationResult = feedbackSchema.safeParse({
-      merchant_id: shopId,
-      rating,
-      comment: feedback || undefined,
-      customer_email: email,
-      user_token: userToken,
-    });
+    // Choose validation schema based on workflow mode
+    if (isWhatsAppMode) {
+      // WhatsApp workflow - validate phone
+      const validationResult = feedbackSchemaWhatsApp.safeParse({
+        merchant_id: shopId,
+        rating,
+        comment: feedback || undefined,
+        customer_phone: phone,
+        user_token: userToken,
+      });
 
-    if (!validationResult.success) {
-      // Extract first error message
-      const formErrors = validationResult.error.flatten().fieldErrors;
-      if (formErrors.customer_email) {
-        const emailErr = formErrors.customer_email[0];
-        setEmailError(emailErr === 'Email requis' ? t('form.emailRequired') : t('form.emailInvalid'));
+      if (!validationResult.success) {
+        const formErrors = validationResult.error.flatten().fieldErrors;
+        if (formErrors.customer_phone) {
+          const phoneErr = formErrors.customer_phone[0];
+          setPhoneError(phoneErr === 'Numéro de téléphone requis' ? t('form.phoneRequired') : t('form.phoneInvalid'));
+        }
+        return;
       }
-      return;
-    }
 
-    setEmailError('');
-    setLoading(true);
+      setPhoneError('');
+      setLoading(true);
 
-    // Use sanitized data from validation
-    const sanitizedData = validationResult.data;
+      const sanitizedData = validationResult.data;
+      const sanitizedPhone = sanitizePhone(sanitizedData.customer_phone);
 
-    const { error } = await supabase.from('feedback').insert({
-      merchant_id: sanitizedData.merchant_id,
-      rating: sanitizedData.rating,
-      comment: sanitizedData.comment ? sanitizeString(sanitizedData.comment, 2000) : null,
-      customer_email: sanitizedData.customer_email,
-      is_positive: sanitizedData.rating >= 4,
-      user_token: sanitizedData.user_token,
-    });
+      const { error } = await supabase.from('feedback').insert({
+        merchant_id: sanitizedData.merchant_id,
+        rating: sanitizedData.rating,
+        comment: sanitizedData.comment ? sanitizeString(sanitizedData.comment, 2000) : null,
+        customer_phone: sanitizedPhone,
+        is_positive: sanitizedData.rating >= 4,
+        user_token: sanitizedData.user_token,
+      });
 
-    setLoading(false);
+      setLoading(false);
 
-    if (!error) {
-      if (rating >= 4) {
-        // Redirect to intermediate page for positive ratings
-        router.push(`/redirect/${shopId}`);
-      } else {
-        alert(t('feedback.thankYou'));
-        setRating(null);
-        setFeedback('');
-        setEmail('');
+      if (!error) {
+        if (rating >= 4) {
+          // Redirect to intermediate page with phone number for WhatsApp workflow
+          router.push(`/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}`);
+        } else {
+          alert(t('feedback.thankYou'));
+          setRating(null);
+          setFeedback('');
+          setPhone('');
+        }
+      }
+    } else {
+      // Web workflow - validate email (original behavior)
+      const validationResult = feedbackSchema.safeParse({
+        merchant_id: shopId,
+        rating,
+        comment: feedback || undefined,
+        customer_email: email,
+        user_token: userToken,
+      });
+
+      if (!validationResult.success) {
+        const formErrors = validationResult.error.flatten().fieldErrors;
+        if (formErrors.customer_email) {
+          const emailErr = formErrors.customer_email[0];
+          setEmailError(emailErr === 'Email requis' ? t('form.emailRequired') : t('form.emailInvalid'));
+        }
+        return;
+      }
+
+      setEmailError('');
+      setLoading(true);
+
+      const sanitizedData = validationResult.data;
+
+      const { error } = await supabase.from('feedback').insert({
+        merchant_id: sanitizedData.merchant_id,
+        rating: sanitizedData.rating,
+        comment: sanitizedData.comment ? sanitizeString(sanitizedData.comment, 2000) : null,
+        customer_email: sanitizedData.customer_email,
+        is_positive: sanitizedData.rating >= 4,
+        user_token: sanitizedData.user_token,
+      });
+
+      setLoading(false);
+
+      if (!error) {
+        if (rating >= 4) {
+          // Redirect to intermediate page for positive ratings
+          router.push(`/redirect/${shopId}`);
+        } else {
+          alert(t('feedback.thankYou'));
+          setRating(null);
+          setFeedback('');
+          setEmail('');
+        }
       }
     }
   };
@@ -211,36 +265,70 @@ export default function RatingPage() {
           ) : rating < 4 ? (
             <div className="space-y-5">
               <h2 className="text-xl font-semibold text-center text-gray-900">{t('feedback.title')}</h2>
-              
-              {/* Email Field */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Mail className="w-4 h-4 text-teal-600" />
-                  {t('form.yourEmail')} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setEmailError('');
-                    }}
-                    placeholder={t('form.emailPlaceholder')}
-                    className={`w-full p-4 pl-11 border-2 ${
-                      emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
-                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
-                    required
-                  />
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+              {/* Contact Field - Email or Phone based on workflow mode */}
+              {isWhatsAppMode ? (
+                // WhatsApp Mode - Phone Input
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <Phone className="w-4 h-4 text-green-600" />
+                    {t('form.yourPhone')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        setPhoneError('');
+                      }}
+                      placeholder={t('form.phonePlaceholder')}
+                      className={`w-full p-4 pl-11 border-2 ${
+                        phoneError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-green-500'
+                      } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                      required
+                    />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  </div>
+                  {phoneError && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      {phoneError}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500">{t('form.phoneHint')}</p>
                 </div>
-                {emailError && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
-                    {emailError}
-                  </p>
-                )}
-              </div>
+              ) : (
+                // Web Mode - Email Input
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <Mail className="w-4 h-4 text-teal-600" />
+                    {t('form.yourEmail')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError('');
+                      }}
+                      placeholder={t('form.emailPlaceholder')}
+                      className={`w-full p-4 pl-11 border-2 ${
+                        emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
+                      } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                      required
+                    />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  </div>
+                  {emailError && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      {emailError}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <Button
                 onClick={handleFeedbackSubmit}
@@ -254,36 +342,70 @@ export default function RatingPage() {
             <div className="space-y-5">
               <h2 className="text-xl font-semibold text-center text-gray-900">{t('social.title')}</h2>
               <p className="text-center text-gray-600">{t('social.subtitle')}</p>
-              
-              {/* Email Field for positive ratings */}
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Mail className="w-4 h-4 text-teal-600" />
-                  {t('form.yourEmail')} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setEmailError('');
-                    }}
-                    placeholder={t('form.emailPlaceholder')}
-                    className={`w-full p-4 pl-11 border-2 ${
-                      emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
-                    } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
-                    required
-                  />
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+              {/* Contact Field - Email or Phone based on workflow mode */}
+              {isWhatsAppMode ? (
+                // WhatsApp Mode - Phone Input
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <Phone className="w-4 h-4 text-green-600" />
+                    {t('form.yourPhone')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value);
+                        setPhoneError('');
+                      }}
+                      placeholder={t('form.phonePlaceholder')}
+                      className={`w-full p-4 pl-11 border-2 ${
+                        phoneError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-green-500'
+                      } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                      required
+                    />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  </div>
+                  {phoneError && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      {phoneError}
+                    </p>
+                  )}
+                  <p className="text-xs text-gray-500">{t('form.phoneHint')}</p>
                 </div>
-                {emailError && (
-                  <p className="text-sm text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
-                    {emailError}
-                  </p>
-                )}
-              </div>
+              ) : (
+                // Web Mode - Email Input
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <Mail className="w-4 h-4 text-teal-600" />
+                    {t('form.yourEmail')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setEmailError('');
+                      }}
+                      placeholder={t('form.emailPlaceholder')}
+                      className={`w-full p-4 pl-11 border-2 ${
+                        emailError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-teal-500'
+                      } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
+                      required
+                    />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  </div>
+                  {emailError && (
+                    <p className="text-sm text-red-600 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      {emailError}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <Button
                 onClick={handleFeedbackSubmit}

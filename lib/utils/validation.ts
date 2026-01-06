@@ -44,7 +44,20 @@ export const emailSchema = z
   .email('Email invalide')
   .transform(sanitizeEmail);
 
-// Feedback/comment validation
+// Phone number validation (international format)
+export const phoneSchema = z
+  .string()
+  .min(1, 'Numéro de téléphone requis')
+  .max(20, 'Numéro trop long')
+  .regex(/^\+?[1-9]\d{6,14}$/, 'Format de numéro invalide (ex: +33612345678)')
+  .transform((val) => val.replace(/\s/g, ''));
+
+// Sanitize phone number
+export function sanitizePhone(phone: string): string {
+  return phone.replace(/\s/g, '').replace(/[^+\d]/g, '').slice(0, 20);
+}
+
+// Feedback/comment validation (Web workflow - with email)
 export const feedbackSchema = z.object({
   merchant_id: z.string().uuid('ID marchand invalide'),
   rating: z.number().int().min(1, 'Note minimum 1').max(5, 'Note maximum 5'),
@@ -54,6 +67,19 @@ export const feedbackSchema = z.object({
     .optional()
     .transform((val) => (val ? sanitizeString(val, 2000) : undefined)),
   customer_email: emailSchema,
+  user_token: z.string().uuid().optional(),
+});
+
+// Feedback validation for WhatsApp workflow (with phone instead of email)
+export const feedbackSchemaWhatsApp = z.object({
+  merchant_id: z.string().uuid('ID marchand invalide'),
+  rating: z.number().int().min(1, 'Note minimum 1').max(5, 'Note maximum 5'),
+  comment: z
+    .string()
+    .max(2000, 'Commentaire trop long (max 2000 caractères)')
+    .optional()
+    .transform((val) => (val ? sanitizeString(val, 2000) : undefined)),
+  customer_phone: phoneSchema,
   user_token: z.string().uuid().optional(),
 });
 
@@ -155,6 +181,11 @@ export function validateData<T>(
 // Quick email validation
 export function isValidEmail(email: string): boolean {
   return emailSchema.safeParse(email).success;
+}
+
+// Quick phone validation
+export function isValidPhone(phone: string): boolean {
+  return phoneSchema.safeParse(phone).success;
 }
 
 // Quick UUID validation

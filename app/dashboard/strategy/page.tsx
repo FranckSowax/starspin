@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, X, Loader2, Calendar, MapPin, Star, Music, Instagram as InstagramIcon } from 'lucide-react';
+import { Check, X, Loader2, Calendar, MapPin, Star, Music, Instagram as InstagramIcon, Globe, MessageCircle } from 'lucide-react';
 
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const PLATFORMS = [
@@ -22,6 +22,12 @@ export default function StrategyPage() {
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  // Workflow mode: 'web' or 'whatsapp'
+  const [workflowMode, setWorkflowMode] = useState<'web' | 'whatsapp'>('web');
+
+  // WhatsApp configuration
+  const [whatsappMessageTemplate, setWhatsappMessageTemplate] = useState('');
 
   // Redirect URLs
   const [googleMapsUrl, setGoogleMapsUrl] = useState('');
@@ -53,6 +59,10 @@ export default function StrategyPage() {
 
       setMerchant(merchantData);
       
+      // Load workflow mode and WhatsApp config
+      setWorkflowMode(merchantData?.workflow_mode || 'web');
+      setWhatsappMessageTemplate(merchantData?.whatsapp_message_template || 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}');
+
       // Load redirect URLs
       setGoogleMapsUrl(merchantData?.google_maps_url || '');
       setTripadvisorUrl(merchantData?.tripadvisor_url || '');
@@ -89,6 +99,8 @@ export default function StrategyPage() {
 
     try {
       const updates: any = {
+        workflow_mode: workflowMode,
+        whatsapp_message_template: whatsappMessageTemplate || null,
         google_maps_url: googleMapsUrl || null,
         tripadvisor_url: tripadvisorUrl || null,
         tiktok_url: tiktokUrl || null,
@@ -156,6 +168,111 @@ export default function StrategyPage() {
             </div>
           </Card>
         )}
+
+        {/* Workflow Mode Selection */}
+        <Card className="p-6 border-2 border-teal-200">
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Mode de Workflow</h3>
+            <p className="text-sm text-gray-600">
+              Choisissez comment vos clients recevront le lien vers la roue après avoir laissé un avis
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Web Mode */}
+            <button
+              type="button"
+              onClick={() => setWorkflowMode('web')}
+              className={`p-4 rounded-lg border-2 text-left transition-all ${
+                workflowMode === 'web'
+                  ? 'border-teal-500 bg-teal-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  workflowMode === 'web' ? 'bg-teal-500' : 'bg-gray-200'
+                }`}>
+                  <Globe className={`w-5 h-5 ${workflowMode === 'web' ? 'text-white' : 'text-gray-500'}`} />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Mode Web</h4>
+                  <p className="text-xs text-gray-500">Workflow actuel</p>
+                </div>
+                {workflowMode === 'web' && (
+                  <Check className="w-5 h-5 text-teal-500 ml-auto" />
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                Après l'avis Google, le client voit un timer de 15 secondes puis clique sur un bouton pour accéder à la roue.
+              </p>
+            </button>
+
+            {/* WhatsApp Mode */}
+            <button
+              type="button"
+              onClick={() => setWorkflowMode('whatsapp')}
+              className={`p-4 rounded-lg border-2 text-left transition-all ${
+                workflowMode === 'whatsapp'
+                  ? 'border-green-500 bg-green-50'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  workflowMode === 'whatsapp' ? 'bg-green-500' : 'bg-gray-200'
+                }`}>
+                  <MessageCircle className={`w-5 h-5 ${workflowMode === 'whatsapp' ? 'text-white' : 'text-gray-500'}`} />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-gray-900">Mode WhatsApp</h4>
+                  <p className="text-xs text-gray-500">Nouveau</p>
+                </div>
+                {workflowMode === 'whatsapp' && (
+                  <Check className="w-5 h-5 text-green-500 ml-auto" />
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                Après l'avis Google, le client reçoit automatiquement un message WhatsApp avec le lien vers la roue.
+              </p>
+            </button>
+          </div>
+
+          {/* WhatsApp Configuration (shown only when WhatsApp mode is selected) */}
+          {workflowMode === 'whatsapp' && (
+            <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg space-y-4">
+              <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-green-600" />
+                Configuration WhatsApp
+              </h4>
+
+              {/* WhatsApp Message Template */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Modèle de Message WhatsApp
+                </label>
+                <textarea
+                  value={whatsappMessageTemplate}
+                  onChange={(e) => setWhatsappMessageTemplate(e.target.value)}
+                  rows={3}
+                  placeholder="Merci pour votre avis ! Tournez la roue : {{spin_url}}"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Utilisez <code className="bg-gray-100 px-1 rounded">{'{{spin_url}}'}</code> comme espace réservé pour le lien de la roue
+                </p>
+              </div>
+
+              {/* Info box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Fonctionnement :</strong> Dans ce mode, le client entre son numéro WhatsApp au lieu de son email.
+                  Après avoir laissé un avis, il reçoit automatiquement un message WhatsApp avec le lien vers la roue.
+                </p>
+              </div>
+            </div>
+          )}
+        </Card>
 
         {/* Redirect URLs Configuration */}
         <Card className="p-6">
@@ -304,6 +421,8 @@ export default function StrategyPage() {
           <Button
             variant="outline"
             onClick={() => {
+              setWorkflowMode(merchant.workflow_mode || 'web');
+              setWhatsappMessageTemplate(merchant.whatsapp_message_template || 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}');
               setGoogleMapsUrl(merchant.google_maps_url || '');
               setTripadvisorUrl(merchant.tripadvisor_url || '');
               setTiktokUrl(merchant.tiktok_url || '');
@@ -312,7 +431,7 @@ export default function StrategyPage() {
                 try {
                   const schedule = JSON.parse(merchant.weekly_schedule);
                   setWeeklySchedule(schedule);
-                } catch (e) {
+                } catch {
                   setWeeklySchedule(Array(7).fill('google_maps'));
                 }
               }

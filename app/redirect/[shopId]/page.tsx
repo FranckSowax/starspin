@@ -1,18 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
-import { Star, ExternalLink } from 'lucide-react';
+import { Star, ExternalLink, MessageCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import '@/lib/i18n/config';
 
 export default function RedirectPage() {
   const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const shopId = params.shopId as string;
+
+  // Get phone number from URL params (for WhatsApp workflow)
+  const phoneNumber = searchParams.get('phone');
 
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
@@ -21,6 +25,16 @@ export default function RedirectPage() {
   const [redirectUrl, setRedirectUrl] = useState('');
   const [strategy, setStrategy] = useState('google_maps');
   const [hasClickedSocial, setHasClickedSocial] = useState(false);
+
+  // WhatsApp workflow states
+  const [whatsappCountdown, setWhatsappCountdown] = useState(10);
+  const [whatsappSending, setWhatsappSending] = useState(false);
+  const [whatsappSent, setWhatsappSent] = useState(false);
+  const [whatsappError, setWhatsappError] = useState('');
+
+  // Determine workflow mode
+  const workflowMode = merchant?.workflow_mode || 'web';
+  const isWhatsAppMode = workflowMode === 'whatsapp' && phoneNumber;
 
   useEffect(() => {
     setIsClient(true);
@@ -86,17 +100,65 @@ export default function RedirectPage() {
     fetchMerchant();
   }, [shopId]);
 
-  // Countdown timer - only starts after social link is clicked
+  // Countdown timer - only starts after social link is clicked (Web mode)
   useEffect(() => {
-    if (hasClickedSocial && countdown > 0) {
+    if (!isWhatsAppMode && hasClickedSocial && countdown > 0) {
       const timer = setTimeout(() => {
         setCountdown(countdown - 1);
       }, 1000);
       return () => clearTimeout(timer);
-    } else if (hasClickedSocial && countdown === 0) {
+    } else if (!isWhatsAppMode && hasClickedSocial && countdown === 0) {
       setCanProceed(true);
     }
-  }, [countdown, hasClickedSocial]);
+  }, [countdown, hasClickedSocial, isWhatsAppMode]);
+
+  // WhatsApp countdown timer - starts after social link is clicked
+  useEffect(() => {
+    if (isWhatsAppMode && hasClickedSocial && whatsappCountdown > 0 && !whatsappSending && !whatsappSent) {
+      const timer = setTimeout(() => {
+        setWhatsappCountdown(whatsappCountdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (isWhatsAppMode && hasClickedSocial && whatsappCountdown === 0 && !whatsappSending && !whatsappSent) {
+      // Auto-send WhatsApp message
+      sendWhatsAppMessage();
+    }
+  }, [whatsappCountdown, hasClickedSocial, isWhatsAppMode, whatsappSending, whatsappSent]);
+
+  // Function to send WhatsApp message via API
+  const sendWhatsAppMessage = async () => {
+    if (!phoneNumber || !shopId) return;
+
+    setWhatsappSending(true);
+    setWhatsappError('');
+
+    try {
+      const response = await fetch('/api/whatsapp/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          merchantId: shopId,
+          phoneNumber: phoneNumber,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setWhatsappError(data.error || t('whatsapp.sendError'));
+        setWhatsappSending(false);
+        return;
+      }
+
+      setWhatsappSent(true);
+      setWhatsappSending(false);
+    } catch (error) {
+      setWhatsappError(t('whatsapp.sendError'));
+      setWhatsappSending(false);
+    }
+  };
 
   const getStrategyInfo = () => {
     switch (strategy) {
@@ -238,51 +300,147 @@ export default function RedirectPage() {
           </div>
 
           {/* Button Flow */}
-          {!hasClickedSocial ? (
-            <div className="space-y-3">
-              <Button
-                onClick={handleOpenSocial}
-                className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
-              >
-                <ExternalLink className="w-5 h-5" />
-                {t('redirect.leaveReviewOn', { platform: strategyInfo.name })}
-              </Button>
-              <p className="text-xs text-center text-gray-500">
-                {t('redirect.clickToOpen', { platform: strategyInfo.name })}
-              </p>
-            </div>
-          ) : !canProceed ? (
-            <div className="text-center space-y-4">
-              <div className="relative">
-                <Button
-                  disabled
-                  className="w-full bg-gray-300 text-gray-500 cursor-not-allowed py-3 rounded-xl font-semibold"
-                >
-                  {t('redirect.iDone')}
-                </Button>
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="bg-white/90 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
-                    <span className="text-2xl font-bold text-teal-600">{countdown}</span>
+          {isWhatsAppMode ? (
+            // WhatsApp Workflow
+            <>
+              {!hasClickedSocial ? (
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleOpenSocial}
+                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    {t('redirect.leaveReviewOn', { platform: strategyInfo.name })}
+                  </Button>
+                  <p className="text-xs text-center text-gray-500">
+                    {t('redirect.clickToOpen', { platform: strategyInfo.name })}
+                  </p>
+                </div>
+              ) : whatsappSending ? (
+                // Sending WhatsApp message
+                <div className="text-center space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {t('whatsapp.sending')}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {t('whatsapp.pleaseWait')}
+                    </p>
                   </div>
                 </div>
-              </div>
-              <p className="text-sm text-gray-500">
-                {t('redirect.buttonActiveIn', { seconds: countdown })}
-              </p>
-            </div>
+              ) : whatsappSent ? (
+                // WhatsApp message sent successfully
+                <div className="text-center space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-10 h-10 text-green-600" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {t('whatsapp.sent')}
+                    </p>
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 justify-center mb-2">
+                        <MessageCircle className="w-5 h-5 text-green-600" />
+                        <span className="font-medium text-green-800">{t('whatsapp.checkYourPhone')}</span>
+                      </div>
+                      <p className="text-sm text-green-700">
+                        {t('whatsapp.linkSentTo')} {phoneNumber}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : whatsappError ? (
+                // WhatsApp error
+                <div className="text-center space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                      <AlertCircle className="w-10 h-10 text-red-600" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {t('whatsapp.errorTitle')}
+                    </p>
+                    <p className="text-sm text-red-600">{whatsappError}</p>
+                    <Button
+                      onClick={sendWhatsAppMessage}
+                      className="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-xl font-semibold"
+                    >
+                      {t('whatsapp.retry')}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // WhatsApp countdown before sending
+                <div className="text-center space-y-4">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-8 h-8 text-green-600" />
+                    </div>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {t('whatsapp.preparingMessage')}
+                    </p>
+                    <div className="bg-white/90 rounded-full w-14 h-14 flex items-center justify-center shadow-lg border-2 border-green-200">
+                      <span className="text-2xl font-bold text-green-600">{whatsappCountdown}</span>
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {t('whatsapp.sendingIn', { seconds: whatsappCountdown })}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
-            <div className="space-y-3">
-              <Button
-                onClick={handleLaunchWheel}
-                className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
-              >
-                <ExternalLink className="w-5 h-5" />
-                {t('redirect.iDoneLaunchWheel')}
-              </Button>
-              <p className="text-xs text-center text-gray-500">
-                {t('redirect.clickToSpinAndWin')}
-              </p>
-            </div>
+            // Web Workflow (original behavior)
+            <>
+              {!hasClickedSocial ? (
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleOpenSocial}
+                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    {t('redirect.leaveReviewOn', { platform: strategyInfo.name })}
+                  </Button>
+                  <p className="text-xs text-center text-gray-500">
+                    {t('redirect.clickToOpen', { platform: strategyInfo.name })}
+                  </p>
+                </div>
+              ) : !canProceed ? (
+                <div className="text-center space-y-4">
+                  <div className="relative">
+                    <Button
+                      disabled
+                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed py-3 rounded-xl font-semibold"
+                    >
+                      {t('redirect.iDone')}
+                    </Button>
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="bg-white/90 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                        <span className="text-2xl font-bold text-teal-600">{countdown}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {t('redirect.buttonActiveIn', { seconds: countdown })}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleLaunchWheel}
+                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    {t('redirect.iDoneLaunchWheel')}
+                  </Button>
+                  <p className="text-xs text-center text-gray-500">
+                    {t('redirect.clickToSpinAndWin')}
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

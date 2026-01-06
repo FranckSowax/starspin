@@ -149,7 +149,24 @@
     "yourEmail": "Your email",
     "emailRequired": "Email is required",
     "emailInvalid": "Please enter a valid email",
-    "emailPlaceholder": "example@email.com"
+    "emailPlaceholder": "example@email.com",
+    "yourPhone": "Your WhatsApp number",
+    "phoneRequired": "Phone number is required",
+    "phoneInvalid": "Invalid format (e.g. +33612345678)",
+    "phonePlaceholder": "+33612345678",
+    "phoneHint": "We'll send the wheel link via WhatsApp"
+  },
+  "whatsapp": {
+    "sending": "Sending WhatsApp message...",
+    "pleaseWait": "Please wait",
+    "sent": "Message sent!",
+    "checkYourPhone": "Check your WhatsApp",
+    "linkSentTo": "Link sent to",
+    "errorTitle": "Send error",
+    "sendError": "Failed to send message",
+    "retry": "Retry",
+    "preparingMessage": "Preparing message...",
+    "sendingIn": "Sending in {{seconds}} second(s)"
   },
   "landing": {
     "nav": {

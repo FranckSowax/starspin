@@ -23,6 +23,9 @@ export interface Merchant {
   unlucky_quantity?: number;
   retry_quantity?: number;
   prize_quantities?: Record<string, number>;
+  // WhatsApp workflow fields
+  workflow_mode?: 'web' | 'whatsapp';
+  whatsapp_message_template?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -45,6 +48,7 @@ export interface Feedback {
   rating: number;
   comment: string | null;
   customer_email?: string | null;
+  customer_phone?: string | null;
   is_positive: boolean;
   user_token: string | null;
   ip_hash: string | null;
