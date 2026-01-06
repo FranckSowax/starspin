@@ -6,7 +6,54 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
 import { Star, ExternalLink, MessageCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import '@/lib/i18n/config';
+
+// Platform logos - using official brand colors and SVG paths
+const PlatformLogos = {
+  google: (
+    <svg viewBox="0 0 24 24" className="w-16 h-16">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+    </svg>
+  ),
+  tripadvisor: (
+    <svg viewBox="0 0 24 24" className="w-16 h-16">
+      <circle cx="12" cy="12" r="11" fill="#34E0A1"/>
+      <circle cx="8" cy="12" r="4" fill="white"/>
+      <circle cx="16" cy="12" r="4" fill="white"/>
+      <circle cx="8" cy="12" r="2" fill="#1A1A1A"/>
+      <circle cx="16" cy="12" r="2" fill="#1A1A1A"/>
+      <path d="M12 6 L14 9 L10 9 Z" fill="#1A1A1A"/>
+    </svg>
+  ),
+  tiktok: (
+    <svg viewBox="0 0 24 24" className="w-16 h-16">
+      <rect width="24" height="24" rx="4" fill="#000"/>
+      <path d="M17.5 8.5c-1.4 0-2.6-.8-3.2-2v7.5c0 2.5-2 4.5-4.5 4.5s-4.5-2-4.5-4.5 2-4.5 4.5-4.5c.2 0 .5 0 .7.1v2.4c-.2-.1-.5-.1-.7-.1-1.2 0-2.1 1-2.1 2.1s1 2.1 2.1 2.1c1.2 0 2.2-.9 2.2-2.1V4h2.4c.2 1.8 1.6 3.2 3.4 3.4v1.1z" fill="#FE2C55"/>
+      <path d="M17.5 8.5c-1.4 0-2.6-.8-3.2-2v7.5c0 2.5-2 4.5-4.5 4.5s-4.5-2-4.5-4.5 2-4.5 4.5-4.5c.2 0 .5 0 .7.1v2.4c-.2-.1-.5-.1-.7-.1-1.2 0-2.1 1-2.1 2.1s1 2.1 2.1 2.1c1.2 0 2.2-.9 2.2-2.1V4h2.4c.2 1.8 1.6 3.2 3.4 3.4v1.1z" fill="#25F4EE" transform="translate(-1, -1)"/>
+    </svg>
+  ),
+  instagram: (
+    <svg viewBox="0 0 24 24" className="w-16 h-16">
+      <defs>
+        <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#FFDC80"/>
+          <stop offset="25%" stopColor="#FCAF45"/>
+          <stop offset="50%" stopColor="#F77737"/>
+          <stop offset="75%" stopColor="#F56040"/>
+          <stop offset="100%" stopColor="#C13584"/>
+        </linearGradient>
+      </defs>
+      <rect width="24" height="24" rx="6" fill="url(#instagram-gradient)"/>
+      <circle cx="12" cy="12" r="4" fill="none" stroke="white" strokeWidth="2"/>
+      <circle cx="18" cy="6" r="1.5" fill="white"/>
+      <rect x="3" y="3" width="18" height="18" rx="5" fill="none" stroke="white" strokeWidth="2"/>
+    </svg>
+  ),
+};
 
 export default function RedirectPage() {
   const { t, i18n } = useTranslation();
@@ -168,61 +215,93 @@ export default function RedirectPage() {
   };
 
   const getStrategyInfo = () => {
+    // Get the appropriate message based on workflow mode
+    const getWorkflowMessage = (isReview: boolean) => {
+      if (isReview) {
+        // Review platforms (Google, TripAdvisor)
+        if (isWhatsAppMode) {
+          return t('redirect.reviewMessageWhatsapp');
+        }
+        return t('redirect.reviewMessageWeb');
+      } else {
+        // Social platforms (TikTok, Instagram)
+        if (isWhatsAppMode) {
+          return t('redirect.socialMessageWhatsapp');
+        }
+        return t('redirect.socialMessageWeb');
+      }
+    };
+
     switch (strategy) {
       case 'google_maps':
         return {
-          icon: '🗺️',
-          name: 'Google Reviews',
-          message: t('redirect.reviewMessage'),
-          bg: 'bg-green-50',
-          border: 'border-green-200',
-          text_color: 'text-green-800',
-          button_bg: 'bg-green-600',
-          button_hover: 'hover:bg-green-700'
+          logo: PlatformLogos.google,
+          showStars: true,
+          name: 'Google',
+          title: t('redirect.yourFeedbackPrecious'),
+          message: getWorkflowMessage(true),
+          buttonText: t('redirect.leaveReview'),
+          bg: 'bg-white',
+          border: 'border-gray-200',
+          text_color: 'text-gray-800',
+          button_bg: 'bg-[#4285F4]',
+          button_hover: 'hover:bg-[#3367D6]'
         };
       case 'tripadvisor':
         return {
-          icon: '⭐',
+          logo: PlatformLogos.tripadvisor,
+          showStars: true,
           name: 'TripAdvisor',
-          message: t('redirect.reviewMessage'),
-          bg: 'bg-green-50',
-          border: 'border-green-200',
-          text_color: 'text-green-800',
-          button_bg: 'bg-green-600',
-          button_hover: 'hover:bg-green-700'
+          title: t('redirect.yourFeedbackPrecious'),
+          message: getWorkflowMessage(true),
+          buttonText: t('redirect.leaveReview'),
+          bg: 'bg-white',
+          border: 'border-[#34E0A1]',
+          text_color: 'text-gray-800',
+          button_bg: 'bg-[#34E0A1]',
+          button_hover: 'hover:bg-[#2BC98E]'
         };
       case 'tiktok':
         return {
-          icon: '🎵',
+          logo: PlatformLogos.tiktok,
+          showStars: false,
           name: 'TikTok',
-          message: t('redirect.socialMessage'),
-          bg: 'bg-gray-50',
+          title: t('redirect.followUs'),
+          message: getWorkflowMessage(false),
+          buttonText: t('redirect.followOnTikTok'),
+          bg: 'bg-white',
           border: 'border-gray-300',
           text_color: 'text-gray-800',
-          button_bg: 'bg-gray-900',
-          button_hover: 'hover:bg-black'
+          button_bg: 'bg-black',
+          button_hover: 'hover:bg-gray-900'
         };
       case 'instagram':
         return {
-          icon: '📸',
+          logo: PlatformLogos.instagram,
+          showStars: false,
           name: 'Instagram',
-          message: t('redirect.socialMessage'),
-          bg: 'bg-pink-50',
+          title: t('redirect.followUs'),
+          message: getWorkflowMessage(false),
+          buttonText: t('redirect.followOnInstagram'),
+          bg: 'bg-white',
           border: 'border-pink-200',
-          text_color: 'text-pink-800',
-          button_bg: 'bg-pink-600',
-          button_hover: 'hover:bg-pink-700'
+          text_color: 'text-gray-800',
+          button_bg: 'bg-gradient-to-r from-[#F56040] via-[#C13584] to-[#833AB4]',
+          button_hover: 'hover:opacity-90'
         };
       default:
         return {
-          icon: '🎁',
-          name: t('redirect.reward'),
-          message: t('redirect.defaultMessage'),
-          bg: 'bg-teal-50',
-          border: 'border-teal-200',
-          text_color: 'text-teal-800',
-          button_bg: 'bg-teal-600',
-          button_hover: 'hover:bg-teal-700'
+          logo: PlatformLogos.google,
+          showStars: true,
+          name: 'Google',
+          title: t('redirect.yourFeedbackPrecious'),
+          message: getWorkflowMessage(true),
+          buttonText: t('redirect.leaveReview'),
+          bg: 'bg-white',
+          border: 'border-gray-200',
+          text_color: 'text-gray-800',
+          button_bg: 'bg-[#4285F4]',
+          button_hover: 'hover:bg-[#3367D6]'
         };
     }
   };
@@ -286,27 +365,41 @@ export default function RedirectPage() {
 
         {/* Redirect Card */}
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Star className="w-6 h-6 text-teal-600 fill-teal-600" />
-            <h1 className="text-2xl font-bold text-gray-900">
-              {t('redirect.thankYou')}
-            </h1>
-          </div>
-
-          <p className="text-center text-gray-600 mb-6">
-            {t('redirect.yourReviewMatters')}
-          </p>
-
-          {/* Strategy Message Card */}
-          <div className={`${strategyInfo.bg} ${strategyInfo.border} border-2 rounded-xl p-6 mb-6`}>
-            <div className="text-center mb-4">
-              <span className="text-6xl mb-3 block">{strategyInfo.icon}</span>
-              <h2 className={`text-xl font-bold ${strategyInfo.text_color} mb-2`}>
-                {strategyInfo.name}
-              </h2>
+          {/* Platform Card - Inspired by the reference image */}
+          <div className={`${strategyInfo.bg} ${strategyInfo.border} border-2 rounded-2xl p-6 mb-6 shadow-sm`}>
+            {/* Platform Logo */}
+            <div className="flex justify-center mb-4">
+              {strategyInfo.logo}
             </div>
-            <p className={`text-sm font-medium ${strategyInfo.text_color} text-center leading-relaxed`}>
-              {strategyInfo.message}
+
+            {/* 5 Stars - Only for review platforms */}
+            {strategyInfo.showStars && (
+              <div className="flex justify-center gap-1 mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className="w-7 h-7 text-yellow-400 fill-yellow-400"
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Title */}
+            <h2 className={`text-xl font-bold ${strategyInfo.text_color} text-center mb-3`}>
+              {strategyInfo.title}
+            </h2>
+
+            {/* Message with highlight */}
+            <p className={`text-sm ${strategyInfo.text_color} text-center leading-relaxed`}>
+              {strategyInfo.message.split('**').map((part, index) =>
+                index % 2 === 1 ? (
+                  <span key={index} className="font-bold text-teal-600 underline decoration-2 underline-offset-2">
+                    {part}
+                  </span>
+                ) : (
+                  <span key={index}>{part}</span>
+                )
+              )}
             </p>
           </div>
 
@@ -318,14 +411,11 @@ export default function RedirectPage() {
                 <div className="space-y-3">
                   <Button
                     onClick={handleOpenSocial}
-                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg`}
                   >
                     <ExternalLink className="w-5 h-5" />
-                    {t('redirect.leaveReviewOn', { platform: strategyInfo.name })}
+                    {strategyInfo.buttonText}
                   </Button>
-                  <p className="text-xs text-center text-gray-500">
-                    {t('redirect.clickToOpen', { platform: strategyInfo.name })}
-                  </p>
                 </div>
               ) : whatsappSending ? (
                 // Sending WhatsApp message
@@ -409,26 +499,23 @@ export default function RedirectPage() {
                 <div className="space-y-3">
                   <Button
                     onClick={handleOpenSocial}
-                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg`}
                   >
                     <ExternalLink className="w-5 h-5" />
-                    {t('redirect.leaveReviewOn', { platform: strategyInfo.name })}
+                    {strategyInfo.buttonText}
                   </Button>
-                  <p className="text-xs text-center text-gray-500">
-                    {t('redirect.clickToOpen', { platform: strategyInfo.name })}
-                  </p>
                 </div>
               ) : !canProceed ? (
                 <div className="text-center space-y-4">
                   <div className="relative">
                     <Button
                       disabled
-                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed py-3 rounded-xl font-semibold"
+                      className="w-full bg-gray-300 text-gray-500 cursor-not-allowed py-4 rounded-xl font-semibold text-lg"
                     >
                       {t('redirect.iDone')}
                     </Button>
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="bg-white/90 rounded-full w-12 h-12 flex items-center justify-center shadow-lg">
+                      <div className="bg-white/90 rounded-full w-14 h-14 flex items-center justify-center shadow-lg border-2 border-teal-200">
                         <span className="text-2xl font-bold text-teal-600">{countdown}</span>
                       </div>
                     </div>
@@ -441,9 +528,9 @@ export default function RedirectPage() {
                 <div className="space-y-3">
                   <Button
                     onClick={handleLaunchWheel}
-                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2`}
+                    className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
                   >
-                    <ExternalLink className="w-5 h-5" />
+                    <Star className="w-5 h-5" />
                     {t('redirect.iDoneLaunchWheel')}
                   </Button>
                   <p className="text-xs text-center text-gray-500">
