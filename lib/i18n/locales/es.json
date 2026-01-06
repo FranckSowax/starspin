@@ -25,13 +25,31 @@
     "followInstagram": "Síguenos en Instagram",
     "followTikTok": "Síguenos en TikTok"
   },
+  "redirect": {
+    "thankYou": "¡Gracias por tu opinión!",
+    "yourReviewMatters": "Tu opinión es muy importante para nosotros",
+    "reviewMessage": "Gracias, tu opinión cuenta mucho. ¿Puedes compartirla aquí?",
+    "socialMessage": "Gracias, tu apoyo significa mucho. ¿Puedes seguirnos aquí?",
+    "defaultMessage": "¡Gracias por tu opinión!",
+    "reward": "Recompensa",
+    "leaveReviewOn": "Dejar mi opinión en {{platform}}",
+    "clickToOpen": "Haz clic para abrir {{platform}} y dejar tu opinión",
+    "iDone": "Ya lo hice",
+    "iDoneLaunchWheel": "Ya lo hice - Girar la rueda",
+    "buttonActiveIn": "El botón estará activo en {{seconds}} segundo(s)",
+    "clickToSpinAndWin": "¡Haz clic para girar la rueda y ganar!"
+  },
   "wheel": {
     "title": "¡Gira para ganar!",
     "spin": "Girar la rueda",
     "congratulations": "¡Felicidades!",
     "youWon": "Ganaste",
     "alreadySpun": "Ya has girado la rueda hoy",
-    "tryAgainTomorrow": "¡Vuelve mañana para otra oportunidad!"
+    "tryAgainTomorrow": "¡Vuelve mañana para otra oportunidad!",
+    "retry": "¡Inténtalo de nuevo!",
+    "unlucky": "Mala suerte...",
+    "spinsRemaining": "Giros restantes",
+    "showCoupon": "Ver mi cupón"
   },
   "coupon": {
     "title": "Tu recompensa",
@@ -131,6 +149,23 @@
     "yourEmail": "Tu correo electrónico",
     "emailRequired": "El correo electrónico es obligatorio",
     "emailInvalid": "Por favor ingresa un correo válido",
-    "emailPlaceholder": "ejemplo@email.com"
+    "emailPlaceholder": "ejemplo@email.com",
+    "yourPhone": "Tu número de WhatsApp",
+    "phoneRequired": "El número de teléfono es obligatorio",
+    "phoneInvalid": "Formato inválido (ej: +34612345678)",
+    "phonePlaceholder": "+34612345678",
+    "phoneHint": "Te enviaremos el enlace de la rueda por WhatsApp"
+  },
+  "whatsapp": {
+    "sending": "Enviando mensaje de WhatsApp...",
+    "pleaseWait": "Por favor espera",
+    "sent": "¡Mensaje enviado!",
+    "checkYourPhone": "Revisa tu WhatsApp",
+    "linkSentTo": "Enlace enviado a",
+    "errorTitle": "Error de envío",
+    "sendError": "Error al enviar el mensaje",
+    "retry": "Reintentar",
+    "preparingMessage": "Preparando mensaje...",
+    "sendingIn": "Enviando en {{seconds}} segundo(s)"
   }
 }

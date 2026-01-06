@@ -25,13 +25,31 @@
     "followInstagram": "تابعنا على إنستغرام",
     "followTikTok": "تابعنا على تيك توك"
   },
+  "redirect": {
+    "thankYou": "شكرًا على رأيك!",
+    "yourReviewMatters": "رأيك مهم جدًا بالنسبة لنا",
+    "reviewMessage": "شكرًا، رأيك يهمنا كثيرًا. هل يمكنك مشاركته هنا؟",
+    "socialMessage": "شكرًا، دعمك يعني الكثير لنا. هل يمكنك متابعتنا هنا؟",
+    "defaultMessage": "شكرًا على رأيك!",
+    "reward": "المكافأة",
+    "leaveReviewOn": "اترك تقييمي على {{platform}}",
+    "clickToOpen": "انقر لفتح {{platform}} وترك تقييمك",
+    "iDone": "انتهيت",
+    "iDoneLaunchWheel": "انتهيت - أدر العجلة",
+    "buttonActiveIn": "سيكون الزر نشطًا خلال {{seconds}} ثانية",
+    "clickToSpinAndWin": "انقر لتدوير العجلة والفوز!"
+  },
   "wheel": {
     "title": "أدر العجلة للفوز!",
     "spin": "أدر العجلة",
     "congratulations": "تهانينا!",
     "youWon": "لقد فزت",
     "alreadySpun": "لقد قمت بتدوير العجلة اليوم",
-    "tryAgainTomorrow": "عد غدًا لفرصة أخرى!"
+    "tryAgainTomorrow": "عد غدًا لفرصة أخرى!",
+    "retry": "حاول مرة أخرى!",
+    "unlucky": "حظ سيء...",
+    "spinsRemaining": "الدورات المتبقية",
+    "showCoupon": "عرض القسيمة"
   },
   "coupon": {
     "title": "مكافأتك",
@@ -131,6 +149,23 @@
     "yourEmail": "بريدك الإلكتروني",
     "emailRequired": "البريد الإلكتروني مطلوب",
     "emailInvalid": "يرجى إدخال بريد إلكتروني صالح",
-    "emailPlaceholder": "example@email.com"
+    "emailPlaceholder": "example@email.com",
+    "yourPhone": "رقم واتساب الخاص بك",
+    "phoneRequired": "رقم الهاتف مطلوب",
+    "phoneInvalid": "تنسيق غير صالح (مثال: +966512345678)",
+    "phonePlaceholder": "+966512345678",
+    "phoneHint": "سنرسل لك رابط العجلة عبر واتساب"
+  },
+  "whatsapp": {
+    "sending": "جاري إرسال رسالة واتساب...",
+    "pleaseWait": "يرجى الانتظار",
+    "sent": "تم إرسال الرسالة!",
+    "checkYourPhone": "تحقق من واتساب الخاص بك",
+    "linkSentTo": "تم إرسال الرابط إلى",
+    "errorTitle": "خطأ في الإرسال",
+    "sendError": "فشل إرسال الرسالة",
+    "retry": "إعادة المحاولة",
+    "preparingMessage": "جاري تحضير الرسالة...",
+    "sendingIn": "سيتم الإرسال خلال {{seconds}} ثانية"
   }
 }

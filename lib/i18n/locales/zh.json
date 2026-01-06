@@ -25,13 +25,31 @@
     "followInstagram": "在Instagram上关注我们",
     "followTikTok": "在TikTok上关注我们"
   },
+  "redirect": {
+    "thankYou": "感谢您的评价！",
+    "yourReviewMatters": "您的意见对我们非常重要",
+    "reviewMessage": "谢谢，您的意见对我们很重要。您能在这里分享吗？",
+    "socialMessage": "谢谢，您的支持对我们意义重大。您能在这里关注我们吗？",
+    "defaultMessage": "感谢您的评价！",
+    "reward": "奖励",
+    "leaveReviewOn": "在 {{platform}} 上留下评论",
+    "clickToOpen": "点击打开 {{platform}} 并留下评论",
+    "iDone": "我完成了",
+    "iDoneLaunchWheel": "我完成了 - 转动转盘",
+    "buttonActiveIn": "按钮将在 {{seconds}} 秒后激活",
+    "clickToSpinAndWin": "点击转动转盘赢取奖品！"
+  },
   "wheel": {
     "title": "转动赢奖！",
     "spin": "转动转盘",
     "congratulations": "恭喜！",
     "youWon": "您赢得了",
     "alreadySpun": "您今天已经转过转盘了",
-    "tryAgainTomorrow": "明天再来试试吧！"
+    "tryAgainTomorrow": "明天再来试试吧！",
+    "retry": "再试一次！",
+    "unlucky": "运气不好...",
+    "spinsRemaining": "剩余转动次数",
+    "showCoupon": "查看我的优惠券"
   },
   "coupon": {
     "title": "您的奖励",
@@ -131,6 +149,23 @@
     "yourEmail": "您的邮箱",
     "emailRequired": "邮箱为必填项",
     "emailInvalid": "请输入有效的邮箱地址",
-    "emailPlaceholder": "example@email.com"
+    "emailPlaceholder": "example@email.com",
+    "yourPhone": "您的WhatsApp号码",
+    "phoneRequired": "电话号码为必填项",
+    "phoneInvalid": "格式无效（例如：+86138123456789）",
+    "phonePlaceholder": "+86138123456789",
+    "phoneHint": "我们将通过WhatsApp发送转盘链接"
+  },
+  "whatsapp": {
+    "sending": "正在发送WhatsApp消息...",
+    "pleaseWait": "请稍候",
+    "sent": "消息已发送！",
+    "checkYourPhone": "请查看您的WhatsApp",
+    "linkSentTo": "链接已发送至",
+    "errorTitle": "发送错误",
+    "sendError": "消息发送失败",
+    "retry": "重试",
+    "preparingMessage": "正在准备消息...",
+    "sendingIn": "将在 {{seconds}} 秒后发送"
   }
 }
