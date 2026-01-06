@@ -28,6 +28,7 @@ export default function AnalyticsPage() {
   const [merchant, setMerchant] = useState<any>(null);
   const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>([]);
   const [ratingDistribution, setRatingDistribution] = useState<RatingDistribution>({ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
+  const [chartData, setChartData] = useState<Array<{ date: string; positive: number; negative: number }>>([]);
   const [stats, setStats] = useState({
     totalReviews: 0,
     positiveReviews: 0,
@@ -84,6 +85,33 @@ export default function AnalyticsPage() {
           }
         });
         setRatingDistribution(distribution);
+
+        // Process chart data - last 90 days
+        const chartMap = new Map<string, { date: string; positive: number; negative: number }>();
+        const today = new Date();
+        const ninetyDaysAgo = new Date();
+        ninetyDaysAgo.setDate(today.getDate() - 90);
+
+        // Initialize all days with 0
+        for (let d = new Date(ninetyDaysAgo); d <= today; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          chartMap.set(dateStr, { date: dateStr, positive: 0, negative: 0 });
+        }
+
+        // Fill with actual feedback data
+        allFeedback.forEach((f) => {
+          const dateStr = new Date(f.created_at).toISOString().split('T')[0];
+          if (chartMap.has(dateStr)) {
+            const entry = chartMap.get(dateStr)!;
+            if (f.is_positive) {
+              entry.positive += 1;
+            } else {
+              entry.negative += 1;
+            }
+          }
+        });
+
+        setChartData(Array.from(chartMap.values()));
 
         // Calculate date ranges for trends
         const now = new Date();
@@ -218,7 +246,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Chart */}
-        <ChartAreaInteractive />
+        <ChartAreaInteractive data={chartData} />
 
         {/* Review Distribution and Conversion Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
