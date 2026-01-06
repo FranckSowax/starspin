@@ -40,6 +40,8 @@ interface ActivityItem {
   rating: number;
   comment: string | null;
   date: string;
+  customer_email: string | null;
+  customer_phone: string | null;
 }
 
 interface ChartDataItem {
@@ -100,7 +102,7 @@ export default function DashboardPage() {
       
       const { data: feedbackData } = await supabase
         .from('feedback')
-        .select('rating, is_positive, created_at, comment')
+        .select('rating, is_positive, created_at, comment, customer_email, customer_phone')
         .eq('merchant_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -148,12 +150,14 @@ export default function DashboardPage() {
       });
 
       // Recent activity from feedback
-      const activity: ActivityItem[] = feedbackData?.slice(0, 5).map((f: { is_positive: boolean; rating: number; comment: string | null; created_at: string }, idx: number) => ({
+      const activity: ActivityItem[] = feedbackData?.slice(0, 5).map((f: { is_positive: boolean; rating: number; comment: string | null; created_at: string; customer_email: string | null; customer_phone: string | null }, idx: number) => ({
         id: idx,
         type: f.is_positive ? 'positive' as const : 'negative' as const,
         rating: f.rating,
         comment: f.comment,
         date: f.created_at,
+        customer_email: f.customer_email,
+        customer_phone: f.customer_phone,
       })) || [];
 
       setRecentActivity(activity);
@@ -329,14 +333,14 @@ export default function DashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-start">
                         <p className="text-sm font-medium text-slate-900 truncate">
-                          {t('dashboard.recentReviews.newCustomer')}
+                          {activity.customer_email || activity.customer_phone || t('dashboard.recentReviews.anonymous')}
                         </p>
                         <span className="text-xs text-slate-400 whitespace-nowrap">
                           {new Date(activity.date).toLocaleDateString(i18n.language)}
                         </span>
                       </div>
                       <p className="text-sm text-slate-600 mt-1 line-clamp-2">
-                        {activity.comment || t('dashboard.recentReviews.noComment')}
+                        {activity.comment || new Date(activity.date).toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                   </div>

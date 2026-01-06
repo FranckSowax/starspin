@@ -93,7 +93,8 @@
       "noReviews": "No recent reviews yet.",
       "viewAll": "View all reviews",
       "newCustomer": "New Customer",
-      "noComment": "No comment"
+      "noComment": "No comment",
+      "anonymous": "Anonymous"
     },
     "quickActions": {
       "title": "Quick Actions",

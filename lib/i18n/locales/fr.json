@@ -93,7 +93,8 @@
       "noReviews": "Aucun avis récent pour le moment.",
       "viewAll": "Voir tous les avis",
       "newCustomer": "Nouveau client",
-      "noComment": "Pas de commentaire"
+      "noComment": "Pas de commentaire",
+      "anonymous": "Anonyme"
     },
     "quickActions": {
       "title": "Actions Rapides",
