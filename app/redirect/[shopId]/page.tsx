@@ -9,7 +9,7 @@ import { Star, ExternalLink, MessageCircle, CheckCircle, AlertCircle, Loader2 } 
 import '@/lib/i18n/config';
 
 export default function RedirectPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -141,6 +141,7 @@ export default function RedirectPage() {
         body: JSON.stringify({
           merchantId: shopId,
           phoneNumber: phoneNumber,
+          language: i18n.language || 'fr',
         }),
       });
 

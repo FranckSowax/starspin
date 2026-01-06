@@ -3,8 +3,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '@/lib/utils/security';
 import { isValidUUID, isValidPhone } from '@/lib/utils/validation';
 
-// Whapi API endpoint
-const WHAPI_API_URL = 'https://gate.whapi.cloud/messages/text';
+// Whapi API endpoint for interactive messages
+const WHAPI_API_URL = 'https://gate.whapi.cloud/messages/interactive';
+
+// Button text translations
+const BUTTON_TEXTS: Record<string, string> = {
+  fr: 'Tourner la Roue',
+  en: 'Spin the Wheel',
+  es: 'Girar la Rueda',
+  pt: 'Girar a Roda',
+  de: 'Drehen Sie das Rad',
+  it: 'Gira la Ruota',
+  ar: 'أدر العجلة',
+  zh: '转动轮盘',
+  ja: 'ルーレットを回す',
+  ko: '룰렛 돌리기',
+  th: 'หมุนวงล้อ',
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json();
-    const { merchantId, phoneNumber } = body;
+    const { merchantId, phoneNumber, language = 'fr' } = body;
 
     // 3. Validate inputs
     if (!merchantId || !phoneNumber) {
@@ -111,25 +126,49 @@ export async function POST(request: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
     const spinUrl = `${baseUrl}/spin/${merchantId}`;
 
-    // 9. Prepare message from template
-    const defaultTemplate = 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}';
-    const messageTemplate = merchant.whatsapp_message_template || defaultTemplate;
-    const message = messageTemplate.replace(/\{\{spin_url\}\}/g, spinUrl);
+    // 9. Prepare message body (without URL since it's in the button)
+    const defaultTemplate = 'Merci pour votre avis ! 🎉 Cliquez sur le bouton ci-dessous pour tourner la roue et gagner un cadeau.';
+    const messageBody = merchant.whatsapp_message_template || defaultTemplate;
 
     // 10. Format phone number for Whapi (remove + prefix)
     const formattedPhone = phoneNumber.replace(/^\+/, '');
 
-    // 11. Call Whapi API with global API key
+    // 11. Get button text based on language
+    const buttonText = BUTTON_TEXTS[language] || BUTTON_TEXTS['fr'];
+
+    // 12. Prepare interactive message payload
+    const interactivePayload = {
+      to: formattedPhone,
+      type: 'button',
+      header: {
+        type: 'text',
+        text: merchant.business_name || 'StarSpin'
+      },
+      body: {
+        text: messageBody
+      },
+      footer: {
+        text: '🎰 StarSpin'
+      },
+      action: {
+        buttons: [
+          {
+            type: 'url',
+            title: buttonText,
+            url: spinUrl
+          }
+        ]
+      }
+    };
+
+    // 13. Call Whapi API with global API key
     const whapiResponse = await fetch(WHAPI_API_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${globalWhapiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        to: formattedPhone,
-        body: message,
-      }),
+      body: JSON.stringify(interactivePayload),
     });
 
     if (!whapiResponse.ok) {
