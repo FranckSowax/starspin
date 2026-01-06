@@ -3,22 +3,38 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIP } from '@/lib/utils/security';
 import { isValidUUID, isValidPhone } from '@/lib/utils/validation';
 
-// Whapi API endpoint for text messages
-const WHAPI_API_URL = 'https://gate.whapi.cloud/messages/text';
+// Whapi API endpoints
+const WHAPI_INTERACTIVE_URL = 'https://gate.whapi.cloud/messages/interactive';
+const WHAPI_TEXT_URL = 'https://gate.whapi.cloud/messages/text';
 
-// Call-to-action text translations
-const CTA_TEXTS: Record<string, string> = {
-  fr: '👉 Tournez la roue maintenant',
-  en: '👉 Spin the wheel now',
-  es: '👉 Gira la rueda ahora',
-  pt: '👉 Gire a roda agora',
-  de: '👉 Drehen Sie jetzt das Rad',
-  it: '👉 Gira la ruota ora',
-  ar: '👉 أدر العجلة الآن',
-  zh: '👉 现在转动轮盘',
-  ja: '👉 今すぐルーレットを回す',
-  ko: '👉 지금 룰렛 돌리기',
-  th: '👉 หมุนวงล้อเลย',
+// Button text translations (max 25 characters for WhatsApp buttons)
+const BUTTON_TEXTS: Record<string, string> = {
+  fr: 'Tourner la Roue 🎰',
+  en: 'Spin the Wheel 🎰',
+  es: 'Girar la Rueda 🎰',
+  pt: 'Girar a Roda 🎰',
+  de: 'Rad drehen 🎰',
+  it: 'Gira la Ruota 🎰',
+  ar: 'أدر العجلة 🎰',
+  zh: '转动轮盘 🎰',
+  ja: 'ルーレット 🎰',
+  ko: '룰렛 돌리기 🎰',
+  th: 'หมุนวงล้อ 🎰',
+};
+
+// Body text translations
+const BODY_TEXTS: Record<string, string> = {
+  fr: 'Merci pour votre avis ! 🎉 Cliquez sur le bouton pour tourner la roue et gagner un cadeau.',
+  en: 'Thank you for your review! 🎉 Click the button to spin the wheel and win a gift.',
+  es: '¡Gracias por tu opinión! 🎉 Haz clic en el botón para girar la rueda y ganar un regalo.',
+  pt: 'Obrigado pela sua avaliação! 🎉 Clique no botão para girar a roda e ganhar um presente.',
+  de: 'Danke für Ihre Bewertung! 🎉 Klicken Sie auf den Button, um das Rad zu drehen.',
+  it: 'Grazie per la tua recensione! 🎉 Clicca il pulsante per girare la ruota e vincere.',
+  ar: 'شكراً لتقييمك! 🎉 انقر على الزر لتدوير العجلة والفوز بهدية.',
+  zh: '感谢您的评价！🎉 点击按钮转动轮盘赢取礼物。',
+  ja: 'レビューありがとうございます！🎉 ボタンをクリックしてルーレットを回そう。',
+  ko: '리뷰 감사합니다! 🎉 버튼을 클릭하여 룰렛을 돌리고 선물을 받으세요.',
+  th: 'ขอบคุณสำหรับรีวิว! 🎉 คลิกปุ่มเพื่อหมุนวงล้อและรับของรางวัล',
 };
 
 export async function POST(request: NextRequest) {
@@ -122,48 +138,84 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 8. Generate spin URL with phone number for congratulation message
+    // 8. Generate spin URL with phone number
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
     const spinUrl = `${baseUrl}/spin/${merchantId}?phone=${encodeURIComponent(phoneNumber)}`;
 
-    // 9. Get CTA text based on language
-    const ctaText = CTA_TEXTS[language] || CTA_TEXTS['fr'];
-
-    // 10. Prepare message with custom template or default
-    const defaultTemplate = `🎉 *${merchant.business_name || 'StarSpin'}*
-
-Merci pour votre avis ! Vous avez maintenant une chance de gagner un cadeau en tournant notre roue de la fortune.
-
-${ctaText}
-${spinUrl}
-
-🎰 Bonne chance !`;
-
-    const message = merchant.whatsapp_message_template
-      ? merchant.whatsapp_message_template.replace(/\{\{spin_url\}\}/g, spinUrl)
-      : defaultTemplate;
-
-    // 11. Format phone number for Whapi (remove + prefix)
+    // 9. Format phone number for Whapi (remove + prefix)
     const formattedPhone = phoneNumber.replace(/^\+/, '');
 
-    // 12. Call Whapi API with text message
-    const whapiResponse = await fetch(WHAPI_API_URL, {
+    // 10. Get translated texts
+    const buttonText = BUTTON_TEXTS[language] || BUTTON_TEXTS['fr'];
+    const bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
+
+    // 11. Try sending interactive message with URL button first
+    const interactivePayload = {
+      to: formattedPhone,
+      type: 'button',
+      header: {
+        type: 'text',
+        text: merchant.business_name || 'StarSpin'
+      },
+      body: {
+        text: bodyText
+      },
+      footer: {
+        text: '🎰 StarSpin'
+      },
+      action: {
+        buttons: [
+          {
+            type: 'url',
+            title: buttonText.substring(0, 25), // Max 25 chars for button title
+            id: `spin_${Date.now()}`,
+            url: spinUrl
+          }
+        ]
+      }
+    };
+
+    let whapiResponse = await fetch(WHAPI_INTERACTIVE_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${globalWhapiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        to: formattedPhone,
-        body: message,
-      }),
+      body: JSON.stringify(interactivePayload),
     });
+
+    // 12. If interactive message fails, fallback to text message
+    if (!whapiResponse.ok) {
+      const errorText = await whapiResponse.text();
+      console.error('Interactive message failed, trying text fallback:', whapiResponse.status, errorText);
+
+      // Prepare fallback text message
+      const textMessage = `🎉 *${merchant.business_name || 'StarSpin'}*
+
+${bodyText}
+
+👉 ${buttonText}
+${spinUrl}
+
+🎰 Bonne chance !`;
+
+      whapiResponse = await fetch(WHAPI_TEXT_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${globalWhapiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: formattedPhone,
+          body: textMessage,
+        }),
+      });
+    }
 
     if (!whapiResponse.ok) {
       const errorText = await whapiResponse.text();
       console.error('Whapi API error:', whapiResponse.status, errorText);
 
-      // Handle specific Whapi errors
       if (whapiResponse.status === 401) {
         return NextResponse.json(
           { error: 'Erreur de configuration WhatsApp' },
