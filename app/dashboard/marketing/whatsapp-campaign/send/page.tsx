@@ -22,8 +22,6 @@ import {
   Calendar,
   Star,
   Check,
-  AlertCircle,
-  RefreshCw,
   FlaskConical,
   Plus,
   X,
@@ -171,7 +169,7 @@ export default function SendCampaignPage() {
   };
 
   const sendCampaign = async () => {
-    if (!campaignData || selectedCustomers.size === 0 || !merchant?.whapi_api_key) {
+    if (!campaignData || selectedCustomers.size === 0) {
       return;
     }
 
@@ -189,8 +187,7 @@ export default function SendCampaignPage() {
 
       try {
         // Build the carousel payload for this recipient
-        const payload = {
-          to: phone.replace(/^\+/, ''), // Remove leading +
+        const carouselPayload = {
           body: { text: campaignData.mainMessage },
           cards: campaignData.cards.map((card: any, index: number) => ({
             media: { media: card.mediaUrl },
@@ -204,21 +201,23 @@ export default function SendCampaignPage() {
           })),
         };
 
-        // Send via Whapi
-        const response = await fetch('https://gate.whapi.cloud/messages/carousel', {
+        // Send via our API route (uses server-side WHAPI_API_KEY)
+        const response = await fetch('/api/whatsapp/carousel', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${merchant.whapi_api_key}`,
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            phoneNumber: phone,
+            carouselPayload,
+          }),
         });
 
-        if (response.ok) {
+        const data = await response.json();
+        if (response.ok && data.success) {
           results.push({ phone, success: true });
         } else {
-          const errorData = await response.json();
-          results.push({ phone, success: false, error: errorData.message || 'Failed to send' });
+          results.push({ phone, success: false, error: data.error || 'Failed to send' });
         }
       } catch (error: any) {
         results.push({ phone, success: false, error: error.message || 'Network error' });
@@ -259,7 +258,7 @@ export default function SendCampaignPage() {
 
   const sendTestCampaign = async () => {
     const validNumbers = testNumbers.filter(n => n.trim().length > 0);
-    if (!campaignData || validNumbers.length === 0 || !merchant?.whapi_api_key) {
+    if (!campaignData || validNumbers.length === 0) {
       return;
     }
 
@@ -270,8 +269,7 @@ export default function SendCampaignPage() {
 
     for (const phone of validNumbers) {
       try {
-        const payload = {
-          to: phone.replace(/^\+/, ''),
+        const carouselPayload = {
           body: { text: campaignData.mainMessage },
           cards: campaignData.cards.map((card: any, index: number) => ({
             media: { media: card.mediaUrl },
@@ -285,20 +283,23 @@ export default function SendCampaignPage() {
           })),
         };
 
-        const response = await fetch('https://gate.whapi.cloud/messages/carousel', {
+        // Send via our API route (uses server-side WHAPI_API_KEY)
+        const response = await fetch('/api/whatsapp/carousel', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${merchant.whapi_api_key}`,
           },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            phoneNumber: phone,
+            carouselPayload,
+          }),
         });
 
-        if (response.ok) {
+        const data = await response.json();
+        if (response.ok && data.success) {
           results.push({ phone, success: true });
         } else {
-          const errorData = await response.json();
-          results.push({ phone, success: false, error: errorData.message || 'Failed to send' });
+          results.push({ phone, success: false, error: data.error || 'Failed to send' });
         }
       } catch (error: any) {
         results.push({ phone, success: false, error: error.message || 'Network error' });
@@ -319,23 +320,6 @@ export default function SendCampaignPage() {
           <p className="text-lg text-slate-600">{t('dashboard.common.loading')}</p>
         </div>
       </div>
-    );
-  }
-
-  if (!merchant?.whapi_api_key) {
-    return (
-      <DashboardLayout merchant={merchant}>
-        <div className="max-w-2xl mx-auto">
-          <Card className="p-8 text-center">
-            <AlertCircle className="w-16 h-16 text-amber-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-900 mb-2">{t('marketing.whatsappCampaign.apiKeyRequired')}</h2>
-            <p className="text-slate-600 mb-6">{t('marketing.whatsappCampaign.apiKeyRequiredDesc')}</p>
-            <Button onClick={() => router.push('/dashboard/strategy')} className="bg-teal-600 hover:bg-teal-700">
-              {t('marketing.whatsappCampaign.goToSettings')}
-            </Button>
-          </Card>
-        </div>
-      </DashboardLayout>
     );
   }
 
