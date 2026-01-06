@@ -245,7 +245,17 @@
       "testSendDesc": "Prueba tu campaña enviándola a 1 o 2 números antes del envío masivo.",
       "testNumberPlaceholder": "+34612345678",
       "addTestNumber": "Agregar un número",
-      "sendTest": "Enviar prueba"
+      "sendTest": "Enviar prueba",
+      "myCampaigns": "Mis campañas",
+      "newCampaign": "Nueva",
+      "saveCampaign": "Guardar",
+      "updateCampaign": "Actualizar",
+      "savedCampaigns": "Campañas guardadas",
+      "noCampaigns": "No hay campañas guardadas",
+      "campaignSaved": "¡Campaña guardada con éxito!",
+      "saveFailed": "Error al guardar",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esta campaña?",
+      "sentTimes": "Enviada {{count}} veces"
     }
   }
 }

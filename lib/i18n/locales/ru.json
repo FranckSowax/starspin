@@ -245,7 +245,17 @@
       "testSendDesc": "Протестируйте кампанию, отправив её на 1 или 2 номера перед массовой рассылкой.",
       "testNumberPlaceholder": "+79123456789",
       "addTestNumber": "Добавить номер",
-      "sendTest": "Отправить тест"
+      "sendTest": "Отправить тест",
+      "myCampaigns": "Мои кампании",
+      "newCampaign": "Новая",
+      "saveCampaign": "Сохранить",
+      "updateCampaign": "Обновить",
+      "savedCampaigns": "Сохранённые кампании",
+      "noCampaigns": "Нет сохранённых кампаний",
+      "campaignSaved": "Кампания успешно сохранена!",
+      "saveFailed": "Ошибка сохранения",
+      "confirmDelete": "Вы уверены, что хотите удалить эту кампанию?",
+      "sentTimes": "Отправлена {{count}} раз"
     }
   }
 }

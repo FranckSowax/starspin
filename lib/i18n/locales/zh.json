@@ -245,7 +245,17 @@
       "testSendDesc": "在批量发送前，先将活动发送到1或2个号码进行测试。",
       "testNumberPlaceholder": "+86138123456789",
       "addTestNumber": "添加号码",
-      "sendTest": "发送测试"
+      "sendTest": "发送测试",
+      "myCampaigns": "我的活动",
+      "newCampaign": "新建",
+      "saveCampaign": "保存",
+      "updateCampaign": "更新",
+      "savedCampaigns": "已保存的活动",
+      "noCampaigns": "暂无保存的活动",
+      "campaignSaved": "活动保存成功！",
+      "saveFailed": "保存失败",
+      "confirmDelete": "确定要删除这个活动吗？",
+      "sentTimes": "已发送 {{count}} 次"
     }
   }
 }

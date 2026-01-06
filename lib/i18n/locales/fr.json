@@ -396,7 +396,17 @@
       "testSendDesc": "Testez votre campagne en l'envoyant à 1 ou 2 numéros avant l'envoi massif.",
       "testNumberPlaceholder": "+33612345678",
       "addTestNumber": "Ajouter un numéro",
-      "sendTest": "Envoyer le test"
+      "sendTest": "Envoyer le test",
+      "myCampaigns": "Mes campagnes",
+      "newCampaign": "Nouvelle",
+      "saveCampaign": "Enregistrer",
+      "updateCampaign": "Mettre à jour",
+      "savedCampaigns": "Campagnes enregistrées",
+      "noCampaigns": "Aucune campagne enregistrée",
+      "campaignSaved": "Campagne enregistrée avec succès !",
+      "saveFailed": "Échec de l'enregistrement",
+      "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette campagne ?",
+      "sentTimes": "Envoyée {{count}} fois"
     }
   }
 }

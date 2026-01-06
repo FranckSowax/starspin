@@ -374,7 +374,17 @@
       "testSendDesc": "ทดสอบแคมเปญของคุณโดยส่งไปยัง 1 หรือ 2 หมายเลขก่อนการส่งจำนวนมาก",
       "testNumberPlaceholder": "+66812345678",
       "addTestNumber": "เพิ่มหมายเลข",
-      "sendTest": "ส่งการทดสอบ"
+      "sendTest": "ส่งการทดสอบ",
+      "myCampaigns": "แคมเปญของฉัน",
+      "newCampaign": "ใหม่",
+      "saveCampaign": "บันทึก",
+      "updateCampaign": "อัปเดต",
+      "savedCampaigns": "แคมเปญที่บันทึกไว้",
+      "noCampaigns": "ไม่มีแคมเปญที่บันทึกไว้",
+      "campaignSaved": "บันทึกแคมเปญสำเร็จ!",
+      "saveFailed": "บันทึกล้มเหลว",
+      "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบแคมเปญนี้?",
+      "sentTimes": "ส่งแล้ว {{count}} ครั้ง"
     }
   }
 }

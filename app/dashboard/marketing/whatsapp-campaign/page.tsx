@@ -25,6 +25,11 @@ import {
   Loader2,
   AlertCircle,
   Users,
+  Save,
+  FolderOpen,
+  Star,
+  Clock,
+  MoreVertical,
 } from 'lucide-react';
 
 interface CarouselCard {
@@ -35,6 +40,19 @@ interface CarouselCard {
   buttonType: 'url' | 'quick_reply';
   buttonTitle: string;
   buttonUrl?: string;
+}
+
+interface SavedCampaign {
+  id: string;
+  merchant_id: string;
+  name: string;
+  main_message: string;
+  cards: CarouselCard[];
+  created_at: string;
+  updated_at: string;
+  is_favorite: boolean;
+  send_count: number;
+  last_sent_at: string | null;
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 9);
@@ -66,6 +84,13 @@ export default function WhatsAppCampaignPage() {
   const [jsonCopied, setJsonCopied] = useState(false);
   const [uploadingCard, setUploadingCard] = useState<string | null>(null);
 
+  // Saved campaigns state
+  const [savedCampaigns, setSavedCampaigns] = useState<SavedCampaign[]>([]);
+  const [showSavedCampaigns, setShowSavedCampaigns] = useState(false);
+  const [currentCampaignId, setCurrentCampaignId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
   useEffect(() => {
     const fetchMerchant = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -76,11 +101,139 @@ export default function WhatsAppCampaignPage() {
           .eq('id', user.id)
           .single();
         setMerchant(data);
+
+        // Fetch saved campaigns
+        fetchSavedCampaigns(user.id);
       }
       setLoading(false);
     };
     fetchMerchant();
   }, []);
+
+  const fetchSavedCampaigns = async (merchantId: string) => {
+    try {
+      const response = await fetch(`/api/whatsapp/campaigns?merchantId=${merchantId}`);
+      const data = await response.json();
+      if (data.campaigns) {
+        setSavedCampaigns(data.campaigns);
+      }
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+    }
+  };
+
+  const saveCampaign = async () => {
+    if (!merchant || !campaignName.trim()) return;
+
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      const payload = {
+        merchantId: merchant.id,
+        name: campaignName,
+        mainMessage: mainMessage,
+        cards: cards,
+      };
+
+      let response;
+      if (currentCampaignId) {
+        // Update existing campaign
+        response = await fetch('/api/whatsapp/campaigns', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, id: currentCampaignId }),
+        });
+      } else {
+        // Create new campaign
+        response = await fetch('/api/whatsapp/campaigns', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      const data = await response.json();
+      if (response.ok && data.campaign) {
+        setSaveMessage({ type: 'success', text: t('marketing.whatsappCampaign.campaignSaved') });
+        setCurrentCampaignId(data.campaign.id);
+        fetchSavedCampaigns(merchant.id);
+        setTimeout(() => setSaveMessage(null), 3000);
+      } else {
+        setSaveMessage({ type: 'error', text: data.error || t('marketing.whatsappCampaign.saveFailed') });
+      }
+    } catch (error) {
+      setSaveMessage({ type: 'error', text: t('marketing.whatsappCampaign.saveFailed') });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const loadCampaign = (campaign: SavedCampaign) => {
+    setCampaignName(campaign.name);
+    setMainMessage(campaign.main_message);
+    setCards(campaign.cards);
+    setCurrentCampaignId(campaign.id);
+    setShowSavedCampaigns(false);
+  };
+
+  const deleteCampaign = async (campaignId: string) => {
+    if (!merchant) return;
+
+    try {
+      const response = await fetch(
+        `/api/whatsapp/campaigns?id=${campaignId}&merchantId=${merchant.id}`,
+        { method: 'DELETE' }
+      );
+
+      if (response.ok) {
+        setSavedCampaigns(savedCampaigns.filter(c => c.id !== campaignId));
+        if (currentCampaignId === campaignId) {
+          setCurrentCampaignId(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+    }
+  };
+
+  const toggleFavorite = async (campaignId: string, currentValue: boolean) => {
+    if (!merchant) return;
+
+    try {
+      await fetch('/api/whatsapp/campaigns', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: campaignId,
+          merchantId: merchant.id,
+          isFavorite: !currentValue,
+        }),
+      });
+
+      setSavedCampaigns(savedCampaigns.map(c =>
+        c.id === campaignId ? { ...c, is_favorite: !currentValue } : c
+      ));
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  };
+
+  const startNewCampaign = () => {
+    setCampaignName('');
+    setMainMessage('');
+    setCards([{
+      id: generateId(),
+      mediaUrl: '',
+      mediaType: 'image',
+      text: '',
+      buttonType: 'url',
+      buttonTitle: '',
+      buttonUrl: '',
+    }]);
+    setCurrentCampaignId(null);
+    setShowSavedCampaigns(false);
+  };
 
   const addCard = () => {
     if (cards.length >= 10) return;
@@ -207,7 +360,23 @@ export default function WhatsAppCampaignPage() {
             <h1 className="text-2xl font-bold text-slate-900">{t('marketing.whatsappCampaign.title')}</h1>
             <p className="text-slate-500 mt-1">{t('marketing.whatsappCampaign.subtitle')}</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowSavedCampaigns(!showSavedCampaigns)}
+              className="gap-2"
+            >
+              <FolderOpen className="w-4 h-4" />
+              {t('marketing.whatsappCampaign.myCampaigns')} ({savedCampaigns.length})
+            </Button>
+            <Button
+              variant="outline"
+              onClick={startNewCampaign}
+              className="gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              {t('marketing.whatsappCampaign.newCampaign')}
+            </Button>
             <Button
               variant="outline"
               onClick={() => setShowPreview(!showPreview)}
@@ -217,15 +386,113 @@ export default function WhatsAppCampaignPage() {
               {showPreview ? t('marketing.whatsappCampaign.hidePreview') : t('marketing.whatsappCampaign.showPreview')}
             </Button>
             <Button
-              onClick={copyJSON}
-              disabled={!isCampaignValid()}
-              className="gap-2 bg-teal-600 hover:bg-teal-700"
+              onClick={saveCampaign}
+              disabled={!campaignName.trim() || isSaving}
+              className="gap-2 bg-blue-600 hover:bg-blue-700"
             >
-              {jsonCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              {jsonCopied ? t('marketing.whatsappCampaign.copied') : t('marketing.whatsappCampaign.copyJSON')}
+              {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {currentCampaignId ? t('marketing.whatsappCampaign.updateCampaign') : t('marketing.whatsappCampaign.saveCampaign')}
             </Button>
           </div>
         </div>
+
+        {/* Save Message */}
+        {saveMessage && (
+          <div className={`p-3 rounded-lg flex items-center gap-2 ${
+            saveMessage.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
+          }`}>
+            {saveMessage.type === 'success' ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+            <span className="text-sm">{saveMessage.text}</span>
+          </div>
+        )}
+
+        {/* Saved Campaigns Panel */}
+        {showSavedCampaigns && (
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <FolderOpen className="w-5 h-5 text-teal-600" />
+                {t('marketing.whatsappCampaign.savedCampaigns')}
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSavedCampaigns(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {savedCampaigns.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <FolderOpen className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+                <p>{t('marketing.whatsappCampaign.noCampaigns')}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {savedCampaigns
+                  .sort((a, b) => {
+                    // Favorites first, then by updated_at
+                    if (a.is_favorite && !b.is_favorite) return -1;
+                    if (!a.is_favorite && b.is_favorite) return 1;
+                    return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+                  })
+                  .map((campaign) => (
+                  <div
+                    key={campaign.id}
+                    className={`border rounded-xl p-4 hover:border-teal-500 transition-colors cursor-pointer ${
+                      currentCampaignId === campaign.id ? 'border-teal-500 bg-teal-50' : 'border-slate-200'
+                    }`}
+                    onClick={() => loadCampaign(campaign)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-medium text-slate-900 line-clamp-1">{campaign.name}</h3>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(campaign.id, campaign.is_favorite);
+                          }}
+                          className={`p-1 rounded hover:bg-slate-100 ${campaign.is_favorite ? 'text-amber-500' : 'text-slate-300'}`}
+                        >
+                          <Star className={`w-4 h-4 ${campaign.is_favorite ? 'fill-amber-500' : ''}`} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(t('marketing.whatsappCampaign.confirmDelete'))) {
+                              deleteCampaign(campaign.id);
+                            }
+                          }}
+                          className="p-1 rounded hover:bg-red-100 text-slate-400 hover:text-red-500"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-500 line-clamp-2 mb-3">{campaign.main_message}</p>
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="flex items-center gap-1">
+                        <ImageIcon className="w-3 h-3" />
+                        {campaign.cards.length} {t('marketing.whatsappCampaign.cards')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {new Date(campaign.updated_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {campaign.send_count > 0 && (
+                      <div className="mt-2 text-xs text-teal-600 flex items-center gap-1">
+                        <Send className="w-3 h-3" />
+                        {t('marketing.whatsappCampaign.sentTimes', { count: campaign.send_count })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Campaign Builder */}
