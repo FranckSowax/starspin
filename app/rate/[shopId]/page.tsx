@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { StarRating } from '@/components/molecules/StarRating';
 import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
@@ -14,8 +14,13 @@ import { feedbackSchema, feedbackSchemaWhatsApp, sanitizeString, sanitizePhone, 
 export default function RatingPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
   const shopId = params.shopId as string;
+
+  // Get language from URL or localStorage
+  const langFromUrl = searchParams.get('lang');
+  const currentLang = langFromUrl || i18n.language || 'en';
 
   const [rating, setRating] = useState<number | null>(null);
   const [feedback, setFeedback] = useState('');
@@ -34,7 +39,11 @@ export default function RatingPage() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    // Apply language from URL if provided
+    if (langFromUrl && i18n.language !== langFromUrl) {
+      i18n.changeLanguage(langFromUrl);
+    }
+  }, [langFromUrl]);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -136,7 +145,7 @@ export default function RatingPage() {
 
         if (rating >= 4) {
           // Redirect to intermediate page with phone number for WhatsApp workflow
-          router.push(`/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}`);
+          router.push(`/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}&lang=${currentLang}`);
         } else {
           alert(t('feedback.thankYou'));
           setRating(null);
@@ -195,7 +204,7 @@ export default function RatingPage() {
 
         if (rating >= 4) {
           // Redirect to intermediate page for positive ratings
-          router.push(`/redirect/${shopId}`);
+          router.push(`/redirect/${shopId}?lang=${currentLang}`);
         } else {
           alert(t('feedback.thankYou'));
           setRating(null);

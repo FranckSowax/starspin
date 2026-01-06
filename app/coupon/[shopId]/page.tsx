@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import QRCode from 'qrcode';
 import { useTranslation } from 'react-i18next';
-import '@/lib/i18n/config';
+import i18n from '@/lib/i18n/config';
 
 function CouponContent() {
   const params = useParams();
@@ -13,6 +13,7 @@ function CouponContent() {
   const { t } = useTranslation();
   const shopId = params.shopId as string;
   const code = searchParams.get('code');
+  const langFromUrl = searchParams.get('lang');
 
   const [coupon, setCoupon] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
@@ -25,7 +26,11 @@ function CouponContent() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    // Apply language from URL if provided
+    if (langFromUrl && i18n.language !== langFromUrl) {
+      i18n.changeLanguage(langFromUrl);
+    }
+  }, [langFromUrl]);
 
   useEffect(() => {
     if (!isClient) return;

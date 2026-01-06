@@ -14,8 +14,10 @@ export default function SpinPage() {
   const { t, i18n } = useTranslation();
   const shopId = params.shopId as string;
 
-  // Get phone number from URL params (passed from redirect page for WhatsApp workflow)
+  // Get phone number and language from URL params (passed from redirect page)
   const phoneFromUrl = searchParams.get('phone');
+  const langFromUrl = searchParams.get('lang');
+  const currentLang = langFromUrl || i18n.language || 'en';
 
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
@@ -44,7 +46,11 @@ export default function SpinPage() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    // Apply language from URL if provided
+    if (langFromUrl && i18n.language !== langFromUrl) {
+      i18n.changeLanguage(langFromUrl);
+    }
+  }, [langFromUrl, i18n]);
 
   useEffect(() => {
     const checkSpinEligibility = async () => {
@@ -337,7 +343,7 @@ export default function SpinPage() {
                 phoneNumber: phoneFromUrl,
                 prizeName: prize.name,
                 couponCode: generatedCode,
-                language: i18n.language || 'fr',
+                language: currentLang,
               }),
             }).catch(() => {}); // Fire and forget
           }
@@ -654,7 +660,7 @@ export default function SpinPage() {
                     <div className="text-2xl text-white font-bold mb-4">{result}</div>
                     <button
                       disabled={isSaving || !couponCode}
-                      onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}`)}
+                      onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}&lang=${currentLang}`)}
                       className={`w-full py-3 px-6 font-bold rounded-xl transition-colors text-lg ${
                         isSaving || !couponCode 
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 

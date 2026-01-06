@@ -132,9 +132,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 8. Generate coupon URL
+    // 8. Generate coupon URL with language
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
-    const couponUrl = `${baseUrl}/coupon/${merchantId}?code=${couponCode}`;
+    const couponUrl = `${baseUrl}/coupon/${merchantId}?code=${couponCode}&lang=${language}`;
 
     // 9. Get congratulation message based on language
     const messageTemplate = CONGRATULATION_MESSAGES[language] || CONGRATULATION_MESSAGES['fr'];

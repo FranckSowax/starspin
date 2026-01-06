@@ -138,9 +138,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 8. Generate spin URL with phone number
+    // 8. Generate spin URL with phone number and language
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
-    const spinUrl = `${baseUrl}/spin/${merchantId}?phone=${encodeURIComponent(phoneNumber)}`;
+    const spinUrl = `${baseUrl}/spin/${merchantId}?phone=${encodeURIComponent(phoneNumber)}&lang=${language}`;
 
     // 9. Format phone number for Whapi (remove + prefix)
     const formattedPhone = phoneNumber.replace(/^\+/, '');

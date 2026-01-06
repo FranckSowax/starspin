@@ -15,8 +15,10 @@ export default function RedirectPage() {
   const searchParams = useSearchParams();
   const shopId = params.shopId as string;
 
-  // Get phone number from URL params (for WhatsApp workflow)
+  // Get phone number and language from URL params
   const phoneNumber = searchParams.get('phone');
+  const langFromUrl = searchParams.get('lang');
+  const currentLang = langFromUrl || i18n.language || 'en';
 
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
@@ -38,7 +40,11 @@ export default function RedirectPage() {
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    // Apply language from URL if provided
+    if (langFromUrl && i18n.language !== langFromUrl) {
+      i18n.changeLanguage(langFromUrl);
+    }
+  }, [langFromUrl, i18n]);
 
   useEffect(() => {
     const fetchMerchant = async () => {
@@ -141,7 +147,7 @@ export default function RedirectPage() {
         body: JSON.stringify({
           merchantId: shopId,
           phoneNumber: phoneNumber,
-          language: i18n.language || 'fr',
+          language: currentLang,
         }),
       });
 
@@ -229,10 +235,11 @@ export default function RedirectPage() {
   };
 
   const handleLaunchWheel = () => {
-    // Redirect to wheel/spin page with phone number for WhatsApp workflow
-    const spinUrl = phoneNumber
-      ? `/spin/${shopId}?phone=${encodeURIComponent(phoneNumber)}`
-      : `/spin/${shopId}`;
+    // Redirect to wheel/spin page with phone number and language
+    let spinUrl = `/spin/${shopId}?lang=${currentLang}`;
+    if (phoneNumber) {
+      spinUrl += `&phone=${encodeURIComponent(phoneNumber)}`;
+    }
     router.push(spinUrl);
   };
 
