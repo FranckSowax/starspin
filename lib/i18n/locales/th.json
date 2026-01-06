@@ -145,7 +145,8 @@
       "add": "เพิ่ม",
       "download": "ดาวน์โหลด",
       "upload": "อัปโหลด",
-      "close": "ปิด"
+      "close": "ปิด",
+      "back": "ย้อนกลับ"
     }
   },
   "languageSelect": {
@@ -320,6 +321,7 @@
       "carouselCards": "การ์ด Carousel",
       "addCard": "เพิ่มการ์ด",
       "card": "การ์ด",
+      "cards": "การ์ด",
       "media": "รูปภาพหรือวิดีโอ",
       "uploadMedia": "คลิกเพื่ออัปโหลด",
       "mediaFormats": "JPG, PNG, MP4 (สูงสุด 5MB)",
@@ -342,7 +344,37 @@
       "nextStep": "ขั้นตอนถัดไป",
       "nextStepDescription": "เมื่อกำหนดค่าแคมเปญแล้ว คุณสามารถเลือกผู้รับจากลูกค้า WhatsApp ที่รวบรวมไว้",
       "selectRecipients": "เลือกผู้รับ",
-      "comingSoon": "เร็วๆ นี้"
+      "selectRecipientsDesc": "เลือกผู้ติดต่อ WhatsApp ที่จะได้รับแคมเปญ carousel ของคุณ",
+      "comingSoon": "เร็วๆ นี้",
+      "untitledCampaign": "แคมเปญไม่มีชื่อ",
+      "totalContacts": "ผู้ติดต่อทั้งหมด",
+      "selected": "เลือกแล้ว",
+      "positiveCustomers": "ลูกค้าเชิงบวก",
+      "sendToSelected": "ส่งไปยังที่เลือก",
+      "searchByPhone": "ค้นหาด้วยหมายเลข...",
+      "selectAll": "เลือกทั้งหมด",
+      "deselectAll": "ยกเลิกเลือกทั้งหมด",
+      "selectPositive": "เลือกลูกค้าเชิงบวก",
+      "phoneNumber": "หมายเลข WhatsApp",
+      "rating": "คะแนน",
+      "reviews": "รีวิว",
+      "lastVisit": "เข้าชมล่าสุด",
+      "noContacts": "ไม่มีผู้ติดต่อ WhatsApp",
+      "noContactsDesc": "ลูกค้าที่ทิ้งหมายเลข WhatsApp จะปรากฏที่นี่",
+      "sendingInProgress": "กำลังส่ง...",
+      "messagesSent": "ข้อความที่ส่งแล้ว",
+      "sendResults": "ผลการส่ง",
+      "successfullySent": "ส่งสำเร็จ",
+      "failed": "ล้มเหลว",
+      "failedNumbers": "หมายเลขที่ล้มเหลว",
+      "apiKeyRequired": "ต้องการคีย์ API Whapi",
+      "apiKeyRequiredDesc": "กำหนดค่าคีย์ Whapi API ในการตั้งค่ากลยุทธ์เพื่อส่งแคมเปญ WhatsApp",
+      "goToSettings": "ไปที่การตั้งค่า",
+      "testSend": "ส่งทดสอบ",
+      "testSendDesc": "ทดสอบแคมเปญของคุณโดยส่งไปยัง 1 หรือ 2 หมายเลขก่อนการส่งจำนวนมาก",
+      "testNumberPlaceholder": "+66812345678",
+      "addTestNumber": "เพิ่มหมายเลข",
+      "sendTest": "ส่งการทดสอบ"
     }
   }
 }

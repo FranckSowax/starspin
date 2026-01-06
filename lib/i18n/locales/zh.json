@@ -149,7 +149,8 @@
       "add": "添加",
       "download": "下载",
       "upload": "上传",
-      "close": "关闭"
+      "close": "关闭",
+      "back": "返回"
     }
   },
   "languageSelect": {
@@ -191,6 +192,7 @@
       "carouselCards": "轮播卡片",
       "addCard": "添加卡片",
       "card": "卡片",
+      "cards": "张卡片",
       "media": "图片或视频",
       "uploadMedia": "点击上传",
       "mediaFormats": "JPG、PNG、MP4（最大5MB）",
@@ -213,7 +215,37 @@
       "nextStep": "下一步",
       "nextStepDescription": "配置活动后，您可以从收集的WhatsApp客户中选择收件人。",
       "selectRecipients": "选择收件人",
-      "comingSoon": "即将推出"
+      "selectRecipientsDesc": "选择将接收您轮播活动的WhatsApp联系人",
+      "comingSoon": "即将推出",
+      "untitledCampaign": "未命名活动",
+      "totalContacts": "总联系人数",
+      "selected": "已选择",
+      "positiveCustomers": "正面客户",
+      "sendToSelected": "发送给已选择",
+      "searchByPhone": "按号码搜索...",
+      "selectAll": "全选",
+      "deselectAll": "取消全选",
+      "selectPositive": "选择正面客户",
+      "phoneNumber": "WhatsApp号码",
+      "rating": "评分",
+      "reviews": "评论",
+      "lastVisit": "上次访问",
+      "noContacts": "没有WhatsApp联系人",
+      "noContactsDesc": "留下WhatsApp号码的客户将显示在这里。",
+      "sendingInProgress": "发送中...",
+      "messagesSent": "条消息已发送",
+      "sendResults": "发送结果",
+      "successfullySent": "发送成功",
+      "failed": "失败",
+      "failedNumbers": "失败的号码",
+      "apiKeyRequired": "需要Whapi API密钥",
+      "apiKeyRequiredDesc": "请在策略设置中配置Whapi API密钥以发送WhatsApp活动。",
+      "goToSettings": "前往设置",
+      "testSend": "测试发送",
+      "testSendDesc": "在批量发送前，先将活动发送到1或2个号码进行测试。",
+      "testNumberPlaceholder": "+86138123456789",
+      "addTestNumber": "添加号码",
+      "sendTest": "发送测试"
     }
   }
 }

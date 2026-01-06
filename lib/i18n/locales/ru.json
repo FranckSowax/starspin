@@ -149,7 +149,8 @@
       "add": "Добавить",
       "download": "Скачать",
       "upload": "Загрузить",
-      "close": "Закрыть"
+      "close": "Закрыть",
+      "back": "Назад"
     }
   },
   "languageSelect": {
@@ -191,6 +192,7 @@
       "carouselCards": "Карточки карусели",
       "addCard": "Добавить карточку",
       "card": "Карточка",
+      "cards": "карточек",
       "media": "Изображение или видео",
       "uploadMedia": "Нажмите для загрузки",
       "mediaFormats": "JPG, PNG, MP4 (макс. 5МБ)",
@@ -213,7 +215,37 @@
       "nextStep": "Следующий шаг",
       "nextStepDescription": "После настройки кампании вы сможете выбрать получателей из собранных контактов WhatsApp.",
       "selectRecipients": "Выбрать получателей",
-      "comingSoon": "Скоро"
+      "selectRecipientsDesc": "Выберите контакты WhatsApp, которые получат вашу карусельную кампанию",
+      "comingSoon": "Скоро",
+      "untitledCampaign": "Кампания без названия",
+      "totalContacts": "Всего контактов",
+      "selected": "Выбрано",
+      "positiveCustomers": "Положительные клиенты",
+      "sendToSelected": "Отправить выбранным",
+      "searchByPhone": "Поиск по номеру...",
+      "selectAll": "Выбрать всех",
+      "deselectAll": "Снять выбор",
+      "selectPositive": "Выбрать положительных",
+      "phoneNumber": "Номер WhatsApp",
+      "rating": "Рейтинг",
+      "reviews": "Отзывы",
+      "lastVisit": "Последний визит",
+      "noContacts": "Нет контактов WhatsApp",
+      "noContactsDesc": "Клиенты, оставившие номер WhatsApp, появятся здесь.",
+      "sendingInProgress": "Отправка...",
+      "messagesSent": "сообщений отправлено",
+      "sendResults": "Результаты отправки",
+      "successfullySent": "Успешно отправлено",
+      "failed": "Ошибки",
+      "failedNumbers": "Неудачные номера",
+      "apiKeyRequired": "Требуется API ключ Whapi",
+      "apiKeyRequiredDesc": "Настройте ключ Whapi API в настройках стратегии для отправки WhatsApp кампаний.",
+      "goToSettings": "Перейти в настройки",
+      "testSend": "Тестовая отправка",
+      "testSendDesc": "Протестируйте кампанию, отправив её на 1 или 2 номера перед массовой рассылкой.",
+      "testNumberPlaceholder": "+79123456789",
+      "addTestNumber": "Добавить номер",
+      "sendTest": "Отправить тест"
     }
   }
 }

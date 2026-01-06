@@ -149,7 +149,8 @@
       "add": "Agregar",
       "download": "Descargar",
       "upload": "Subir",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "back": "Volver"
     }
   },
   "languageSelect": {
@@ -191,6 +192,7 @@
       "carouselCards": "Tarjetas del carrusel",
       "addCard": "Agregar tarjeta",
       "card": "Tarjeta",
+      "cards": "tarjetas",
       "media": "Imagen o video",
       "uploadMedia": "Clic para subir",
       "mediaFormats": "JPG, PNG, MP4 (máx 5MB)",
@@ -213,7 +215,37 @@
       "nextStep": "Siguiente paso",
       "nextStepDescription": "Una vez configurada tu campaña, podrás seleccionar destinatarios de tus clientes de WhatsApp recopilados.",
       "selectRecipients": "Seleccionar destinatarios",
-      "comingSoon": "Próximamente"
+      "selectRecipientsDesc": "Elige los contactos de WhatsApp que recibirán tu campaña de carrusel",
+      "comingSoon": "Próximamente",
+      "untitledCampaign": "Campaña sin título",
+      "totalContacts": "Contactos totales",
+      "selected": "Seleccionados",
+      "positiveCustomers": "Clientes positivos",
+      "sendToSelected": "Enviar a seleccionados",
+      "searchByPhone": "Buscar por número...",
+      "selectAll": "Seleccionar todo",
+      "deselectAll": "Deseleccionar todo",
+      "selectPositive": "Seleccionar positivos",
+      "phoneNumber": "Número WhatsApp",
+      "rating": "Calificación",
+      "reviews": "Reseñas",
+      "lastVisit": "Última visita",
+      "noContacts": "Sin contactos WhatsApp",
+      "noContactsDesc": "Los clientes que dejaron su número de WhatsApp aparecerán aquí.",
+      "sendingInProgress": "Envío en progreso...",
+      "messagesSent": "mensajes enviados",
+      "sendResults": "Resultados del envío",
+      "successfullySent": "Enviados exitosamente",
+      "failed": "Fallidos",
+      "failedNumbers": "Números fallidos",
+      "apiKeyRequired": "Clave API Whapi requerida",
+      "apiKeyRequiredDesc": "Configura tu clave API Whapi en los ajustes de estrategia para enviar campañas de WhatsApp.",
+      "goToSettings": "Ir a ajustes",
+      "testSend": "Envío de prueba",
+      "testSendDesc": "Prueba tu campaña enviándola a 1 o 2 números antes del envío masivo.",
+      "testNumberPlaceholder": "+34612345678",
+      "addTestNumber": "Agregar un número",
+      "sendTest": "Enviar prueba"
     }
   }
 }

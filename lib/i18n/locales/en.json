@@ -150,7 +150,8 @@
       "add": "Add",
       "download": "Download",
       "upload": "Upload",
-      "close": "Close"
+      "close": "Close",
+      "back": "Back"
     }
   },
   "languageSelect": {
@@ -342,6 +343,7 @@
       "carouselCards": "Carousel Cards",
       "addCard": "Add a card",
       "card": "Card",
+      "cards": "cards",
       "media": "Image or video",
       "uploadMedia": "Click to upload",
       "mediaFormats": "JPG, PNG, MP4 (max 5MB)",
@@ -364,7 +366,37 @@
       "nextStep": "Next Step",
       "nextStepDescription": "Once your campaign is configured, you can select recipients from your collected WhatsApp customers.",
       "selectRecipients": "Select Recipients",
-      "comingSoon": "Coming Soon"
+      "selectRecipientsDesc": "Choose WhatsApp contacts who will receive your carousel campaign",
+      "comingSoon": "Coming Soon",
+      "untitledCampaign": "Untitled Campaign",
+      "totalContacts": "Total Contacts",
+      "selected": "Selected",
+      "positiveCustomers": "Positive Customers",
+      "sendToSelected": "Send to Selected",
+      "searchByPhone": "Search by number...",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selectPositive": "Select Positive",
+      "phoneNumber": "WhatsApp Number",
+      "rating": "Rating",
+      "reviews": "Reviews",
+      "lastVisit": "Last Visit",
+      "noContacts": "No WhatsApp Contacts",
+      "noContactsDesc": "Customers who left their WhatsApp number will appear here.",
+      "sendingInProgress": "Sending in progress...",
+      "messagesSent": "messages sent",
+      "sendResults": "Send Results",
+      "successfullySent": "Successfully Sent",
+      "failed": "Failed",
+      "failedNumbers": "Failed Numbers",
+      "apiKeyRequired": "Whapi API Key Required",
+      "apiKeyRequiredDesc": "Configure your Whapi API key in strategy settings to send WhatsApp campaigns.",
+      "goToSettings": "Go to Settings",
+      "testSend": "Test Send",
+      "testSendDesc": "Test your campaign by sending it to 1 or 2 numbers before mass sending.",
+      "testNumberPlaceholder": "+1234567890",
+      "addTestNumber": "Add a number",
+      "sendTest": "Send Test"
     }
   }
 }

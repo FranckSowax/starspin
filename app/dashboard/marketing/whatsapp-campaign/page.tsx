@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase/client';
@@ -40,6 +41,7 @@ const generateId = () => Math.random().toString(36).substring(2, 9);
 
 export default function WhatsAppCampaignPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -554,10 +556,21 @@ export default function WhatsAppCampaignPage() {
             <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl border border-teal-200 p-6">
               <h3 className="text-lg font-semibold text-teal-900 mb-2">{t('marketing.whatsappCampaign.nextStep')}</h3>
               <p className="text-sm text-teal-700 mb-4">{t('marketing.whatsappCampaign.nextStepDescription')}</p>
-              <Button className="bg-teal-600 hover:bg-teal-700 gap-2" disabled>
+              <Button
+                className="bg-teal-600 hover:bg-teal-700 gap-2"
+                disabled={!isCampaignValid()}
+                onClick={() => {
+                  // Save campaign to localStorage
+                  localStorage.setItem('whatsapp_campaign_draft', JSON.stringify({
+                    campaignName,
+                    mainMessage,
+                    cards,
+                  }));
+                  router.push('/dashboard/marketing/whatsapp-campaign/send');
+                }}
+              >
                 <Users className="w-4 h-4" />
                 {t('marketing.whatsappCampaign.selectRecipients')}
-                <span className="text-xs bg-teal-500 px-2 py-0.5 rounded-full">{t('marketing.whatsappCampaign.comingSoon')}</span>
               </Button>
             </div>
           </div>

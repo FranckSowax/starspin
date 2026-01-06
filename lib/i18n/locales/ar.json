@@ -149,7 +149,8 @@
       "add": "إضافة",
       "download": "تحميل",
       "upload": "رفع",
-      "close": "إغلاق"
+      "close": "إغلاق",
+      "back": "رجوع"
     }
   },
   "languageSelect": {
@@ -191,6 +192,7 @@
       "carouselCards": "بطاقات الكاروسيل",
       "addCard": "إضافة بطاقة",
       "card": "بطاقة",
+      "cards": "بطاقات",
       "media": "صورة أو فيديو",
       "uploadMedia": "انقر للرفع",
       "mediaFormats": "JPG، PNG، MP4 (الحد الأقصى 5 ميجابايت)",
@@ -213,7 +215,37 @@
       "nextStep": "الخطوة التالية",
       "nextStepDescription": "بمجرد تكوين حملتك، يمكنك اختيار المستلمين من عملاء واتساب المجمعين.",
       "selectRecipients": "اختيار المستلمين",
-      "comingSoon": "قريبًا"
+      "selectRecipientsDesc": "اختر جهات اتصال واتساب التي ستتلقى حملتك",
+      "comingSoon": "قريبًا",
+      "untitledCampaign": "حملة بدون عنوان",
+      "totalContacts": "إجمالي جهات الاتصال",
+      "selected": "المحددين",
+      "positiveCustomers": "العملاء الإيجابيون",
+      "sendToSelected": "إرسال للمحددين",
+      "searchByPhone": "البحث برقم...",
+      "selectAll": "تحديد الكل",
+      "deselectAll": "إلغاء تحديد الكل",
+      "selectPositive": "تحديد الإيجابيين",
+      "phoneNumber": "رقم واتساب",
+      "rating": "التقييم",
+      "reviews": "المراجعات",
+      "lastVisit": "آخر زيارة",
+      "noContacts": "لا توجد جهات اتصال واتساب",
+      "noContactsDesc": "سيظهر هنا العملاء الذين تركوا رقم واتساب الخاص بهم.",
+      "sendingInProgress": "جاري الإرسال...",
+      "messagesSent": "رسائل مرسلة",
+      "sendResults": "نتائج الإرسال",
+      "successfullySent": "تم الإرسال بنجاح",
+      "failed": "فشل",
+      "failedNumbers": "الأرقام الفاشلة",
+      "apiKeyRequired": "مفتاح API Whapi مطلوب",
+      "apiKeyRequiredDesc": "قم بتكوين مفتاح Whapi API في إعدادات الاستراتيجية لإرسال حملات واتساب.",
+      "goToSettings": "الذهاب للإعدادات",
+      "testSend": "إرسال تجريبي",
+      "testSendDesc": "اختبر حملتك بإرسالها إلى رقم أو رقمين قبل الإرسال الجماعي.",
+      "testNumberPlaceholder": "+966512345678",
+      "addTestNumber": "إضافة رقم",
+      "sendTest": "إرسال الاختبار"
     }
   }
 }
