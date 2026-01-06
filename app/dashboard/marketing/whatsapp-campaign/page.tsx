@@ -11,12 +11,10 @@ import {
   Plus,
   Trash2,
   Image as ImageIcon,
-  Video,
   Link as LinkIcon,
   MessageSquare,
   Send,
   Eye,
-  Copy,
   Check,
   Upload,
   X,
@@ -29,7 +27,6 @@ import {
   FolderOpen,
   Star,
   Clock,
-  MoreVertical,
 } from 'lucide-react';
 
 interface CarouselCard {
@@ -81,7 +78,6 @@ export default function WhatsAppCampaignPage() {
 
   // UI state
   const [showPreview, setShowPreview] = useState(false);
-  const [jsonCopied, setJsonCopied] = useState(false);
   const [uploadingCard, setUploadingCard] = useState<string | null>(null);
 
   // Saved campaigns state
@@ -294,43 +290,6 @@ export default function WhatsAppCampaignPage() {
     } finally {
       setUploadingCard(null);
     }
-  };
-
-  const generateJSON = () => {
-    const payload = {
-      body: {
-        text: mainMessage,
-      },
-      to: '{{phone_number}}',
-      cards: cards.map((card, index) => ({
-        media: {
-          media: card.mediaUrl,
-        },
-        text: card.text,
-        id: `Card-ID${index + 1}`,
-        buttons: [
-          card.buttonType === 'url'
-            ? {
-                type: 'url',
-                title: card.buttonTitle,
-                id: `Button-ID${index + 1}`,
-                url: card.buttonUrl,
-              }
-            : {
-                type: 'quick_reply',
-                title: card.buttonTitle,
-                id: `Button-ID${index + 1}`,
-              },
-        ],
-      })),
-    };
-    return JSON.stringify(payload, null, 2);
-  };
-
-  const copyJSON = () => {
-    navigator.clipboard.writeText(generateJSON());
-    setJsonCopied(true);
-    setTimeout(() => setJsonCopied(false), 2000);
   };
 
   const isCardValid = (card: CarouselCard) => {
@@ -618,7 +577,7 @@ export default function WhatsAppCampaignPage() {
                       ) : (
                         <div
                           onClick={() => fileInputRefs.current[card.id]?.click()}
-                          className="w-full h-40 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 transition-colors"
+                          className="w-full h-48 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 transition-colors"
                         >
                           {uploadingCard === card.id ? (
                             <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
@@ -626,7 +585,11 @@ export default function WhatsAppCampaignPage() {
                             <>
                               <Upload className="w-8 h-8 text-slate-400 mb-2" />
                               <span className="text-sm text-slate-500">{t('marketing.whatsappCampaign.uploadMedia')}</span>
-                              <span className="text-xs text-slate-400 mt-1">{t('marketing.whatsappCampaign.mediaFormats')}</span>
+                              <div className="text-xs text-slate-400 mt-2 text-center px-4 space-y-1">
+                                <p className="font-medium">{t('marketing.whatsappCampaign.mediaRequirements')}</p>
+                                <p>{t('marketing.whatsappCampaign.imageRequirements')}</p>
+                                <p>{t('marketing.whatsappCampaign.videoRequirements')}</p>
+                              </div>
                             </>
                           )}
                         </div>
@@ -634,7 +597,7 @@ export default function WhatsAppCampaignPage() {
                       <input
                         ref={(el) => { fileInputRefs.current[card.id] = el; }}
                         type="file"
-                        accept="image/*,video/*"
+                        accept="image/jpeg,image/jpg,image/png,video/mp4"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           if (file) handleFileUpload(card.id, file);
@@ -787,37 +750,6 @@ export default function WhatsAppCampaignPage() {
                 </div>
               </div>
             )}
-
-            {/* JSON Output */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                  <Send className="w-5 h-5 text-teal-600" />
-                  {t('marketing.whatsappCampaign.jsonPayload')}
-                </h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyJSON}
-                  disabled={!isCampaignValid()}
-                  className="gap-1"
-                >
-                  {jsonCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                  {jsonCopied ? t('marketing.whatsappCampaign.copied') : t('marketing.whatsappCampaign.copy')}
-                </Button>
-              </div>
-
-              {!isCampaignValid() && (
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-amber-700">{t('marketing.whatsappCampaign.fillAllFields')}</p>
-                </div>
-              )}
-
-              <pre className="bg-slate-900 text-slate-100 rounded-xl p-4 overflow-x-auto text-xs font-mono max-h-96">
-                {generateJSON()}
-              </pre>
-            </div>
 
             {/* Next Step Info */}
             <div className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-2xl border border-teal-200 p-6">
