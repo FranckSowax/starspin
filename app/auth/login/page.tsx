@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Button } from '@/components/atoms/Button';
 import { Input } from '@/components/atoms/Input';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,19 +44,22 @@ function LoginForm() {
       }
 
       if (data.session) {
-        // Attendre que la session soit bien persistée
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Vérifier que la session est bien active
-        const { data: sessionCheck } = await supabase.auth.getSession();
-
-        if (sessionCheck.session) {
-          // Utiliser window.location pour une redirection garantie
-          window.location.href = redirectUrl;
-        } else {
-          setError('Session non persistée. Vérifiez que les cookies sont activés.');
-          setLoading(false);
+        // Stocker la session manuellement pour Safari
+        try {
+          localStorage.setItem('starspin-auth-token', JSON.stringify({
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+            expires_at: data.session.expires_at,
+          }));
+        } catch {
+          // localStorage might be disabled
         }
+
+        // Attendre que la session soit bien persistée
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Rediriger directement - Safari a besoin d'une navigation complète
+        window.location.replace(redirectUrl);
       } else {
         setError('Connexion échouée. Veuillez réessayer.');
         setLoading(false);
