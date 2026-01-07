@@ -76,7 +76,7 @@ export default function RedirectPage() {
   const [hasClickedSocial, setHasClickedSocial] = useState(false);
 
   // WhatsApp workflow states
-  const [whatsappCountdown, setWhatsappCountdown] = useState(10);
+  const [whatsappCountdown, setWhatsappCountdown] = useState(20);
   const [whatsappSending, setWhatsappSending] = useState(false);
   const [whatsappSent, setWhatsappSent] = useState(false);
   const [whatsappError, setWhatsappError] = useState('');
