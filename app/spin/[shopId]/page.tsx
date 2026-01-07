@@ -512,10 +512,13 @@ export default function SpinPage() {
             <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
               {merchant?.logo_url ? (
                 <>
-                  <div className="w-24 h-24 bg-white rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#ffd700] mb-[-15px] relative z-10">
-                    <img 
-                      src={merchant.logo_url} 
-                      alt="Merchant Logo" 
+                  <div
+                    className="w-24 h-24 rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#ffd700] mb-[-15px] relative z-10"
+                    style={{ backgroundColor: merchant.logo_background_color || '#FFFFFF' }}
+                  >
+                    <img
+                      src={merchant.logo_url}
+                      alt="Merchant Logo"
                       className="w-full h-full object-contain rounded-full"
                     />
                   </div>
@@ -550,18 +553,14 @@ export default function SpinPage() {
                 style={{ boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.5)' }}
               >
                 {allSegments.map((segment, index) => {
-                  const isUnlucky = segment.type === 'unlucky';
-                  const prize = segment.prize;
-                  const isHighValue = prize && (prize.probability || 0) <= 10;
-                  
-                  // Color logic: UNLUCKY = black/red, RETRY = yellow, high value prize = yellow, normal prize = green
-                  let segmentColor = 'green';
+                  // New color logic: alternate yellow/black for ALL segments
+                  // Start with yellow (index 0 = yellow, index 1 = black, etc.)
+                  // UNLUCKY segments are always black
+                  let segmentColor = index % 2 === 0 ? 'yellow' : 'black';
+
+                  // Override: UNLUCKY is always black
                   if (segment.type === 'unlucky') {
                     segmentColor = 'black';
-                  } else if (segment.type === 'retry') {
-                    segmentColor = 'yellow';
-                  } else if (isHighValue) {
-                    segmentColor = 'yellow';
                   }
                   
                   // Use segment label directly
@@ -615,8 +614,8 @@ export default function SpinPage() {
                       <div 
                         className={`segment-content ${segmentColor}`}
                       >
-                        <div 
-                          className={`segment-text ${isHighValue ? 'yellow-text' : ''}`}
+                        <div
+                          className={`segment-text ${segmentColor === 'yellow' ? 'yellow-text' : ''}`}
                           style={{
                             position: 'absolute',
                             top: `${textY}%`,

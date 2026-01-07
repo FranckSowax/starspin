@@ -180,7 +180,10 @@ function CouponContent() {
         <div className="relative z-10 w-full max-w-md bg-black/40 backdrop-blur-xl rounded-3xl p-8 border border-[#ffd700]/30 shadow-[0_0_50px_rgba(255,215,0,0.1)]">
           {merchant?.logo_url && (
             <div className="flex justify-center mb-8">
-              <div className="w-24 h-24 bg-white rounded-full p-2 shadow-[0_0_20px_rgba(255,215,0,0.3)] flex items-center justify-center border-4 border-[#ffd700]">
+              <div
+                className="w-24 h-24 rounded-full p-2 shadow-[0_0_20px_rgba(255,215,0,0.3)] flex items-center justify-center border-4 border-[#ffd700]"
+                style={{ backgroundColor: merchant.logo_background_color || '#FFFFFF' }}
+              >
                 <img src={merchant.logo_url} alt={merchant.business_name} className="w-full h-full object-contain rounded-full" />
               </div>
             </div>

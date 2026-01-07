@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, X, Loader2, Calendar, MapPin, Star, Music, Instagram as InstagramIcon, Globe, MessageCircle } from 'lucide-react';
+import { Check, X, Loader2, Calendar, MapPin, Star, Music, Instagram as InstagramIcon, Globe, MessageCircle, Palette } from 'lucide-react';
 
 const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
 const PLATFORMS = [
@@ -28,6 +28,9 @@ export default function StrategyPage() {
 
   // WhatsApp configuration
   const [whatsappMessageTemplate, setWhatsappMessageTemplate] = useState('');
+
+  // Logo background color
+  const [logoBackgroundColor, setLogoBackgroundColor] = useState('#FFFFFF');
 
   // Redirect URLs
   const [googleMapsUrl, setGoogleMapsUrl] = useState('');
@@ -62,6 +65,9 @@ export default function StrategyPage() {
       // Load workflow mode and WhatsApp config
       setWorkflowMode(merchantData?.workflow_mode || 'web');
       setWhatsappMessageTemplate(merchantData?.whatsapp_message_template || 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}');
+
+      // Load logo background color
+      setLogoBackgroundColor(merchantData?.logo_background_color || '#FFFFFF');
 
       // Load redirect URLs
       setGoogleMapsUrl(merchantData?.google_maps_url || '');
@@ -101,6 +107,7 @@ export default function StrategyPage() {
       const updates: any = {
         workflow_mode: workflowMode,
         whatsapp_message_template: whatsappMessageTemplate || null,
+        logo_background_color: logoBackgroundColor || '#FFFFFF',
         google_maps_url: googleMapsUrl || null,
         tripadvisor_url: tripadvisorUrl || null,
         tiktok_url: tiktokUrl || null,
@@ -274,6 +281,90 @@ export default function StrategyPage() {
           )}
         </Card>
 
+        {/* Logo Background Color */}
+        <Card className="p-6">
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Palette className="w-5 h-5 text-teal-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Couleur de Fond du Logo</h3>
+            </div>
+            <p className="text-sm text-gray-600">
+              Définissez la couleur de fond du cercle qui contient votre logo sur la roue et la page coupon
+            </p>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              <label className="text-sm font-medium text-gray-700">Couleur :</label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={logoBackgroundColor}
+                  onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                  className="w-12 h-12 rounded-lg cursor-pointer border-2 border-gray-300 hover:border-teal-500 transition-colors"
+                />
+                <input
+                  type="text"
+                  value={logoBackgroundColor}
+                  onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                  placeholder="#FFFFFF"
+                  className="w-28 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            {/* Preview */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">Aperçu :</span>
+              <div
+                className="w-16 h-16 rounded-full border-4 border-[#ffd700] flex items-center justify-center shadow-lg"
+                style={{ backgroundColor: logoBackgroundColor }}
+              >
+                {merchant?.logo_url ? (
+                  <img
+                    src={merchant.logo_url}
+                    alt="Logo"
+                    className="w-12 h-12 object-contain rounded-full"
+                  />
+                ) : (
+                  <span className="text-xs text-gray-400">Logo</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setLogoBackgroundColor('#FFFFFF')}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${logoBackgroundColor === '#FFFFFF' ? 'bg-gray-100 border-gray-400' : 'border-gray-200 hover:border-gray-300'}`}
+            >
+              Blanc
+            </button>
+            <button
+              type="button"
+              onClick={() => setLogoBackgroundColor('#000000')}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${logoBackgroundColor === '#000000' ? 'bg-gray-100 border-gray-400' : 'border-gray-200 hover:border-gray-300'}`}
+            >
+              Noir
+            </button>
+            <button
+              type="button"
+              onClick={() => setLogoBackgroundColor('#FFD700')}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${logoBackgroundColor === '#FFD700' ? 'bg-gray-100 border-gray-400' : 'border-gray-200 hover:border-gray-300'}`}
+            >
+              Or
+            </button>
+            <button
+              type="button"
+              onClick={() => setLogoBackgroundColor('#1a1a2e')}
+              className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${logoBackgroundColor === '#1a1a2e' ? 'bg-gray-100 border-gray-400' : 'border-gray-200 hover:border-gray-300'}`}
+            >
+              Bleu nuit
+            </button>
+          </div>
+        </Card>
+
         {/* Redirect URLs Configuration */}
         <Card className="p-6">
           <div className="mb-6">
@@ -423,6 +514,7 @@ export default function StrategyPage() {
             onClick={() => {
               setWorkflowMode(merchant.workflow_mode || 'web');
               setWhatsappMessageTemplate(merchant.whatsapp_message_template || 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}');
+              setLogoBackgroundColor(merchant.logo_background_color || '#FFFFFF');
               setGoogleMapsUrl(merchant.google_maps_url || '');
               setTripadvisorUrl(merchant.tripadvisor_url || '');
               setTiktokUrl(merchant.tiktok_url || '');
