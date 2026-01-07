@@ -42,6 +42,7 @@ function LoginForm() {
       console.log('[LOGIN] Réponse Supabase:', {
         hasSession: !!data.session,
         hasUser: !!data.user,
+        userId: data.user?.id,
         error: error?.message
       });
 
@@ -53,41 +54,23 @@ function LoginForm() {
       }
 
       if (data.session) {
-        console.log('[LOGIN] Session créée, user_id:', data.session.user.id);
-        console.log('[LOGIN] Token expires_at:', data.session.expires_at);
+        // Vérifier les cookies après login
+        console.log('[LOGIN] Cookies après login:', document.cookie);
 
-        // Stocker la session manuellement pour Safari
-        try {
-          localStorage.setItem('starspin-auth-token', JSON.stringify({
-            access_token: data.session.access_token,
-            refresh_token: data.session.refresh_token,
-            expires_at: data.session.expires_at,
-          }));
-          console.log('[LOGIN] Token stocké dans localStorage');
-        } catch (storageError) {
-          console.error('[LOGIN] Erreur localStorage:', storageError);
-        }
+        // Attendre que les cookies soient bien écrits
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // Vérifier que la session est bien active
-        const { data: sessionCheck, error: sessionError } = await supabase.auth.getSession();
+        const { data: sessionCheck } = await supabase.auth.getSession();
         console.log('[LOGIN] Vérification session:', {
           hasSession: !!sessionCheck.session,
-          error: sessionError?.message
+          userId: sessionCheck.session?.user?.id
         });
-
-        if (!sessionCheck.session) {
-          console.error('[LOGIN] Session non persistée après login!');
-          setError('Session non persistée. Vérifiez que les cookies sont activés.');
-          setLoading(false);
-          return;
-        }
 
         console.log('[LOGIN] Redirection vers:', redirectUrl);
 
-        // Attendre un peu avant la redirection
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        window.location.replace(redirectUrl);
+        // Redirection
+        window.location.href = redirectUrl;
       } else {
         console.error('[LOGIN] Pas de session retournée');
         setError('Connexion échouée. Veuillez réessayer.');
