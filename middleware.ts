@@ -16,6 +16,13 @@ function getAdminEmails(): string[] {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Log pour debug
+  const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+  if (isProtectedRoute) {
+    console.log('[MIDDLEWARE] Route protégée:', pathname);
+    console.log('[MIDDLEWARE] Cookies présents:', request.cookies.getAll().map(c => c.name));
+  }
+
   // Create response to modify
   let response = NextResponse.next({
     request: {
@@ -45,12 +52,18 @@ export async function middleware(request: NextRequest) {
   // Get current session
   const { data: { user }, error } = await supabase.auth.getUser();
 
+  if (isProtectedRoute) {
+    console.log('[MIDDLEWARE] User trouvé:', !!user);
+    console.log('[MIDDLEWARE] User email:', user?.email);
+    console.log('[MIDDLEWARE] Erreur auth:', error?.message);
+  }
+
   // Check if route requires authentication
-  const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   const isAdminRoute = ADMIN_ROUTES.some(route => pathname.startsWith(route));
 
   // Redirect unauthenticated users from protected routes
   if (isProtectedRoute && (!user || error)) {
+    console.log('[MIDDLEWARE] Redirection vers login - pas de session valide');
     const loginUrl = new URL('/auth/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
