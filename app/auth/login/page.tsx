@@ -45,10 +45,19 @@ function LoginForm() {
       }
 
       if (data.session) {
-        // Rafraîchir le router et rediriger
-        router.refresh();
-        // Utiliser window.location pour une redirection garantie
-        window.location.href = redirectUrl;
+        // Attendre que la session soit bien persistée
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Vérifier que la session est bien active
+        const { data: sessionCheck } = await supabase.auth.getSession();
+
+        if (sessionCheck.session) {
+          // Utiliser window.location pour une redirection garantie
+          window.location.href = redirectUrl;
+        } else {
+          setError('Session non persistée. Vérifiez que les cookies sont activés.');
+          setLoading(false);
+        }
       } else {
         setError('Connexion échouée. Veuillez réessayer.');
         setLoading(false);
