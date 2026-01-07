@@ -43,6 +43,16 @@ export default function StrategyPage() {
     Array(7).fill('google_maps')
   );
 
+  // Current day index (0 = Monday, 6 = Sunday) - computed client-side to avoid hydration mismatch
+  const [currentDayIndex, setCurrentDayIndex] = useState<number | null>(null);
+
+  // Set current day index on client-side only
+  useEffect(() => {
+    const jsDay = new Date().getDay(); // 0 = Sunday, 1 = Monday, ...
+    const dayIndex = jsDay === 0 ? 6 : jsDay - 1; // Convert to 0 = Monday, 6 = Sunday
+    setCurrentDayIndex(dayIndex);
+  }, []);
+
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -488,24 +498,26 @@ export default function StrategyPage() {
         </Card>
 
         {/* Current Day Preview */}
-        <Card className="p-6 bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">Aujourd'hui</h3>
-              <p className="text-sm text-gray-600">
-                Les clients seront redirigés vers : 
-                <span className="font-bold text-teal-700 ml-1">
-                  {getPlatformInfo(weeklySchedule[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]).label}
-                </span>
-              </p>
+        {currentDayIndex !== null && (
+          <Card className="p-6 bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Aujourd'hui ({DAYS[currentDayIndex]})</h3>
+                <p className="text-sm text-gray-600">
+                  Les clients seront redirigés vers :
+                  <span className="font-bold text-teal-700 ml-1">
+                    {getPlatformInfo(weeklySchedule[currentDayIndex]).label}
+                  </span>
+                </p>
+              </div>
+              <div className={`w-16 h-16 ${getPlatformInfo(weeklySchedule[currentDayIndex]).color} rounded-full flex items-center justify-center shadow-lg`}>
+                {React.createElement(getPlatformInfo(weeklySchedule[currentDayIndex]).icon, {
+                  className: "w-8 h-8 text-white"
+                })}
+              </div>
             </div>
-            <div className={`w-16 h-16 ${getPlatformInfo(weeklySchedule[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]).color} rounded-full flex items-center justify-center shadow-lg`}>
-              {React.createElement(getPlatformInfo(weeklySchedule[new Date().getDay() === 0 ? 6 : new Date().getDay() - 1]).icon, {
-                className: "w-8 h-8 text-white"
-              })}
-            </div>
-          </div>
-        </Card>
+          </Card>
+        )}
 
         {/* Save Button */}
         <div className="flex justify-end gap-3">
