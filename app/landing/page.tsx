@@ -802,11 +802,11 @@ export default function LandingPage() {
                   <span className="text-gray-700">{t('landing.pricing.dedicatedManager')}</span>
                 </li>
               </ul>
-              <Link href="/contact" className="w-full">
+              <a href="mailto:contact@starspin.app" className="w-full block">
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
                   {t('landing.pricing.contactUs')}
                 </Button>
-              </Link>
+              </a>
             </Card>
           </div>
 

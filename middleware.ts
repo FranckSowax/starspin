@@ -2,10 +2,13 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 // Routes that require authentication
-const PROTECTED_ROUTES = ['/dashboard', '/admin'];
+const PROTECTED_ROUTES = ['/dashboard'];
 
-// Routes that require admin privileges
-const ADMIN_ROUTES = ['/admin', '/api/admin'];
+// Routes that require admin privileges (except /admin/login)
+const ADMIN_ROUTES = ['/api/admin'];
+
+// Admin page routes (separate handling for redirect to admin login)
+const ADMIN_PAGE_ROUTES = ['/admin'];
 
 // Admin emails - loaded from environment variable
 function getAdminEmails(): string[] {
@@ -66,10 +69,12 @@ export async function middleware(request: NextRequest) {
     console.log('[MIDDLEWARE] Erreur auth:', error?.message);
   }
 
-  // Check if route requires authentication
-  const isAdminRoute = ADMIN_ROUTES.some(route => pathname.startsWith(route));
+  // Check if route requires admin authentication
+  const isAdminApiRoute = ADMIN_ROUTES.some(route => pathname.startsWith(route));
+  const isAdminPageRoute = ADMIN_PAGE_ROUTES.some(route => pathname.startsWith(route));
+  const isAdminLoginPage = pathname === '/admin/login';
 
-  // Redirect unauthenticated users from protected routes
+  // Redirect unauthenticated users from protected routes (dashboard)
   if (isProtectedRoute && (!user || error)) {
     console.log('[MIDDLEWARE] Redirection vers login - pas de session valide');
     const loginUrl = new URL('/auth/login', request.url);
@@ -77,34 +82,46 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Check admin authorization for admin routes
-  if (isAdminRoute && user) {
+  // Handle admin page routes (except login page)
+  if (isAdminPageRoute && !isAdminLoginPage) {
+    // Not authenticated - redirect to admin login
+    if (!user || error) {
+      console.log('[MIDDLEWARE] Redirection vers admin login - pas de session');
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+
+    // Check admin authorization
     const adminEmails = getAdminEmails();
     const userEmail = user.email?.toLowerCase();
 
-    // If no admin emails configured, deny access (fail-secure)
     if (adminEmails.length === 0) {
       console.warn('No admin emails configured. Admin access denied.');
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+
+    if (!userEmail || !adminEmails.includes(userEmail)) {
+      console.warn(`Unauthorized admin access attempt by: ${userEmail}`);
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+  }
+
+  // Handle admin API routes
+  if (isAdminApiRoute) {
+    if (!user || error) {
       return NextResponse.json(
-        { error: 'Admin access not configured. Please set ADMIN_EMAILS environment variable.' },
-        { status: 403 }
+        { error: 'Non authentifié' },
+        { status: 401 }
       );
     }
 
-    // Check if user is admin
-    if (!userEmail || !adminEmails.includes(userEmail)) {
-      console.warn(`Unauthorized admin access attempt by: ${userEmail}`);
+    const adminEmails = getAdminEmails();
+    const userEmail = user.email?.toLowerCase();
 
-      // For API routes, return JSON error
-      if (pathname.startsWith('/api/')) {
-        return NextResponse.json(
-          { error: 'Forbidden: Admin access required' },
-          { status: 403 }
-        );
-      }
-
-      // For page routes, redirect to dashboard
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+    if (adminEmails.length === 0 || !userEmail || !adminEmails.includes(userEmail)) {
+      return NextResponse.json(
+        { error: 'Forbidden: Admin access required' },
+        { status: 403 }
+      );
     }
   }
 
