@@ -932,15 +932,10 @@ export default function LandingPage() {
               {t('landing.cta.subtitle')}
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex justify-center items-center">
               <Link href="/auth/signup">
                 <Button size="lg" className="bg-white text-[#2D6A4F] hover:bg-gray-100 px-12 py-7 text-xl font-bold rounded-full shadow-2xl">
                   {t('landing.cta.tryFree')}
-                </Button>
-              </Link>
-              <Link href="/demo">
-                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/10 px-12 py-7 text-xl font-bold rounded-full">
-                  {t('landing.cta.seeDemo')}
                 </Button>
               </Link>
             </div>
