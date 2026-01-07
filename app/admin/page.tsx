@@ -338,7 +338,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-slate-300">Loading admin dashboard...</p>
+          <p className="text-lg text-white/70">Loading admin dashboard...</p>
         </div>
       </div>
     );
@@ -408,15 +408,15 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-bold text-white">
                   {activeSection === 'dashboard' ? 'Tableau de Bord' : 'Gestion des Marchands'}
                 </h2>
-                <p className="text-slate-200 text-sm mt-0.5">
-                  {activeSection === 'dashboard' 
-                    ? 'Statistiques et analytics' 
+                <p className="text-white/70 text-sm mt-0.5">
+                  {activeSection === 'dashboard'
+                    ? 'Statistiques et analytics'
                     : 'Liste et gestion des marchands'}
                 </p>
               </div>
               <div className="flex items-center gap-4">
                 {lastUpdated && (
-                  <span className="text-xs text-slate-300">
+                  <span className="text-xs text-white/70">
                     Mis à jour: {lastUpdated.toLocaleTimeString('fr-FR')}
                   </span>
                 )}
@@ -488,9 +488,9 @@ export default function AdminDashboard() {
                   <span className="font-semibold">+12%</span>
                 </div>
               </div>
-              <p className="text-slate-200 text-sm mb-2">Total Marchands</p>
+              <p className="text-white text-sm mb-2">Total Marchands</p>
               <p className="text-4xl font-bold text-white mb-1">{stats.totalMerchants}</p>
-              <p className="text-xs text-slate-300">{stats.activeMerchants} actifs</p>
+              <p className="text-xs text-white/60">{stats.activeMerchants} actifs</p>
             </div>
           </div>
 
@@ -506,9 +506,9 @@ export default function AdminDashboard() {
                   <span className="font-semibold">+8%</span>
                 </div>
               </div>
-              <p className="text-slate-200 text-sm mb-2">Total Reviews</p>
+              <p className="text-white text-sm mb-2">Total Reviews</p>
               <p className="text-4xl font-bold text-white mb-1">{stats.totalReviews}</p>
-              <p className="text-xs text-slate-300">Tous marchands</p>
+              <p className="text-xs text-white/60">Tous marchands</p>
             </div>
           </div>
 
@@ -524,9 +524,9 @@ export default function AdminDashboard() {
                   <span className="font-semibold">+15%</span>
                 </div>
               </div>
-              <p className="text-slate-200 text-sm mb-2">Revenue Estimé (MRR)</p>
+              <p className="text-white text-sm mb-2">Revenue Estimé (MRR)</p>
               <p className="text-4xl font-bold text-white mb-1">{stats.totalRevenue.toFixed(0)}฿</p>
-              <p className="text-xs text-slate-300">Basé sur abonnements</p>
+              <p className="text-xs text-white/60">Basé sur abonnements</p>
             </div>
           </div>
 
@@ -542,9 +542,9 @@ export default function AdminDashboard() {
                   <span className="font-semibold">+5%</span>
                 </div>
               </div>
-              <p className="text-slate-200 text-sm mb-2">Total Spins</p>
+              <p className="text-white text-sm mb-2">Total Spins</p>
               <p className="text-4xl font-bold text-white mb-1">{stats.totalSpins}</p>
-              <p className="text-xs text-slate-300">Tours de roue totaux</p>
+              <p className="text-xs text-white/60">Tours de roue totaux</p>
             </div>
           </div>
         </div>
@@ -711,13 +711,13 @@ export default function AdminDashboard() {
             {/* Filters */}
             <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 mb-6 border border-slate-700/50">
               <div className="flex items-center gap-2 mb-4">
-                <Filter className="w-5 h-5 text-slate-300" />
-                <span className="text-sm font-semibold text-slate-200">Filtres</span>
+                <Filter className="w-5 h-5 text-white/70" />
+                <span className="text-sm font-semibold text-white">Filtres</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Search */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
                   <input
                     type="text"
                     placeholder="Rechercher..."
@@ -755,7 +755,7 @@ export default function AdminDashboard() {
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden">
           <div className="p-6 border-b border-slate-700/50">
             <h2 className="text-xl font-bold text-white">Liste des Marchands</h2>
-            <p className="text-sm text-slate-300 mt-1">{filteredMerchants.length} marchands trouvés</p>
+            <p className="text-sm text-white/70 mt-1">{filteredMerchants.length} marchands trouvés</p>
           </div>
           <div className="divide-y divide-slate-700/50">
             {filteredMerchants.map((merchant) => {
@@ -774,7 +774,7 @@ export default function AdminDashboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
                           <h3 className="text-lg font-semibold text-white">{merchant.business_name}</h3>
-                          <Badge className="capitalize bg-slate-700 text-slate-200 border-slate-600">{merchant.subscription_tier}</Badge>
+                          <Badge className="capitalize bg-slate-700 text-white border-slate-600">{merchant.subscription_tier}</Badge>
                           {merchant.is_active !== false ? (
                             <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                               <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -787,24 +787,24 @@ export default function AdminDashboard() {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-slate-300 mb-3">{merchant.email}</p>
+                        <p className="text-sm text-white/70 mb-3">{merchant.email}</p>
                         
                         {/* Stats Grid */}
                         <div className="grid grid-cols-4 gap-3 mb-4">
                           <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
-                            <p className="text-xs text-slate-300">Reviews</p>
+                            <p className="text-xs text-white/70">Reviews</p>
                             <p className="text-lg font-bold text-white">{stats.totalReviews}</p>
                           </div>
                           <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
-                            <p className="text-xs text-slate-300">Positive</p>
+                            <p className="text-xs text-white/70">Positive</p>
                             <p className="text-lg font-bold text-emerald-400">{stats.positiveReviews}</p>
                           </div>
                           <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
-                            <p className="text-xs text-slate-300">Avg Rating</p>
+                            <p className="text-xs text-white/70">Avg Rating</p>
                             <p className="text-lg font-bold text-white">{stats.avgRating} ⭐</p>
                           </div>
                           <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-700/50">
-                            <p className="text-xs text-slate-300">Spins</p>
+                            <p className="text-xs text-white/70">Spins</p>
                             <p className="text-lg font-bold text-purple-400">{stats.totalSpins}</p>
                           </div>
                         </div>
@@ -857,17 +857,17 @@ export default function AdminDashboard() {
                         {isExpanded && (
                           <div className="mt-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700/50 space-y-3">
                             <div>
-                              <p className="text-xs font-semibold text-slate-200 mb-1">Merchant ID</p>
+                              <p className="text-xs font-semibold text-white mb-1">Merchant ID</p>
                               <code className="text-xs text-white font-mono bg-slate-800 px-2 py-1 rounded">{merchant.id}</code>
                             </div>
                             <div>
-                              <p className="text-xs font-semibold text-slate-200 mb-1">Rate Link</p>
+                              <p className="text-xs font-semibold text-white mb-1">Rate Link</p>
                               <code className="text-xs text-white font-mono break-all bg-slate-800 px-2 py-1 rounded block">
                                 {process.env.NEXT_PUBLIC_APP_URL}/rate/{merchant.id}
                               </code>
                             </div>
                             <div>
-                              <p className="text-xs font-semibold text-slate-200 mb-1">Inscription</p>
+                              <p className="text-xs font-semibold text-white mb-1">Inscription</p>
                               <p className="text-xs text-white">
                                 {new Date(merchant.created_at).toLocaleDateString('fr-FR', {
                                   year: 'numeric',
@@ -880,7 +880,7 @@ export default function AdminDashboard() {
                             </div>
                             {merchant.logo_url && (
                               <div>
-                                <p className="text-xs font-semibold text-slate-200 mb-2">Logo</p>
+                                <p className="text-xs font-semibold text-white mb-2">Logo</p>
                                 <div className="bg-slate-800 p-2 rounded-lg inline-block">
                                   <img src={merchant.logo_url} alt="Logo" className="h-16 object-contain" />
                                 </div>
@@ -888,24 +888,24 @@ export default function AdminDashboard() {
                             )}
                             {merchant.background_url && (
                               <div>
-                                <p className="text-xs font-semibold text-slate-200 mb-2">Background</p>
+                                <p className="text-xs font-semibold text-white mb-2">Background</p>
                                 <img src={merchant.background_url} alt="Background" className="h-24 w-auto object-cover rounded-lg border border-slate-700" />
                               </div>
                             )}
                             
                             {/* Social Media Links */}
                             <div className="border-t border-slate-700/50 pt-3 mt-3">
-                              <p className="text-xs font-semibold text-slate-200 mb-2">Liens de Redirection</p>
+                              <p className="text-xs font-semibold text-white mb-2">Liens de Redirection</p>
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs text-slate-300">Stratégie:</span>
+                                  <span className="text-xs text-white/70">Stratégie:</span>
                                   <Badge className="text-xs capitalize bg-purple-500/20 text-purple-400 border-purple-500/30">
                                     {merchant.redirect_strategy?.replace('_', ' ') || 'none'}
                                   </Badge>
                                 </div>
                                 {merchant.google_maps_url && (
                                   <div className="bg-slate-800/50 p-2 rounded">
-                                    <span className="text-xs text-slate-300 block mb-1">Google Reviews:</span>
+                                    <span className="text-xs text-white/70 block mb-1">Google Reviews:</span>
                                     <a href={merchant.google_maps_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.google_maps_url}
                                     </a>
@@ -913,7 +913,7 @@ export default function AdminDashboard() {
                                 )}
                                 {merchant.tripadvisor_url && (
                                   <div className="bg-slate-800/50 p-2 rounded">
-                                    <span className="text-xs text-slate-300 block mb-1">TripAdvisor:</span>
+                                    <span className="text-xs text-white/70 block mb-1">TripAdvisor:</span>
                                     <a href={merchant.tripadvisor_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.tripadvisor_url}
                                     </a>
@@ -921,7 +921,7 @@ export default function AdminDashboard() {
                                 )}
                                 {merchant.tiktok_url && (
                                   <div className="bg-slate-800/50 p-2 rounded">
-                                    <span className="text-xs text-slate-300 block mb-1">TikTok:</span>
+                                    <span className="text-xs text-white/70 block mb-1">TikTok:</span>
                                     <a href={merchant.tiktok_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.tiktok_url}
                                     </a>
@@ -929,7 +929,7 @@ export default function AdminDashboard() {
                                 )}
                                 {merchant.instagram_url && (
                                   <div className="bg-slate-800/50 p-2 rounded">
-                                    <span className="text-xs text-slate-300 block mb-1">Instagram:</span>
+                                    <span className="text-xs text-white/70 block mb-1">Instagram:</span>
                                     <a href={merchant.instagram_url} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:text-blue-300 block truncate">
                                       {merchant.instagram_url}
                                     </a>
@@ -948,8 +948,8 @@ export default function AdminDashboard() {
 
             {filteredMerchants.length === 0 && (
               <div className="p-12 text-center">
-                <Store className="w-12 h-12 text-slate-200 mx-auto mb-3" />
-                <p className="text-slate-200">Aucun marchand trouvé</p>
+                <Store className="w-12 h-12 text-white mx-auto mb-3" />
+                <p className="text-white">Aucun marchand trouvé</p>
               </div>
             )}
           </div>
