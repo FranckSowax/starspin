@@ -558,12 +558,34 @@ export default function AdminDashboard() {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={(() => {
-                        // Generate mock data based on real stats
-                        const days = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-                        const baseReviews = Math.max(1, Math.floor(stats.totalReviews / 7));
-                        const baseSpins = Math.max(1, Math.floor(stats.totalSpins / 7));
-                        return days.map((day) => ({
-                          name: day,
+                        // Generate data based on selected time range
+                        let labels: string[];
+                        let divisor: number;
+
+                        switch (timeRange) {
+                          case 'day':
+                            // Heures de la journée
+                            labels = ['00h', '04h', '08h', '12h', '16h', '20h', '23h'];
+                            divisor = 24;
+                            break;
+                          case 'month':
+                            // Semaines du mois
+                            labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+                            divisor = 4;
+                            break;
+                          case 'week':
+                          default:
+                            // Jours de la semaine
+                            labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+                            divisor = 7;
+                            break;
+                        }
+
+                        const baseReviews = Math.max(1, Math.floor(stats.totalReviews / divisor));
+                        const baseSpins = Math.max(1, Math.floor(stats.totalSpins / divisor));
+
+                        return labels.map((label) => ({
+                          name: label,
                           reviews: Math.floor(baseReviews * (0.5 + Math.random())),
                           spins: Math.floor(baseSpins * (0.5 + Math.random())),
                         }));
