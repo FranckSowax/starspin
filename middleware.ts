@@ -20,7 +20,15 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
   if (isProtectedRoute) {
     console.log('[MIDDLEWARE] Route protégée:', pathname);
-    console.log('[MIDDLEWARE] Cookies présents:', request.cookies.getAll().map(c => c.name));
+    const allCookies = request.cookies.getAll();
+    const supabaseCookies = allCookies.filter(c => c.name.startsWith('sb-'));
+    console.log('[MIDDLEWARE] Nombre total de cookies:', allCookies.length);
+    console.log('[MIDDLEWARE] Cookies Supabase:', supabaseCookies.map(c => ({
+      name: c.name,
+      valueLength: c.value?.length || 0,
+      // Afficher les 50 premiers caractères pour debug
+      valuePreview: c.value?.substring(0, 50) + '...'
+    })));
   }
 
   // Create response to modify

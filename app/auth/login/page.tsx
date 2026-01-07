@@ -54,23 +54,39 @@ function LoginForm() {
       }
 
       if (data.session) {
-        // Vérifier les cookies après login
-        console.log('[LOGIN] Cookies après login:', document.cookie);
+        // Log les cookies Supabase présents
+        const allCookies = document.cookie.split(';').map(c => c.trim());
+        const supabaseCookies = allCookies.filter(c => c.startsWith('sb-'));
+        console.log('[LOGIN] Tous les cookies:', allCookies);
+        console.log('[LOGIN] Cookies Supabase:', supabaseCookies);
 
-        // Attendre que les cookies soient bien écrits
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Attendre que les cookies soient bien écrits par @supabase/ssr
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Re-vérifier les cookies après le délai
+        const cookiesAfterWait = document.cookie.split(';').map(c => c.trim());
+        const supabaseCookiesAfterWait = cookiesAfterWait.filter(c => c.startsWith('sb-'));
+        console.log('[LOGIN] Cookies Supabase après attente:', supabaseCookiesAfterWait);
 
         // Vérifier que la session est bien active
         const { data: sessionCheck } = await supabase.auth.getSession();
         console.log('[LOGIN] Vérification session:', {
           hasSession: !!sessionCheck.session,
-          userId: sessionCheck.session?.user?.id
+          userId: sessionCheck.session?.user?.id,
+          expiresAt: sessionCheck.session?.expires_at
         });
+
+        if (!sessionCheck.session) {
+          console.error('[LOGIN] Session perdue après login!');
+          setError('Session perdue. Veuillez réessayer.');
+          setLoading(false);
+          return;
+        }
 
         console.log('[LOGIN] Redirection vers:', redirectUrl);
 
-        // Redirection
-        window.location.href = redirectUrl;
+        // Utiliser window.location.replace pour une navigation propre
+        window.location.replace(redirectUrl);
       } else {
         console.error('[LOGIN] Pas de session retournée');
         setError('Connexion échouée. Veuillez réessayer.');
