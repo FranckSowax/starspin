@@ -138,4 +138,12 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Reset link colors to inherit from parent, allow Tailwind classes to control */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:visited {
+    color: inherit;
+  }
 }

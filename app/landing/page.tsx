@@ -65,9 +65,9 @@ export default function LandingPage() {
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#features" className="text-white/90 hover:text-white transition text-sm">{t('landing.nav.howItWorks')}</a>
-            <a href="#pricing" className="text-white/90 hover:text-white transition text-sm">{t('landing.nav.pricing')}</a>
-            <a href="#testimonials" className="text-white/90 hover:text-white transition text-sm">{t('landing.nav.testimonials')}</a>
+            <a href="#demo" className="text-white/90 hover:text-white transition text-sm no-underline">{t('landing.nav.howItWorks')}</a>
+            <a href="#pricing" className="text-white/90 hover:text-white transition text-sm no-underline">{t('landing.nav.pricing')}</a>
+            <a href="#testimonials" className="text-white/90 hover:text-white transition text-sm no-underline">{t('landing.nav.testimonials')}</a>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -179,7 +179,7 @@ export default function LandingPage() {
       </section>
 
       {/* Demo Video Section */}
-      <section className="py-24 px-4 bg-gradient-to-br from-slate-50 to-white">
+      <section id="demo" className="py-24 px-4 bg-gradient-to-br from-slate-50 to-white scroll-mt-20">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
