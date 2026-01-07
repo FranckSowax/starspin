@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,12 +23,33 @@ import step4 from '@/app/assets/images/step4.jpg';
 
 // Force rebuild: v3 (Redesign Le Defi + Arco Fonts)
 export default function LandingPage() {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation(undefined, { useSuspense: false });
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch by only using translations after mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
   };
+
+  // Use empty string during SSR, real translation after mount to prevent hydration mismatch
+  const safeT = (key: string): string => {
+    if (!mounted) return '';
+    return t(key);
+  };
+
+  // Show loading state during initial render to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-[#E8EDE8] flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#E8EDE8]">
