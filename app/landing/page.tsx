@@ -687,7 +687,11 @@ export default function LandingPage() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-white mb-4">{t('landing.pricing.pro')}</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-white">{t('landing.pricing.proPrice')}</span>
+                  <span className="text-2xl font-medium text-white/60 line-through mr-2">2,000 ฿</span>
+                  <span className="text-5xl font-black text-white">1,000 ฿</span>
+                </div>
+                <div className="inline-flex items-center gap-2 bg-[#FFB703]/20 rounded-full px-3 py-1 mb-2">
+                  <span className="text-[#FFB703] font-bold text-sm">-50% PROMO</span>
                 </div>
                 <p className="text-white/80">{t('landing.pricing.proPeriod')}</p>
               </div>
