@@ -178,8 +178,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Vérifier que Supabase est configuré
+    const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
-      console.error('[LOYALTY CLIENT POST] Missing SUPABASE_SERVICE_ROLE_KEY');
+      console.error('[LOYALTY CLIENT POST] Failed to create Supabase client');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
@@ -382,8 +383,9 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     // Vérifier que Supabase est configuré
+    const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
-      console.error('[LOYALTY CLIENT PATCH] Missing SUPABASE_SERVICE_ROLE_KEY');
+      console.error('[LOYALTY CLIENT PATCH] Failed to create Supabase client');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
