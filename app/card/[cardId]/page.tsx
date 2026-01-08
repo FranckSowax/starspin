@@ -55,7 +55,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
   const fetchData = useCallback(async () => {
     try {
-      // Fetch client by QR code data
+      // Fetch client by QR code data (includes merchant data)
       const clientRes = await fetch(`/api/loyalty/client?qrCode=${cardId}`);
       if (!clientRes.ok) {
         setError('Card not found');
@@ -65,12 +65,19 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       const clientData = await clientRes.json();
       setClient(clientData.client);
 
+      // Use merchant data from client API response if available
+      if (clientData.merchant) {
+        setMerchant(clientData.merchant);
+      }
+
       if (clientData.client?.merchant_id) {
-        // Fetch merchant info
-        const merchantRes = await fetch(`/api/merchant?id=${clientData.client.merchant_id}`);
-        if (merchantRes.ok) {
-          const merchantData = await merchantRes.json();
-          setMerchant(merchantData.merchant);
+        // Fallback: Fetch merchant info if not included in client response
+        if (!clientData.merchant) {
+          const merchantRes = await fetch(`/api/merchant?id=${clientData.client.merchant_id}`);
+          if (merchantRes.ok) {
+            const merchantData = await merchantRes.json();
+            setMerchant(merchantData.merchant);
+          }
         }
 
         // Fetch available rewards

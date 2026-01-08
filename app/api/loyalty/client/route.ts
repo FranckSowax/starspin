@@ -325,7 +325,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Client not found', found: false }, { status: 404 });
       }
 
-      return NextResponse.json({ client: data, found: true });
+      // Récupérer les infos du merchant pour l'affichage de la carte
+      let merchantData = null;
+      if (data?.merchant_id) {
+        const { data: merchant } = await supabaseAdmin
+          .from('merchants')
+          .select('id, business_name, logo_url, background_url, loyalty_card_image_url, loyalty_enabled')
+          .eq('id', data.merchant_id)
+          .single();
+        merchantData = merchant;
+      }
+
+      return NextResponse.json({ client: data, merchant: merchantData, found: true });
     }
 
     // Recherche par téléphone
