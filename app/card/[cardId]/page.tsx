@@ -14,7 +14,6 @@ import {
   Calendar,
   TrendingUp,
   ExternalLink,
-  CheckCircle,
   Download,
   Phone,
   Mail,
@@ -35,33 +34,6 @@ const LANGUAGES = [
   { code: 'pt', flag: '🇵🇹', name: 'Português' }
 ];
 
-// Apple Wallet Icon SVG
-const AppleWalletIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="2" y="4" width="20" height="16" rx="2" fill="#000000"/>
-    <rect x="2" y="4" width="20" height="4" fill="#FF3B30"/>
-    <rect x="2" y="8" width="20" height="4" fill="#FF9500"/>
-    <rect x="2" y="12" width="20" height="4" fill="#34C759"/>
-    <path d="M2 16h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2z" fill="#007AFF"/>
-  </svg>
-);
-
-// Google Wallet Icon SVG
-const GoogleWalletIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#4285F4"/>
-    <path d="M12 2C6.48 2 2 6.48 2 12c0 2.76 1.12 5.26 2.93 7.07L12 12V2z" fill="#EA4335"/>
-    <path d="M2 12c0 2.76 1.12 5.26 2.93 7.07L12 12H2z" fill="#FBBC05"/>
-    <path d="M12 12l-7.07 7.07C6.74 20.88 9.24 22 12 22c5.52 0 10-4.48 10-10H12z" fill="#34A853"/>
-    <circle cx="12" cy="12" r="4" fill="white"/>
-  </svg>
-);
-
-interface WalletStatus {
-  apple: { configured: boolean; loading: boolean; added: boolean };
-  google: { configured: boolean; loading: boolean; added: boolean };
-}
-
 interface PageProps {
   params: Promise<{ cardId: string }>;
 }
@@ -77,10 +49,6 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'card' | 'rewards' | 'history'>('card');
   const [redeeming, setRedeeming] = useState<string | null>(null);
-  const [walletStatus, setWalletStatus] = useState<WalletStatus>({
-    apple: { configured: false, loading: false, added: false },
-    google: { configured: false, loading: false, added: false }
-  });
   const [downloading, setDownloading] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [currentLang, setCurrentLang] = useState(i18n.language || 'fr');
@@ -148,53 +116,6 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useEffect(() => {
-    const checkWalletStatus = async () => {
-      if (!cardId) return;
-      try {
-        const appleRes = await fetch(`/api/loyalty/wallet/apple?clientId=${cardId}`);
-        if (appleRes.ok) {
-          const data = await appleRes.json();
-          setWalletStatus(prev => ({
-            ...prev,
-            apple: { ...prev.apple, configured: data.configured || false }
-          }));
-        }
-      } catch { /* ignore */ }
-
-      try {
-        const googleRes = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
-        if (googleRes.ok) {
-          const data = await googleRes.json();
-          setWalletStatus(prev => ({
-            ...prev,
-            google: { ...prev.google, configured: data.configured || false }
-          }));
-        }
-      } catch { /* ignore */ }
-    };
-    checkWalletStatus();
-  }, [cardId]);
-
-  const handleAddToAppleWallet = async () => {
-    setWalletStatus(prev => ({ ...prev, apple: { ...prev.apple, loading: true } }));
-    try {
-      const res = await fetch(`/api/loyalty/wallet/apple?clientId=${cardId}`);
-      const data = await res.json();
-      alert(data.configured ? t('loyalty.wallet.appleComingSoon') : t('loyalty.wallet.notConfigured'));
-    } catch {
-      alert(t('loyalty.wallet.error'));
-    } finally {
-      setWalletStatus(prev => ({ ...prev, apple: { ...prev.apple, loading: false } }));
-    }
-  };
-
-  const handleAddToGoogleWallet = async () => {
-    // Google Wallet nécessite une approbation du compte marchand Google Pay
-    // En attendant l'approbation, afficher un message "Coming Soon"
-    alert(t('loyalty.wallet.googleComingSoon'));
-  };
 
   const handleRedeem = async (reward: LoyaltyReward) => {
     if (!client || !merchant) return;
@@ -596,40 +517,6 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                           <Download className="w-5 h-5 mr-2" />
                         )}
                         {t('loyalty.card.download')}
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        className="w-full bg-white hover:bg-gray-50 text-gray-800 border-gray-300"
-                        onClick={handleAddToAppleWallet}
-                        disabled={walletStatus.apple.loading}
-                      >
-                        {walletStatus.apple.loading ? (
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        ) : walletStatus.apple.added ? (
-                          <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
-                        ) : (
-                          <AppleWalletIcon className="w-6 h-6 mr-2" />
-                        )}
-                        {t('loyalty.card.appleWallet')}
-                        <span className="ml-2 text-xs text-gray-400">(Beta)</span>
-                      </Button>
-
-                      <Button
-                        variant="outline"
-                        className="w-full bg-white hover:bg-gray-50 text-gray-800 border-gray-300"
-                        onClick={handleAddToGoogleWallet}
-                        disabled={walletStatus.google.loading}
-                      >
-                        {walletStatus.google.loading ? (
-                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        ) : walletStatus.google.added ? (
-                          <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
-                        ) : (
-                          <GoogleWalletIcon className="w-6 h-6 mr-2" />
-                        )}
-                        {t('loyalty.card.googleWallet')}
-                        <span className="ml-2 text-xs text-gray-400">(Beta)</span>
                       </Button>
 
                       <Button
