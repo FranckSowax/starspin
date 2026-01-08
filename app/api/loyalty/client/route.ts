@@ -264,16 +264,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Générer un nouveau card_id
-    const { data: cardIdResult } = await supabaseAdmin
-      .rpc('generate_loyalty_card_id', { p_merchant_id: merchantId });
+    let cardId = `STAR-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
 
-    const cardId = cardIdResult || `STAR-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
+    try {
+      const { data: cardIdResult, error: rpcError } = await supabaseAdmin
+        .rpc('generate_loyalty_card_id', { p_merchant_id: merchantId });
+
+      if (rpcError) {
+        console.error('[LOYALTY CLIENT] RPC error (using fallback):', rpcError);
+      } else if (cardIdResult) {
+        cardId = cardIdResult;
+      }
+    } catch (rpcErr) {
+      console.error('[LOYALTY CLIENT] RPC exception (using fallback):', rpcErr);
+    }
 
     // Générer un QR code unique
     const qrCodeData = uuidv4();
 
     // Créer le nouveau client
     const welcomePoints = merchant.welcome_points || 50;
+
+    console.log('[LOYALTY CLIENT] Creating new client with:', {
+      merchant_id: merchantId,
+      card_id: cardId,
+      phone: phone || null,
+      points: welcomePoints,
+      qr_code_data: qrCodeData
+    });
 
     const { data: newClient, error: createError } = await supabaseAdmin
       .from('loyalty_clients')
@@ -296,12 +314,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (createError) {
-      console.error('[LOYALTY CLIENT] Create error:', createError);
+      console.error('[LOYALTY CLIENT] Create error:', JSON.stringify(createError, null, 2));
       return NextResponse.json(
-        { error: createError.message },
+        { error: createError.message, details: createError },
         { status: 500 }
       );
     }
+
+    console.log('[LOYALTY CLIENT] Client created successfully:', newClient?.id);
 
     // Créer la transaction de points de bienvenue
     if (welcomePoints > 0) {
