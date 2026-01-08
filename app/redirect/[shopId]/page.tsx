@@ -62,10 +62,15 @@ export default function RedirectPage() {
   const searchParams = useSearchParams();
   const shopId = params.shopId as string;
 
-  // Get phone number and language from URL params
+  // Get phone number, language, and loyalty card info from URL params
   const phoneNumber = searchParams.get('phone');
   const langFromUrl = searchParams.get('lang');
   const currentLang = langFromUrl || i18n.language || 'en';
+
+  // Loyalty card info for combined WhatsApp message
+  const cardQrCode = searchParams.get('cardQr');
+  const isNewLoyaltyClient = searchParams.get('isNew') === 'true';
+  const loyaltyClientPoints = parseInt(searchParams.get('points') || '0', 10);
 
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
@@ -179,6 +184,7 @@ export default function RedirectPage() {
   }, [whatsappCountdown, hasClickedSocial, isWhatsAppMode, whatsappSending, whatsappSent]);
 
   // Function to send WhatsApp message via API
+  // Uses combined API if loyalty card exists, otherwise falls back to simple spin message
   const sendWhatsAppMessage = async () => {
     if (!phoneNumber || !shopId) return;
 
@@ -186,17 +192,38 @@ export default function RedirectPage() {
     setWhatsappError('');
 
     try {
-      const response = await fetch('/api/whatsapp/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          merchantId: shopId,
-          phoneNumber: phoneNumber,
-          language: currentLang,
-        }),
-      });
+      let response;
+
+      if (cardQrCode) {
+        // Use combined API with both Spin Wheel and Loyalty Card buttons
+        response = await fetch('/api/whatsapp/combined', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            merchantId: shopId,
+            phoneNumber: phoneNumber,
+            cardQrCode: cardQrCode,
+            isNewClient: isNewLoyaltyClient,
+            points: loyaltyClientPoints,
+            language: currentLang,
+          }),
+        });
+      } else {
+        // Fallback to simple spin wheel message (no loyalty card)
+        response = await fetch('/api/whatsapp/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            merchantId: shopId,
+            phoneNumber: phoneNumber,
+            language: currentLang,
+          }),
+        });
+      }
 
       const data = await response.json();
 

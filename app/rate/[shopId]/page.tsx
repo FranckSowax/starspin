@@ -144,22 +144,41 @@ export default function RatingPage() {
         }).catch(() => {}); // Fire and forget
 
         // Create loyalty card if merchant has loyalty enabled
+        let loyaltyCardQrCode = '';
+        let isNewLoyaltyClient = false;
+        let loyaltyClientPoints = 0;
+
         if (merchant?.loyalty_enabled) {
-          fetch('/api/loyalty/client', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              merchantId: sanitizedData.merchant_id,
-              phone: sanitizedPhone,
-              userToken: sanitizedData.user_token,
-              language: currentLang, // Pass language for WhatsApp message
-            }),
-          }).catch(() => {}); // Fire and forget
+          try {
+            const loyaltyRes = await fetch('/api/loyalty/client', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                merchantId: sanitizedData.merchant_id,
+                phone: sanitizedPhone,
+                userToken: sanitizedData.user_token,
+                language: currentLang,
+              }),
+            });
+
+            if (loyaltyRes.ok) {
+              const loyaltyData = await loyaltyRes.json();
+              loyaltyCardQrCode = loyaltyData.client?.qr_code_data || '';
+              isNewLoyaltyClient = loyaltyData.isNew || false;
+              loyaltyClientPoints = loyaltyData.client?.points || 0;
+            }
+          } catch {
+            // Continue without loyalty card
+          }
         }
 
         if (rating >= 4) {
-          // Redirect to intermediate page with phone number for WhatsApp workflow
-          router.push(`/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}&lang=${currentLang}`);
+          // Redirect to intermediate page with phone number and loyalty card info for combined WhatsApp message
+          let redirectUrl = `/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}&lang=${currentLang}`;
+          if (loyaltyCardQrCode) {
+            redirectUrl += `&cardQr=${encodeURIComponent(loyaltyCardQrCode)}&isNew=${isNewLoyaltyClient}&points=${loyaltyClientPoints}`;
+          }
+          router.push(redirectUrl);
         } else {
           alert(t('feedback.thankYou'));
           setRating(null);
