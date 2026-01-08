@@ -219,7 +219,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 11. Try sending interactive message with 2 URL buttons
-    // Structure based on Whapi documentation for interactive messages with URL buttons
+    // Structure based on Whapi documentation: https://support.whapi.cloud/help-desk/sending/send-message-with-buttons
+    const timestamp = Date.now();
     const interactivePayload = {
       to: formattedPhone,
       type: 'button',
@@ -236,14 +237,14 @@ export async function POST(request: NextRequest) {
         buttons: [
           {
             type: 'url',
-            title: buttonTexts.spin.substring(0, 20),
-            id: `spin_${Date.now()}`,
+            title: buttonTexts.spin.substring(0, 25), // Max 25 chars
+            id: `spin_${timestamp}`,
             url: spinUrl
           },
           {
             type: 'url',
-            title: buttonTexts.card.substring(0, 20),
-            id: `card_${Date.now() + 1}`,
+            title: buttonTexts.card.substring(0, 25), // Max 25 chars
+            id: `card_${timestamp + 1}`,
             url: cardUrl
           }
         ]
