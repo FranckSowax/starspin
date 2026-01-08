@@ -9,13 +9,10 @@ import {
   Gift,
   QrCode,
   History,
-  ChevronRight,
   Loader2,
   AlertCircle,
-  Wallet,
   Apple,
   Smartphone,
-  Store,
   Calendar,
   TrendingUp,
   ExternalLink,
@@ -51,11 +48,10 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     google: { configured: false, loading: false, added: false }
   });
   const [downloading, setDownloading] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
-      // Fetch client by QR code data (includes merchant data)
       const clientRes = await fetch(`/api/loyalty/client?qrCode=${cardId}`);
       if (!clientRes.ok) {
         setError('Card not found');
@@ -65,13 +61,11 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       const clientData = await clientRes.json();
       setClient(clientData.client);
 
-      // Use merchant data from client API response if available
       if (clientData.merchant) {
         setMerchant(clientData.merchant);
       }
 
       if (clientData.client?.merchant_id) {
-        // Fallback: Fetch merchant info if not included in client response
         if (!clientData.merchant) {
           const merchantRes = await fetch(`/api/merchant?id=${clientData.client.merchant_id}`);
           if (merchantRes.ok) {
@@ -80,21 +74,19 @@ export default function LoyaltyCardPage({ params }: PageProps) {
           }
         }
 
-        // Fetch available rewards
         const rewardsRes = await fetch(`/api/loyalty/rewards?merchantId=${clientData.client.merchant_id}`);
         if (rewardsRes.ok) {
           const rewardsData = await rewardsRes.json();
           setRewards(rewardsData.rewards?.filter((r: LoyaltyReward) => r.is_active) || []);
         }
 
-        // Fetch transaction history
         const transactionsRes = await fetch(`/api/loyalty/points?clientId=${clientData.client.id}`);
         if (transactionsRes.ok) {
           const transactionsData = await transactionsRes.json();
           setTransactions(transactionsData.transactions || []);
         }
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load card data');
     } finally {
       setLoading(false);
@@ -105,12 +97,9 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     fetchData();
   }, [fetchData]);
 
-  // Check wallet configuration status
   useEffect(() => {
     const checkWalletStatus = async () => {
       if (!cardId) return;
-
-      // Check Apple Wallet
       try {
         const appleRes = await fetch(`/api/loyalty/wallet/apple?clientId=${cardId}`);
         if (appleRes.ok) {
@@ -120,11 +109,8 @@ export default function LoyaltyCardPage({ params }: PageProps) {
             apple: { ...prev.apple, configured: data.configured || false }
           }));
         }
-      } catch {
-        // Apple Wallet not configured
-      }
+      } catch { /* ignore */ }
 
-      // Check Google Wallet
       try {
         const googleRes = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
         if (googleRes.ok) {
@@ -134,65 +120,34 @@ export default function LoyaltyCardPage({ params }: PageProps) {
             google: { ...prev.google, configured: data.configured || false }
           }));
         }
-      } catch {
-        // Google Wallet not configured
-      }
+      } catch { /* ignore */ }
     };
-
     checkWalletStatus();
   }, [cardId]);
 
   const handleAddToAppleWallet = async () => {
-    setWalletStatus(prev => ({
-      ...prev,
-      apple: { ...prev.apple, loading: true }
-    }));
-
+    setWalletStatus(prev => ({ ...prev, apple: { ...prev.apple, loading: true } }));
     try {
       const res = await fetch(`/api/loyalty/wallet/apple?clientId=${cardId}`);
       const data = await res.json();
-
-      if (data.configured) {
-        // TODO: Télécharger le .pkpass quand implémenté
-        alert(t('loyalty.wallet.appleComingSoon'));
-      } else {
-        // Afficher message configuration requise
-        alert(t('loyalty.wallet.notConfigured'));
-      }
+      alert(data.configured ? t('loyalty.wallet.appleComingSoon') : t('loyalty.wallet.notConfigured'));
     } catch {
       alert(t('loyalty.wallet.error'));
     } finally {
-      setWalletStatus(prev => ({
-        ...prev,
-        apple: { ...prev.apple, loading: false }
-      }));
+      setWalletStatus(prev => ({ ...prev, apple: { ...prev.apple, loading: false } }));
     }
   };
 
   const handleAddToGoogleWallet = async () => {
-    setWalletStatus(prev => ({
-      ...prev,
-      google: { ...prev.google, loading: true }
-    }));
-
+    setWalletStatus(prev => ({ ...prev, google: { ...prev.google, loading: true } }));
     try {
       const res = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
       const data = await res.json();
-
-      if (data.configured) {
-        // TODO: Ouvrir le lien Google Wallet quand implémenté
-        alert(t('loyalty.wallet.googleComingSoon'));
-      } else {
-        // Afficher message configuration requise
-        alert(t('loyalty.wallet.notConfigured'));
-      }
+      alert(data.configured ? t('loyalty.wallet.googleComingSoon') : t('loyalty.wallet.notConfigured'));
     } catch {
       alert(t('loyalty.wallet.error'));
     } finally {
-      setWalletStatus(prev => ({
-        ...prev,
-        google: { ...prev.google, loading: false }
-      }));
+      setWalletStatus(prev => ({ ...prev, google: { ...prev.google, loading: false } }));
     }
   };
 
@@ -214,50 +169,131 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
       if (res.ok) {
         const data = await res.json();
-        // Show redemption code
         alert(`${t('loyalty.redeem.success')}\n\n${t('loyalty.redeem.code')}: ${data.redemptionCode}\n\n${t('loyalty.redeem.showToStaff')}`);
-        fetchData(); // Refresh data
+        fetchData();
       } else {
         const data = await res.json();
         alert(data.error || 'Failed to redeem reward');
       }
-    } catch (err) {
+    } catch {
       alert('An error occurred');
     } finally {
       setRedeeming(null);
     }
   };
 
+  // Generate card image with Canvas
   const handleDownloadCard = async () => {
-    if (!cardRef.current || !client) return;
+    if (!client || !qrRef.current) return;
 
-    const downloadShopName = merchant?.business_name || 'StarSpin';
-
+    const shopName = merchant?.business_name || 'StarSpin';
     setDownloading(true);
+
     try {
-      // Use dom-to-image-more which handles modern CSS better
-      const domtoimage = await import('dom-to-image-more');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas not supported');
 
-      const dataUrl = await domtoimage.toPng(cardRef.current, {
-        quality: 1,
-        bgcolor: '#fffbeb',
-        style: {
-          transform: 'scale(1)',
-          transformOrigin: 'top left',
-        },
-        filter: (node: Node) => {
-          // Filter out problematic elements
-          if (node instanceof Element) {
-            return node.tagName !== 'IFRAME' && node.tagName !== 'VIDEO';
-          }
-          return true;
-        },
-      });
+      // Card dimensions (credit card ratio ~1.586)
+      const width = 800;
+      const height = 500;
+      canvas.width = width;
+      canvas.height = height;
 
-      // Download the image
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, '#f59e0b');
+      gradient.addColorStop(1, '#ea580c');
+      ctx.fillStyle = gradient;
+      ctx.roundRect(0, 0, width, height, 24);
+      ctx.fill();
+
+      // Shop name header
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
+      ctx.fillText(`${shopName} Card`, 40, 60);
+
+      // Loyalty Card subtitle
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.font = '18px system-ui, -apple-system, sans-serif';
+      ctx.fillText(t('loyalty.card.title'), 40, 90);
+
+      // White card area
+      ctx.fillStyle = '#ffffff';
+      ctx.roundRect(30, 120, width - 60, height - 150, 16);
+      ctx.fill();
+
+      // Client name
+      ctx.fillStyle = '#1e293b';
+      ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+      ctx.fillText(client.name || t('dashboard.recentReviews.anonymous'), 50, 165);
+
+      // Card ID
+      ctx.fillStyle = '#64748b';
+      ctx.font = '16px monospace';
+      ctx.fillText(client.card_id, 50, 195);
+
+      // Points section
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
+      const pointsText = `${client.points}`;
+      ctx.fillText(pointsText, 50, 270);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '20px system-ui, -apple-system, sans-serif';
+      ctx.fillText('points', 50 + ctx.measureText(pointsText).width + 10, 270);
+
+      // Stats
+      ctx.fillStyle = '#64748b';
+      ctx.font = '14px system-ui, -apple-system, sans-serif';
+      ctx.fillText(`${client.total_purchases || 0} achats`, 50, 310);
+
+      const memberDate = client.created_at ? new Date(client.created_at).toLocaleDateString('fr-FR') : '-';
+      ctx.fillText(`Membre depuis: ${memberDate}`, 50, 335);
+
+      // QR Code - get SVG from the ref and draw it
+      const svgElement = qrRef.current.querySelector('svg');
+      if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
+
+        const qrImage = new Image();
+        await new Promise<void>((resolve, reject) => {
+          qrImage.onload = () => resolve();
+          qrImage.onerror = reject;
+          qrImage.src = svgUrl;
+        });
+
+        // Draw QR code on right side
+        const qrSize = 200;
+        const qrX = width - qrSize - 60;
+        const qrY = 150;
+
+        // White background for QR
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+
+        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+        URL.revokeObjectURL(svgUrl);
+
+        // QR code label
+        ctx.fillStyle = '#64748b';
+        ctx.font = '12px system-ui, -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Scannez pour gagner des points', qrX + qrSize / 2, qrY + qrSize + 30);
+        ctx.textAlign = 'left';
+      }
+
+      // Footer
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.font = '12px system-ui, -apple-system, sans-serif';
+      ctx.fillText('Powered by StarSpin', 40, height - 15);
+
+      // Download as JPG
       const link = document.createElement('a');
-      link.download = `${downloadShopName.replace(/\s+/g, '_')}_card_${client.card_id}.png`;
-      link.href = dataUrl;
+      link.download = `${shopName.replace(/\s+/g, '_')}_card_${client.card_id}.jpg`;
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
       link.click();
     } catch (err) {
       console.error('Download error:', err);
@@ -292,350 +328,371 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
-      {/* Top Banner Image */}
-      {cardImageUrl && (
-        <div className="relative w-full h-48 overflow-hidden">
-          <img
-            src={cardImageUrl}
-            alt={`${shopName} Card`}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-amber-50/90" />
-        </div>
-      )}
-
-      {/* Header */}
-      <div className={`relative ${cardImageUrl ? '-mt-16' : 'pt-8'}`}>
-        <div className={`${!cardImageUrl ? 'bg-gradient-to-r from-amber-500 to-orange-500 pt-8' : ''} px-4 pb-24`}>
-          <div className="flex items-center gap-3 mb-4">
-            {merchant?.logo_url && (
-              <img
-                src={merchant.logo_url ?? undefined}
-                alt={shopName}
-                className="h-14 w-14 object-contain bg-white rounded-xl p-1.5 shadow-lg"
-              />
-            )}
-            <div>
-              <h1 className={`text-2xl font-bold ${cardImageUrl ? 'text-slate-900' : 'text-white'}`}>
-                {shopName} Card
-              </h1>
-              <p className={`text-sm ${cardImageUrl ? 'text-slate-600' : 'text-white/80'}`}>
-                {t('loyalty.card.title')}
-              </p>
-            </div>
+      {/* Desktop Layout Container */}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          {merchant?.logo_url && (
+            <img
+              src={merchant.logo_url}
+              alt={shopName}
+              className="h-16 w-16 object-contain bg-white rounded-xl p-2 shadow-lg"
+            />
+          )}
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">{shopName} Card</h1>
+            <p className="text-slate-600">{t('loyalty.card.title')}</p>
           </div>
         </div>
-      </div>
 
-      {/* Card */}
-      <div className="px-4 -mt-20 relative z-10">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Downloadable Card Section */}
-          <div ref={cardRef}>
-            {/* Card Header with Shop Branding */}
-            {cardImageUrl && (
-              <div className="relative w-full h-32 overflow-hidden">
-                <img
-                  src={cardImageUrl}
-                  alt={`${shopName} Card`}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50" />
-                {merchant?.logo_url && (
-                  <div className="absolute bottom-3 left-4 flex items-center gap-2">
-                    <img
-                      src={merchant.logo_url}
-                      alt={shopName}
-                      className="h-10 w-10 object-contain bg-white rounded-lg p-1 shadow"
-                    />
-                    <span className="text-white font-bold text-lg drop-shadow">{shopName}</span>
+        {/* Main Grid - Desktop: 2 columns, Mobile: 1 column */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Card Preview */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              {/* Card Header with Background Image */}
+              {cardImageUrl ? (
+                <div className="relative h-40 overflow-hidden">
+                  <img
+                    src={cardImageUrl}
+                    alt={shopName}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-6 text-white">
+                    <p className="text-sm opacity-80">{client.name || t('dashboard.recentReviews.anonymous')}</p>
+                    <p className="font-mono text-lg">{client.card_id}</p>
                   </div>
-                )}
-              </div>
-            )}
-            {/* Card Header */}
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-amber-100 text-sm mb-1">{client.name || t('dashboard.recentReviews.anonymous')}</p>
-                  <p className="font-mono text-lg">{client.card_id}</p>
+                  <Award className="absolute bottom-4 right-6 w-10 h-10 text-white/80" />
                 </div>
-                <Award className="w-10 h-10 text-white/80" />
-              </div>
-            </div>
-
-            {/* Points Balance */}
-            <div className="p-6 bg-white">
-              <div className="text-center">
-                <p className="text-slate-600 text-sm mb-1">{t('loyalty.card.balance')}</p>
-                <div className="flex items-center justify-center gap-2">
-                  <Star className="w-8 h-8 text-amber-500" />
-                  <span className="text-4xl font-bold text-slate-900">{client.points}</span>
-                  <span className="text-slate-600">{t('loyalty.clients.points')}</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <TrendingUp className="w-5 h-5 text-green-500 mx-auto mb-1" />
-                  <p className="text-lg font-semibold text-slate-900">{client.total_purchases || 0}</p>
-                  <p className="text-xs text-slate-600">Purchases</p>
-                </div>
-                <div className="bg-slate-50 rounded-xl p-3 text-center">
-                  <Calendar className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                  <p className="text-sm font-medium text-slate-900">
-                    {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}
-                  </p>
-                  <p className="text-xs text-slate-600">{t('loyalty.card.memberSince')}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="border-t border-slate-100"></div>
-
-          {/* Tabs */}
-          <div className="flex border-b border-slate-200">
-            <button
-              onClick={() => setActiveTab('card')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'card'
-                  ? 'text-amber-600 border-b-2 border-amber-500'
-                  : 'text-slate-600'
-              }`}
-            >
-              <QrCode className="w-4 h-4 mx-auto mb-1" />
-              QR Code
-            </button>
-            <button
-              onClick={() => setActiveTab('rewards')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'rewards'
-                  ? 'text-amber-600 border-b-2 border-amber-500'
-                  : 'text-slate-600'
-              }`}
-            >
-              <Gift className="w-4 h-4 mx-auto mb-1" />
-              {t('loyalty.rewards.title')}
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                activeTab === 'history'
-                  ? 'text-amber-600 border-b-2 border-amber-500'
-                  : 'text-slate-600'
-              }`}
-            >
-              <History className="w-4 h-4 mx-auto mb-1" />
-              {t('loyalty.clients.history')}
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-6">
-            {activeTab === 'card' && (
-              <div className="text-center">
-                <p className="text-slate-600 text-sm mb-4">{t('loyalty.card.scanToEarn')}</p>
-                <div className="bg-white p-4 rounded-2xl shadow-inner inline-block">
-                  <QRCode value={client.qr_code_data} size={180} />
-                </div>
-                <p className="mt-4 font-mono text-slate-500 text-sm">{client.qr_code_data}</p>
-
-                {/* Download Button */}
-                <div className="mt-6">
-                  <Button
-                    variant="default"
-                    className="w-full bg-amber-500 hover:bg-amber-600 text-white"
-                    onClick={handleDownloadCard}
-                    disabled={downloading}
-                  >
-                    {downloading ? (
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    ) : (
-                      <Download className="w-5 h-5 mr-2" />
-                    )}
-                    {t('loyalty.card.download') || 'Download Card Image'}
-                  </Button>
-                </div>
-
-                {/* Wallet Buttons */}
-                <div className="mt-4 space-y-3">
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-300 hover:border-slate-400 hover:bg-slate-50"
-                    onClick={handleAddToAppleWallet}
-                    disabled={walletStatus.apple.loading || walletStatus.apple.added}
-                  >
-                    {walletStatus.apple.loading ? (
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    ) : walletStatus.apple.added ? (
-                      <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
-                    ) : (
-                      <Apple className="w-5 h-5 mr-2" />
-                    )}
-                    {walletStatus.apple.added
-                      ? t('loyalty.wallet.added')
-                      : t('loyalty.card.appleWallet')
-                    }
-                    {!walletStatus.apple.configured && !walletStatus.apple.added && (
-                      <span className="ml-2 text-xs text-amber-500">(Beta)</span>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-300 hover:border-slate-400 hover:bg-slate-50"
-                    onClick={handleAddToGoogleWallet}
-                    disabled={walletStatus.google.loading || walletStatus.google.added}
-                  >
-                    {walletStatus.google.loading ? (
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    ) : walletStatus.google.added ? (
-                      <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
-                    ) : (
-                      <Smartphone className="w-5 h-5 mr-2" />
-                    )}
-                    {walletStatus.google.added
-                      ? t('loyalty.wallet.added')
-                      : t('loyalty.card.googleWallet')
-                    }
-                    {!walletStatus.google.configured && !walletStatus.google.added && (
-                      <span className="ml-2 text-xs text-amber-500">(Beta)</span>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Share Button */}
-                <div className="mt-4">
-                  <Button
-                    variant="ghost"
-                    className="w-full text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                    onClick={() => {
-                      if (navigator.share) {
-                        navigator.share({
-                          title: t('loyalty.card.shareTitle'),
-                          text: t('loyalty.card.shareText'),
-                          url: window.location.href
-                        }).catch(() => {});
-                      } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        alert(t('loyalty.card.linkCopied'));
-                      }
-                    }}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    {t('loyalty.card.share')}
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'rewards' && (
-              <div className="space-y-4">
-                {rewards.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Gift className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-600">{t('loyalty.rewards.noRewards')}</p>
-                  </div>
-                ) : (
-                  rewards.map((reward) => {
-                    const canRedeem = client.points >= reward.points_cost;
-                    return (
-                      <div
-                        key={reward.id}
-                        className={`border rounded-xl p-4 ${canRedeem ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200'}`}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <div>
-                            <h3 className="font-semibold text-slate-900">{reward.name}</h3>
-                            {reward.description && (
-                              <p className="text-sm text-slate-600">{reward.description}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1 bg-amber-100 px-2 py-1 rounded-full">
-                            <Star className="w-3 h-3 text-amber-600" />
-                            <span className="text-sm font-semibold text-amber-700">{reward.points_cost}</span>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center mt-3">
-                          <span className={`text-sm ${
-                            reward.type === 'discount' ? 'text-blue-600' :
-                            reward.type === 'product' ? 'text-green-600' :
-                            reward.type === 'service' ? 'text-purple-600' :
-                            'text-amber-600'
-                          }`}>
-                            {reward.value}
-                          </span>
-                          <Button
-                            size="sm"
-                            onClick={() => handleRedeem(reward)}
-                            disabled={!canRedeem || redeeming === reward.id}
-                            className={canRedeem ? 'bg-amber-500 hover:bg-amber-600' : 'bg-slate-300'}
-                          >
-                            {redeeming === reward.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : canRedeem ? (
-                              t('loyalty.redeem.confirm')
-                            ) : (
-                              t('loyalty.redeem.insufficientPoints')
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            )}
-
-            {activeTab === 'history' && (
-              <div className="space-y-3">
-                {transactions.length === 0 ? (
-                  <div className="text-center py-8">
-                    <History className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-600">{t('loyalty.transactions.noTransactions')}</p>
-                  </div>
-                ) : (
-                  transactions.slice(0, 20).map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          tx.points > 0 ? 'bg-green-100' : 'bg-red-100'
-                        }`}>
-                          {tx.points > 0 ? (
-                            <TrendingUp className="w-4 h-4 text-green-600" />
-                          ) : (
-                            <Gift className="w-4 h-4 text-red-600" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            {t(`loyalty.transactions.${tx.type}`)}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '-'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-semibold ${tx.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {tx.points > 0 ? '+' : ''}{tx.points}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          Balance: {tx.balance_after}
-                        </p>
-                      </div>
+              ) : (
+                <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="text-amber-100 text-sm mb-1">{client.name || t('dashboard.recentReviews.anonymous')}</p>
+                      <p className="font-mono text-lg">{client.card_id}</p>
                     </div>
-                  ))
+                    <Award className="w-10 h-10 text-white/80" />
+                  </div>
+                </div>
+              )}
+
+              {/* Points and Stats */}
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                  {/* Points */}
+                  <div className="text-center md:text-left">
+                    <p className="text-slate-600 text-sm mb-1">{t('loyalty.card.balance')}</p>
+                    <div className="flex items-center justify-center md:justify-start gap-2">
+                      <Star className="w-10 h-10 text-amber-500" />
+                      <span className="text-5xl font-bold text-slate-900">{client.points}</span>
+                      <span className="text-slate-600 text-lg">{t('loyalty.clients.points')}</span>
+                    </div>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-50 rounded-xl p-4 text-center">
+                      <TrendingUp className="w-6 h-6 text-green-500 mx-auto mb-2" />
+                      <p className="text-2xl font-semibold text-slate-900">{client.total_purchases || 0}</p>
+                      <p className="text-xs text-slate-600">Purchases</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-xl p-4 text-center">
+                      <Calendar className="w-6 h-6 text-blue-500 mx-auto mb-2" />
+                      <p className="text-sm font-medium text-slate-900">
+                        {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}
+                      </p>
+                      <p className="text-xs text-slate-600">{t('loyalty.card.memberSince')}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="border-t border-slate-200">
+                <div className="flex">
+                  {[
+                    { id: 'card' as const, icon: QrCode, label: 'QR Code' },
+                    { id: 'rewards' as const, icon: Gift, label: t('loyalty.rewards.title') },
+                    { id: 'history' as const, icon: History, label: t('loyalty.clients.history') }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex-1 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                        activeTab === tab.id
+                          ? 'text-amber-600 border-b-2 border-amber-500 bg-amber-50/50'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <tab.icon className="w-4 h-4" />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-6">
+                {activeTab === 'card' && (
+                  <div className="flex flex-col md:flex-row items-center gap-8">
+                    {/* QR Code */}
+                    <div className="text-center">
+                      <div ref={qrRef} className="bg-white p-4 rounded-2xl shadow-inner inline-block border border-slate-100">
+                        <QRCode value={client.qr_code_data} size={200} />
+                      </div>
+                      <p className="mt-3 text-slate-600 text-sm">{t('loyalty.card.scanToEarn')}</p>
+                      <p className="mt-1 font-mono text-slate-400 text-xs">{client.qr_code_data.substring(0, 18)}...</p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex-1 space-y-3 w-full md:max-w-xs">
+                      <Button
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                        onClick={handleDownloadCard}
+                        disabled={downloading}
+                      >
+                        {downloading ? (
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : (
+                          <Download className="w-5 h-5 mr-2" />
+                        )}
+                        {t('loyalty.card.download')}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleAddToAppleWallet}
+                        disabled={walletStatus.apple.loading}
+                      >
+                        {walletStatus.apple.loading ? (
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : walletStatus.apple.added ? (
+                          <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                        ) : (
+                          <Apple className="w-5 h-5 mr-2" />
+                        )}
+                        {t('loyalty.card.appleWallet')}
+                        <span className="ml-2 text-xs text-amber-500">(Beta)</span>
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleAddToGoogleWallet}
+                        disabled={walletStatus.google.loading}
+                      >
+                        {walletStatus.google.loading ? (
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : walletStatus.google.added ? (
+                          <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                        ) : (
+                          <Smartphone className="w-5 h-5 mr-2" />
+                        )}
+                        {t('loyalty.card.googleWallet')}
+                        <span className="ml-2 text-xs text-amber-500">(Beta)</span>
+                      </Button>
+
+                      <Button
+                        variant="ghost"
+                        className="w-full text-amber-600"
+                        onClick={() => {
+                          if (navigator.share) {
+                            navigator.share({
+                              title: t('loyalty.card.shareTitle'),
+                              text: t('loyalty.card.shareText'),
+                              url: window.location.href
+                            }).catch(() => {});
+                          } else {
+                            navigator.clipboard.writeText(window.location.href);
+                            alert(t('loyalty.card.linkCopied'));
+                          }
+                        }}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        {t('loyalty.card.share')}
+                      </Button>
+                    </div>
+                  </div>
                 )}
+
+                {activeTab === 'rewards' && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {rewards.length === 0 ? (
+                      <div className="col-span-full text-center py-12">
+                        <Gift className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                        <p className="text-slate-600">{t('loyalty.rewards.noRewards')}</p>
+                      </div>
+                    ) : (
+                      rewards.map((reward) => {
+                        const canRedeem = client.points >= reward.points_cost;
+                        return (
+                          <div
+                            key={reward.id}
+                            className={`border rounded-xl p-4 transition-all ${
+                              canRedeem ? 'border-amber-200 bg-amber-50/50 hover:shadow-md' : 'border-slate-200'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start mb-3">
+                              <div>
+                                <h3 className="font-semibold text-slate-900">{reward.name}</h3>
+                                {reward.description && (
+                                  <p className="text-sm text-slate-600 mt-1">{reward.description}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1 bg-amber-100 px-3 py-1 rounded-full">
+                                <Star className="w-4 h-4 text-amber-600" />
+                                <span className="font-semibold text-amber-700">{reward.points_cost}</span>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center mt-4">
+                              <span className={`text-sm font-medium ${
+                                reward.type === 'discount' ? 'text-blue-600' :
+                                reward.type === 'product' ? 'text-green-600' :
+                                reward.type === 'service' ? 'text-purple-600' :
+                                'text-amber-600'
+                              }`}>
+                                {reward.value}
+                              </span>
+                              <Button
+                                size="sm"
+                                onClick={() => handleRedeem(reward)}
+                                disabled={!canRedeem || redeeming === reward.id}
+                                className={canRedeem ? 'bg-amber-500 hover:bg-amber-600' : ''}
+                              >
+                                {redeeming === reward.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : canRedeem ? (
+                                  t('loyalty.redeem.confirm')
+                                ) : (
+                                  t('loyalty.redeem.insufficientPoints')
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+
+                {activeTab === 'history' && (
+                  <div className="space-y-2">
+                    {transactions.length === 0 ? (
+                      <div className="text-center py-12">
+                        <History className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+                        <p className="text-slate-600">{t('loyalty.transactions.noTransactions')}</p>
+                      </div>
+                    ) : (
+                      transactions.slice(0, 20).map((tx) => (
+                        <div
+                          key={tx.id}
+                          className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              tx.points > 0 ? 'bg-green-100' : 'bg-red-100'
+                            }`}>
+                              {tx.points > 0 ? (
+                                <TrendingUp className="w-5 h-5 text-green-600" />
+                              ) : (
+                                <Gift className="w-5 h-5 text-red-600" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium text-slate-900">
+                                {t(`loyalty.transactions.${tx.type}`)}
+                              </p>
+                              <p className="text-sm text-slate-500">
+                                {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '-'}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className={`text-lg font-semibold ${tx.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {tx.points > 0 ? '+' : ''}{tx.points}
+                            </p>
+                            <p className="text-sm text-slate-500">
+                              Balance: {tx.balance_after}
+                            </p>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Quick Info (Desktop only) */}
+          <div className="hidden lg:block space-y-6">
+            {/* Quick Stats Card */}
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              <h3 className="font-semibold text-slate-900 mb-4">Quick Stats</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Points Balance</span>
+                  <span className="font-bold text-amber-600">{client.points}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Total Purchases</span>
+                  <span className="font-bold text-slate-900">{client.total_purchases || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-600">Available Rewards</span>
+                  <span className="font-bold text-slate-900">
+                    {rewards.filter(r => client.points >= r.points_cost).length}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Reward Progress */}
+            {rewards.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-xl p-6">
+                <h3 className="font-semibold text-slate-900 mb-4">Next Reward</h3>
+                {(() => {
+                  const nextReward = rewards
+                    .filter(r => r.points_cost > client.points)
+                    .sort((a, b) => a.points_cost - b.points_cost)[0];
+
+                  if (!nextReward) {
+                    return (
+                      <p className="text-green-600 font-medium">
+                        You can redeem all available rewards!
+                      </p>
+                    );
+                  }
+
+                  const progress = (client.points / nextReward.points_cost) * 100;
+                  const pointsNeeded = nextReward.points_cost - client.points;
+
+                  return (
+                    <div>
+                      <p className="font-medium text-slate-900 mb-2">{nextReward.name}</p>
+                      <div className="w-full bg-slate-200 rounded-full h-3 mb-2">
+                        <div
+                          className="bg-amber-500 h-3 rounded-full transition-all"
+                          style={{ width: `${Math.min(progress, 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-sm text-slate-600">
+                        {pointsNeeded} more points needed
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
         </div>
-      </div>
 
-      {/* Footer */}
-      <div className="p-4 mt-6 text-center">
-        <p className="text-sm text-slate-500">Powered by StarSpin</p>
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-slate-500">Powered by StarSpin</p>
+        </div>
       </div>
     </div>
   );
