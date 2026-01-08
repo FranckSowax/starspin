@@ -17,7 +17,9 @@ import {
   TrendingUp,
   ExternalLink,
   CheckCircle,
-  Download
+  Download,
+  Phone,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
@@ -226,30 +228,40 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       // Client name
       ctx.fillStyle = '#1e293b';
       ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
-      ctx.fillText(client.name || t('dashboard.recentReviews.anonymous'), 50, 165);
+      ctx.fillText(client.name || t('dashboard.recentReviews.anonymous'), 50, 160);
 
       // Card ID
       ctx.fillStyle = '#64748b';
       ctx.font = '16px monospace';
-      ctx.fillText(client.card_id, 50, 195);
+      ctx.fillText(client.card_id, 50, 185);
+
+      // Contact (phone or email)
+      const contactInfo = client.phone || client.email;
+      if (contactInfo) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px system-ui, -apple-system, sans-serif';
+        const contactLabel = client.phone ? '📱 ' : '✉️ ';
+        ctx.fillText(contactLabel + contactInfo, 50, 210);
+      }
 
       // Points section
       ctx.fillStyle = '#f59e0b';
       ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
       const pointsText = `${client.points}`;
-      ctx.fillText(pointsText, 50, 270);
+      ctx.fillText(pointsText, 50, contactInfo ? 280 : 260);
 
+      const pointsY = contactInfo ? 280 : 260;
       ctx.fillStyle = '#64748b';
       ctx.font = '20px system-ui, -apple-system, sans-serif';
-      ctx.fillText('points', 50 + ctx.measureText(pointsText).width + 10, 270);
+      ctx.fillText('points', 50 + ctx.measureText(pointsText).width + 10, pointsY);
 
       // Stats
       ctx.fillStyle = '#64748b';
       ctx.font = '14px system-ui, -apple-system, sans-serif';
-      ctx.fillText(`${client.total_purchases || 0} achats`, 50, 310);
+      ctx.fillText(`${client.total_purchases || 0} achats`, 50, pointsY + 40);
 
       const memberDate = client.created_at ? new Date(client.created_at).toLocaleDateString('fr-FR') : '-';
-      ctx.fillText(`Membre depuis: ${memberDate}`, 50, 335);
+      ctx.fillText(`Membre depuis: ${memberDate}`, 50, pointsY + 65);
 
       // QR Code - get SVG from the ref and draw it
       const svgElement = qrRef.current.querySelector('svg');
@@ -362,6 +374,21 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                   <div className="absolute bottom-4 left-6 text-white">
                     <p className="text-sm opacity-80">{client.name || t('dashboard.recentReviews.anonymous')}</p>
                     <p className="font-mono text-lg">{client.card_id}</p>
+                    {(client.phone || client.email) && (
+                      <div className="flex items-center gap-1 mt-1 text-xs opacity-70">
+                        {client.phone ? (
+                          <>
+                            <Phone className="w-3 h-3" />
+                            <span>{client.phone}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Mail className="w-3 h-3" />
+                            <span>{client.email}</span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <Award className="absolute bottom-4 right-6 w-10 h-10 text-white/80" />
                 </div>
@@ -371,6 +398,21 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                     <div>
                       <p className="text-amber-100 text-sm mb-1">{client.name || t('dashboard.recentReviews.anonymous')}</p>
                       <p className="font-mono text-lg">{client.card_id}</p>
+                      {(client.phone || client.email) && (
+                        <div className="flex items-center gap-1 mt-1 text-xs text-amber-200">
+                          {client.phone ? (
+                            <>
+                              <Phone className="w-3 h-3" />
+                              <span>{client.phone}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Mail className="w-3 h-3" />
+                              <span>{client.email}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <Award className="w-10 h-10 text-white/80" />
                   </div>
