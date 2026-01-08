@@ -219,11 +219,11 @@ export async function POST(request: NextRequest) {
     }
 
     // 11. Try sending interactive message with 2 URL buttons
+    // Structure based on Whapi documentation for interactive messages with URL buttons
     const interactivePayload = {
       to: formattedPhone,
       type: 'button',
       header: {
-        type: 'text',
         text: headerText.substring(0, 60) // Max 60 chars for header
       },
       body: {
@@ -243,18 +243,21 @@ export async function POST(request: NextRequest) {
           {
             type: 'url',
             title: buttonTexts.card.substring(0, 20),
-            id: `card_${Date.now()}`,
+            id: `card_${Date.now() + 1}`,
             url: cardUrl
           }
         ]
       }
     };
 
+    console.log('[WHATSAPP COMBINED] Sending payload:', JSON.stringify(interactivePayload, null, 2));
+
     let whapiResponse = await fetch(WHAPI_INTERACTIVE_URL, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${globalWhapiKey}`,
         'Content-Type': 'application/json',
+        'accept': 'application/json',
       },
       body: JSON.stringify(interactivePayload),
     });
@@ -262,7 +265,8 @@ export async function POST(request: NextRequest) {
     // 12. If interactive fails, fallback to text message
     if (!whapiResponse.ok) {
       const errorText = await whapiResponse.text();
-      console.error('Interactive message failed, trying text fallback:', whapiResponse.status, errorText);
+      console.error('[WHATSAPP COMBINED] Interactive message failed:', whapiResponse.status, errorText);
+      console.error('[WHATSAPP COMBINED] Falling back to text message');
 
       const spinButtonText = buttonTexts.spin;
       const cardButtonText = buttonTexts.card;
@@ -294,7 +298,7 @@ ${footerText}`;
 
     if (!whapiResponse.ok) {
       const errorText = await whapiResponse.text();
-      console.error('Whapi API error:', whapiResponse.status, errorText);
+      console.error('[WHATSAPP COMBINED] Final API error:', whapiResponse.status, errorText);
       return NextResponse.json(
         { error: 'Failed to send WhatsApp message' },
         { status: 500 }
@@ -302,6 +306,7 @@ ${footerText}`;
     }
 
     const result = await whapiResponse.json();
+    console.log('[WHATSAPP COMBINED] Message sent successfully:', result);
 
     return NextResponse.json({
       success: true,
