@@ -435,7 +435,9 @@
       "share": "Partager ma carte",
       "shareTitle": "Ma Carte Fidélité",
       "shareText": "Voici ma carte fidélité !",
-      "linkCopied": "Lien copié dans le presse-papiers !"
+      "linkCopied": "Lien copié dans le presse-papiers !",
+      "download": "Télécharger l'image",
+      "downloadError": "Erreur lors du téléchargement"
     },
     "wallet": {
       "added": "Ajouté au portefeuille",

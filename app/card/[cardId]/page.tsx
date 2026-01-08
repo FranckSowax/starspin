@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import { useState, useEffect, useCallback, use, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 import {
@@ -19,7 +19,8 @@ import {
   Calendar,
   TrendingUp,
   ExternalLink,
-  CheckCircle
+  CheckCircle,
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
@@ -49,6 +50,8 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     apple: { configured: false, loading: false, added: false },
     google: { configured: false, loading: false, added: false }
   });
+  const [downloading, setDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -218,6 +221,38 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     }
   };
 
+  const handleDownloadCard = async () => {
+    if (!cardRef.current || !client) return;
+
+    const downloadShopName = merchant?.business_name || 'StarSpin';
+
+    setDownloading(true);
+    try {
+      // Dynamically import html2canvas
+      const html2canvasModule = await import('html2canvas');
+      const html2canvas = html2canvasModule.default;
+
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#fffbeb',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+      });
+
+      // Convert to PNG and download
+      const link = document.createElement('a');
+      link.download = `${downloadShopName.replace(/\s+/g, '_')}_card_${client.card_id}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Download error:', err);
+      alert(t('loyalty.card.downloadError') || 'Failed to download card image');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 flex items-center justify-center">
@@ -281,43 +316,69 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       {/* Card */}
       <div className="px-4 -mt-20 relative z-10">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Card Header */}
-          <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-amber-100 text-sm mb-1">{client.name || t('dashboard.recentReviews.anonymous')}</p>
-                <p className="font-mono text-lg">{client.card_id}</p>
+          {/* Downloadable Card Section */}
+          <div ref={cardRef}>
+            {/* Card Header with Shop Branding */}
+            {cardImageUrl && (
+              <div className="relative w-full h-32 overflow-hidden">
+                <img
+                  src={cardImageUrl}
+                  alt={`${shopName} Card`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/50" />
+                {merchant?.logo_url && (
+                  <div className="absolute bottom-3 left-4 flex items-center gap-2">
+                    <img
+                      src={merchant.logo_url}
+                      alt={shopName}
+                      className="h-10 w-10 object-contain bg-white rounded-lg p-1 shadow"
+                    />
+                    <span className="text-white font-bold text-lg drop-shadow">{shopName}</span>
+                  </div>
+                )}
               </div>
-              <Award className="w-10 h-10 text-white/80" />
+            )}
+            {/* Card Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-amber-100 text-sm mb-1">{client.name || t('dashboard.recentReviews.anonymous')}</p>
+                  <p className="font-mono text-lg">{client.card_id}</p>
+                </div>
+                <Award className="w-10 h-10 text-white/80" />
+              </div>
+            </div>
+
+            {/* Points Balance */}
+            <div className="p-6 bg-white">
+              <div className="text-center">
+                <p className="text-slate-600 text-sm mb-1">{t('loyalty.card.balance')}</p>
+                <div className="flex items-center justify-center gap-2">
+                  <Star className="w-8 h-8 text-amber-500" />
+                  <span className="text-4xl font-bold text-slate-900">{client.points}</span>
+                  <span className="text-slate-600">{t('loyalty.clients.points')}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div className="bg-slate-50 rounded-xl p-3 text-center">
+                  <TrendingUp className="w-5 h-5 text-green-500 mx-auto mb-1" />
+                  <p className="text-lg font-semibold text-slate-900">{client.total_purchases || 0}</p>
+                  <p className="text-xs text-slate-600">Purchases</p>
+                </div>
+                <div className="bg-slate-50 rounded-xl p-3 text-center">
+                  <Calendar className="w-5 h-5 text-blue-500 mx-auto mb-1" />
+                  <p className="text-sm font-medium text-slate-900">
+                    {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}
+                  </p>
+                  <p className="text-xs text-slate-600">{t('loyalty.card.memberSince')}</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Points Balance */}
-          <div className="p-6 border-b border-slate-100">
-            <div className="text-center">
-              <p className="text-slate-600 text-sm mb-1">{t('loyalty.card.balance')}</p>
-              <div className="flex items-center justify-center gap-2">
-                <Star className="w-8 h-8 text-amber-500" />
-                <span className="text-4xl font-bold text-slate-900">{client.points}</span>
-                <span className="text-slate-600">{t('loyalty.clients.points')}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <div className="bg-slate-50 rounded-xl p-3 text-center">
-                <TrendingUp className="w-5 h-5 text-green-500 mx-auto mb-1" />
-                <p className="text-lg font-semibold text-slate-900">{client.total_purchases || 0}</p>
-                <p className="text-xs text-slate-600">Purchases</p>
-              </div>
-              <div className="bg-slate-50 rounded-xl p-3 text-center">
-                <Calendar className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-                <p className="text-sm font-medium text-slate-900">
-                  {client.created_at ? new Date(client.created_at).toLocaleDateString() : '-'}
-                </p>
-                <p className="text-xs text-slate-600">{t('loyalty.card.memberSince')}</p>
-              </div>
-            </div>
-          </div>
+          <div className="border-t border-slate-100"></div>
 
           {/* Tabs */}
           <div className="flex border-b border-slate-200">
@@ -366,8 +427,25 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                 </div>
                 <p className="mt-4 font-mono text-slate-500 text-sm">{client.qr_code_data}</p>
 
+                {/* Download Button */}
+                <div className="mt-6">
+                  <Button
+                    variant="default"
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-white"
+                    onClick={handleDownloadCard}
+                    disabled={downloading}
+                  >
+                    {downloading ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-5 h-5 mr-2" />
+                    )}
+                    {t('loyalty.card.download') || 'Download Card Image'}
+                  </Button>
+                </div>
+
                 {/* Wallet Buttons */}
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 space-y-3">
                   <Button
                     variant="outline"
                     className="w-full border-slate-300 hover:border-slate-400 hover:bg-slate-50"
