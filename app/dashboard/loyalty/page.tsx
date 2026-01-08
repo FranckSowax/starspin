@@ -238,6 +238,48 @@ export default function LoyaltyPage() {
           </div>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link href="/dashboard/loyalty/rewards" className="block">
+            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Gift className="w-8 h-8 mb-3" />
+                  <h3 className="font-semibold text-lg">{t('loyalty.rewards.title')}</h3>
+                  <p className="text-amber-100 text-sm mt-1">{t('loyalty.rewards.subtitle')}</p>
+                </div>
+                <ChevronRight className="w-6 h-6" />
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/dashboard/scan" className="block">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CreditCard className="w-8 h-8 mb-3" />
+                  <h3 className="font-semibold text-lg">{t('dashboard.nav.scanner')}</h3>
+                  <p className="text-blue-100 text-sm mt-1">{t('loyalty.scan.loyaltyCardDetected')}</p>
+                </div>
+                <ChevronRight className="w-6 h-6" />
+              </div>
+            </div>
+          </Link>
+
+          <Link href="/dashboard/settings" className="block">
+            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Settings className="w-8 h-8 mb-3" />
+                  <h3 className="font-semibold text-lg">{t('loyalty.settings.title')}</h3>
+                  <p className="text-purple-100 text-sm mt-1">{t('loyalty.settings.enabledDesc')}</p>
+                </div>
+                <ChevronRight className="w-6 h-6" />
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {/* Clients List */}
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
           <div className="p-6 border-b border-slate-200">
@@ -353,48 +395,6 @@ export default function LoyaltyPage() {
               </table>
             </div>
           )}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/dashboard/loyalty/rewards" className="block">
-            <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-6 text-white hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Gift className="w-8 h-8 mb-3" />
-                  <h3 className="font-semibold text-lg">{t('loyalty.rewards.title')}</h3>
-                  <p className="text-amber-100 text-sm mt-1">{t('loyalty.rewards.subtitle')}</p>
-                </div>
-                <ChevronRight className="w-6 h-6" />
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/dashboard/scan" className="block">
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CreditCard className="w-8 h-8 mb-3" />
-                  <h3 className="font-semibold text-lg">{t('dashboard.nav.scanner')}</h3>
-                  <p className="text-blue-100 text-sm mt-1">{t('loyalty.scan.loyaltyCardDetected')}</p>
-                </div>
-                <ChevronRight className="w-6 h-6" />
-              </div>
-            </div>
-          </Link>
-
-          <Link href="/dashboard/settings" className="block">
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white hover:shadow-lg transition-shadow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Settings className="w-8 h-8 mb-3" />
-                  <h3 className="font-semibold text-lg">{t('loyalty.settings.title')}</h3>
-                  <p className="text-purple-100 text-sm mt-1">{t('loyalty.settings.enabledDesc')}</p>
-                </div>
-                <ChevronRight className="w-6 h-6" />
-              </div>
-            </div>
-          </Link>
         </div>
       </div>
     </DashboardLayout>
