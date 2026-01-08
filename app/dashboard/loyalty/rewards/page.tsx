@@ -138,9 +138,16 @@ export default function RewardsPage() {
     setError(null);
 
     try {
+      // Transform snake_case to camelCase for API
       const payload = {
-        ...form,
-        merchantId: merchant.id
+        merchantId: merchant.id,
+        name: form.name,
+        description: form.description,
+        type: form.type,
+        value: form.value,
+        pointsCost: form.points_cost,
+        quantityAvailable: form.quantity_available,
+        isActive: form.is_active
       };
 
       let res: Response;
@@ -149,7 +156,11 @@ export default function RewardsPage() {
         res = await fetch('/api/loyalty/rewards', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, rewardId: editingReward.id })
+          body: JSON.stringify({
+            rewardId: editingReward.id,
+            merchantId: merchant.id,
+            updates: form
+          })
         });
       } else {
         res = await fetch('/api/loyalty/rewards', {
