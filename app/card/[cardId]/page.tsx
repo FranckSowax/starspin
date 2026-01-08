@@ -23,6 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
 import { jsPDF } from 'jspdf';
+import QRCodeLib from 'qrcode';
 import type { LoyaltyClient, LoyaltyReward, PointsTransaction, Merchant } from '@/lib/types/database';
 
 // Available languages
@@ -343,38 +344,19 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       pdf.setFont('helvetica', 'normal');
       pdf.text(t('loyalty.card.scanToEarn'), pageWidth / 2, currentY, { align: 'center' });
 
-      // Generate QR code as image
-      const svgElement = qrRef.current.querySelector('svg');
-      if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-        const svgUrl = URL.createObjectURL(svgBlob);
-
-        const qrImage = new Image();
-        await new Promise<void>((resolve, reject) => {
-          qrImage.onload = () => resolve();
-          qrImage.onerror = reject;
-          qrImage.src = svgUrl;
-        });
-
-        // Draw QR to canvas then to PDF
-        const qrCanvas = document.createElement('canvas');
-        qrCanvas.width = 200;
-        qrCanvas.height = 200;
-        const qrCtx = qrCanvas.getContext('2d');
-        if (qrCtx) {
-          qrCtx.fillStyle = 'white';
-          qrCtx.fillRect(0, 0, 200, 200);
-          qrCtx.drawImage(qrImage, 0, 0, 200, 200);
-          const qrDataUrl = qrCanvas.toDataURL('image/png');
-
-          const qrSize = 40;
-          const qrX = (pageWidth - qrSize) / 2;
-          pdf.addImage(qrDataUrl, 'PNG', qrX, currentY + 5, qrSize, qrSize);
+      // Generate QR code directly as data URL using qrcode library
+      const qrDataUrl = await QRCodeLib.toDataURL(client.qr_code_data, {
+        width: 200,
+        margin: 1,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
         }
+      });
 
-        URL.revokeObjectURL(svgUrl);
-      }
+      const qrSize = 40;
+      const qrX = (pageWidth - qrSize) / 2;
+      pdf.addImage(qrDataUrl, 'PNG', qrX, currentY + 5, qrSize, qrSize);
 
       // Footer
       pdf.setTextColor(148, 163, 184); // slate-400
