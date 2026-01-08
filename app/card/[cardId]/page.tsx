@@ -305,15 +305,17 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       // Points section
       currentY += 5;
       pdf.setTextColor(245, 158, 11); // amber-500
-      pdf.setFontSize(32);
+      pdf.setFontSize(28);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(`${client.points}`, margin, currentY + 5);
+      const pointsText = `${client.points}`;
+      pdf.text(pointsText, margin, currentY + 5);
 
+      // "points" label aligned with the baseline
       pdf.setTextColor(100, 116, 139);
-      pdf.setFontSize(12);
+      pdf.setFontSize(14);
       pdf.setFont('helvetica', 'normal');
-      const pointsWidth = pdf.getTextWidth(`${client.points}`);
-      pdf.text(' points', margin + pointsWidth + 2, currentY + 5);
+      const pointsWidth = pdf.getTextWidth(pointsText);
+      pdf.text('points', margin + pointsWidth + 3, currentY + 5);
 
       // Stats box
       currentY += 20;
@@ -338,9 +340,9 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       pdf.text(memberDate, margin + 35, currentY + 14);
 
       // QR Code section
-      currentY += 28;
+      currentY += 25;
       pdf.setTextColor(71, 85, 105);
-      pdf.setFontSize(9);
+      pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
       pdf.text(t('loyalty.card.scanToEarn'), pageWidth / 2, currentY, { align: 'center' });
 
@@ -354,19 +356,20 @@ export default function LoyaltyCardPage({ params }: PageProps) {
         }
       });
 
-      const qrSize = 40;
+      const qrSize = 35;
       const qrX = (pageWidth - qrSize) / 2;
-      pdf.addImage(qrDataUrl, 'PNG', qrX, currentY + 5, qrSize, qrSize);
+      pdf.addImage(qrDataUrl, 'PNG', qrX, currentY + 3, qrSize, qrSize);
 
-      // Footer
+      // Footer - positioned below QR code with proper spacing
+      const footerY = currentY + 3 + qrSize + 8;
       pdf.setTextColor(148, 163, 184); // slate-400
       pdf.setFontSize(7);
       pdf.setFont('helvetica', 'normal');
-      pdf.text('Powered by StarSpin', pageWidth / 2, pageHeight - 5, { align: 'center' });
+      pdf.text('Powered by StarSpin', pageWidth / 2, footerY, { align: 'center' });
 
       // Card URL
-      pdf.setFontSize(6);
-      pdf.text(`starspin.netlify.app/card/${client.qr_code_data}`, pageWidth / 2, pageHeight - 2, { align: 'center' });
+      pdf.setFontSize(5);
+      pdf.text(`starspin.netlify.app/card/${client.qr_code_data}`, pageWidth / 2, footerY + 4, { align: 'center' });
 
       // Download PDF
       pdf.save(`${shopName.replace(/\s+/g, '_')}_card_${client.card_id}.pdf`);
