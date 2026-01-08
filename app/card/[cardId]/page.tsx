@@ -11,8 +11,6 @@ import {
   History,
   Loader2,
   AlertCircle,
-  Apple,
-  Smartphone,
   Calendar,
   TrendingUp,
   ExternalLink,
@@ -24,6 +22,28 @@ import {
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
 import type { LoyaltyClient, LoyaltyReward, PointsTransaction, Merchant } from '@/lib/types/database';
+
+// Apple Wallet Icon SVG
+const AppleWalletIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="4" width="20" height="16" rx="2" fill="#000000"/>
+    <rect x="2" y="4" width="20" height="4" fill="#FF3B30"/>
+    <rect x="2" y="8" width="20" height="4" fill="#FF9500"/>
+    <rect x="2" y="12" width="20" height="4" fill="#34C759"/>
+    <rect x="2" y="16" width="20" height="4" rx="0 0 2 2" fill="#007AFF"/>
+  </svg>
+);
+
+// Google Wallet Icon SVG
+const GoogleWalletIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="#4285F4"/>
+    <path d="M12 2C6.48 2 2 6.48 2 12c0 2.76 1.12 5.26 2.93 7.07L12 12V2z" fill="#EA4335"/>
+    <path d="M2 12c0 2.76 1.12 5.26 2.93 7.07L12 12H2z" fill="#FBBC05"/>
+    <path d="M12 12l-7.07 7.07C6.74 20.88 9.24 22 12 22c5.52 0 10-4.48 10-10H12z" fill="#34A853"/>
+    <circle cx="12" cy="12" r="4" fill="white"/>
+  </svg>
+);
 
 interface WalletStatus {
   apple: { configured: boolean; loading: boolean; added: boolean };
@@ -510,7 +530,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full bg-black hover:bg-gray-900 text-white border-black"
                         onClick={handleAddToAppleWallet}
                         disabled={walletStatus.apple.loading}
                       >
@@ -519,15 +539,15 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                         ) : walletStatus.apple.added ? (
                           <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
                         ) : (
-                          <Apple className="w-5 h-5 mr-2" />
+                          <AppleWalletIcon className="w-6 h-6 mr-2" />
                         )}
                         {t('loyalty.card.appleWallet')}
-                        <span className="ml-2 text-xs text-amber-500">(Beta)</span>
+                        <span className="ml-2 text-xs text-gray-400">(Beta)</span>
                       </Button>
 
                       <Button
                         variant="outline"
-                        className="w-full"
+                        className="w-full bg-white hover:bg-gray-50 text-gray-800 border-gray-300"
                         onClick={handleAddToGoogleWallet}
                         disabled={walletStatus.google.loading}
                       >
@@ -536,10 +556,10 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                         ) : walletStatus.google.added ? (
                           <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
                         ) : (
-                          <Smartphone className="w-5 h-5 mr-2" />
+                          <GoogleWalletIcon className="w-6 h-6 mr-2" />
                         )}
                         {t('loyalty.card.googleWallet')}
-                        <span className="ml-2 text-xs text-amber-500">(Beta)</span>
+                        <span className="ml-2 text-xs text-gray-400">(Beta)</span>
                       </Button>
 
                       <Button
