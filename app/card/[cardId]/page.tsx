@@ -655,18 +655,18 @@ export default function LoyaltyCardPage({ params }: PageProps) {
           <div className="hidden lg:block space-y-6">
             {/* Quick Stats Card */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Quick Stats</h3>
+              <h3 className="font-semibold text-slate-900 mb-4">{t('loyalty.card.quickStats')}</h3>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Points Balance</span>
+                  <span className="text-slate-600">{t('loyalty.card.pointsBalance')}</span>
                   <span className="font-bold text-amber-600">{client.points}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Total Purchases</span>
+                  <span className="text-slate-600">{t('loyalty.card.totalPurchases')}</span>
                   <span className="font-bold text-slate-900">{client.total_purchases || 0}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600">Available Rewards</span>
+                  <span className="text-slate-600">{t('loyalty.card.availableRewards')}</span>
                   <span className="font-bold text-slate-900">
                     {rewards.filter(r => client.points >= r.points_cost).length}
                   </span>
@@ -677,7 +677,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
             {/* Next Reward Progress */}
             {rewards.length > 0 && (
               <div className="bg-white rounded-2xl shadow-xl p-6">
-                <h3 className="font-semibold text-slate-900 mb-4">Next Reward</h3>
+                <h3 className="font-semibold text-slate-900 mb-4">{t('loyalty.card.nextReward')}</h3>
                 {(() => {
                   const nextReward = rewards
                     .filter(r => r.points_cost > client.points)
@@ -686,7 +686,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                   if (!nextReward) {
                     return (
                       <p className="text-green-600 font-medium">
-                        You can redeem all available rewards!
+                        {t('loyalty.card.canRedeemAll')}
                       </p>
                     );
                   }
@@ -704,7 +704,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                         />
                       </div>
                       <p className="text-sm text-slate-600">
-                        {pointsNeeded} more points needed
+                        {t('loyalty.card.morePointsNeeded', { count: pointsNeeded })}
                       </p>
                     </div>
                   );

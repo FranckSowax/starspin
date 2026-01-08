@@ -438,7 +438,14 @@
       "shareText": "Voici ma carte fidélité !",
       "linkCopied": "Lien copié dans le presse-papiers !",
       "download": "Télécharger l'image",
-      "downloadError": "Erreur lors du téléchargement"
+      "downloadError": "Erreur lors du téléchargement",
+      "quickStats": "Statistiques",
+      "pointsBalance": "Solde de points",
+      "totalPurchases": "Total achats",
+      "availableRewards": "Récompenses disponibles",
+      "nextReward": "Prochaine récompense",
+      "morePointsNeeded": "{{count}} points restants",
+      "canRedeemAll": "Vous pouvez échanger toutes les récompenses !"
     },
     "wallet": {
       "added": "Ajouté au portefeuille",

@@ -438,7 +438,14 @@
       "shareText": "Here's my loyalty card!",
       "linkCopied": "Link copied to clipboard!",
       "download": "Download Card Image",
-      "downloadError": "Error downloading image"
+      "downloadError": "Error downloading image",
+      "quickStats": "Quick Stats",
+      "pointsBalance": "Points Balance",
+      "totalPurchases": "Total Purchases",
+      "availableRewards": "Available Rewards",
+      "nextReward": "Next Reward",
+      "morePointsNeeded": "{{count}} more points needed",
+      "canRedeemAll": "You can redeem all available rewards!"
     },
     "wallet": {
       "added": "Added to wallet",
