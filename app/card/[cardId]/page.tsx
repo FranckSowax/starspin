@@ -239,13 +239,41 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       const html2canvasModule = await import('html2canvas');
       const html2canvas = html2canvasModule.default;
 
-      const canvas = await html2canvas(cardRef.current, {
+      // Clone the element to avoid modifying the original
+      const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
+      clonedElement.style.position = 'absolute';
+      clonedElement.style.left = '-9999px';
+      clonedElement.style.top = '0';
+      document.body.appendChild(clonedElement);
+
+      // Replace any lab() colors with fallback colors in computed styles
+      const allElements = clonedElement.querySelectorAll('*');
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const computedStyle = window.getComputedStyle(htmlEl);
+        // Force standard colors to avoid lab() parsing issues
+        if (computedStyle.backgroundColor.includes('lab')) {
+          htmlEl.style.backgroundColor = '#f8fafc';
+        }
+        if (computedStyle.color.includes('lab')) {
+          htmlEl.style.color = '#1e293b';
+        }
+      });
+
+      const canvas = await html2canvas(clonedElement, {
         backgroundColor: '#fffbeb',
         scale: 2,
         useCORS: true,
         allowTaint: true,
         logging: false,
+        ignoreElements: (element) => {
+          // Ignore elements that might cause issues
+          return element.tagName === 'IFRAME' || element.tagName === 'VIDEO';
+        },
       });
+
+      // Remove the cloned element
+      document.body.removeChild(clonedElement);
 
       // Convert to PNG and download
       const link = document.createElement('a');
