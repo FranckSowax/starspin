@@ -591,7 +591,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
                       <Button
                         variant="outline"
-                        className="w-full bg-black hover:bg-gray-900 text-white border-black"
+                        className="w-full bg-white hover:bg-gray-50 text-gray-800 border-gray-300"
                         onClick={handleAddToAppleWallet}
                         disabled={walletStatus.apple.loading}
                       >
