@@ -81,18 +81,24 @@ export default function LoyaltyPage() {
         .select('id, status')
         .eq('merchant_id', user.id);
 
-      const totalClients = allClients?.length || 0;
-      const activeClients = allClients?.filter(c => c.status === 'active').length || 0;
-      const totalPointsDistributed = transactions
+      const total_clients = allClients?.length || 0;
+      const active_clients = allClients?.filter(c => c.status === 'active').length || 0;
+      const total_points_issued = transactions
         ?.filter(t => t.points > 0)
         .reduce((sum, t) => sum + t.points, 0) || 0;
-      const totalRewardsRedeemed = redeemed?.filter(r => r.status === 'used').length || 0;
+      const total_points_redeemed = transactions
+        ?.filter(t => t.points < 0)
+        .reduce((sum, t) => sum + Math.abs(t.points), 0) || 0;
+      const total_rewards_redeemed = redeemed?.filter(r => r.status === 'used').length || 0;
+      const average_points_per_client = total_clients > 0 ? Math.round(total_points_issued / total_clients) : 0;
 
       setStats({
-        totalClients,
-        activeClients,
-        totalPointsDistributed,
-        totalRewardsRedeemed
+        total_clients,
+        active_clients,
+        total_points_issued,
+        total_points_redeemed,
+        total_rewards_redeemed,
+        average_points_per_client
       });
 
     } catch (error) {
@@ -190,7 +196,7 @@ export default function LoyaltyPage() {
               </div>
               <div>
                 <p className="text-sm text-slate-600">{t('loyalty.overview.totalClients')}</p>
-                <p className="text-2xl font-bold text-slate-900">{stats?.totalClients || 0}</p>
+                <p className="text-2xl font-bold text-slate-900">{stats?.total_clients || 0}</p>
               </div>
             </div>
           </div>
@@ -202,7 +208,7 @@ export default function LoyaltyPage() {
               </div>
               <div>
                 <p className="text-sm text-slate-600">{t('loyalty.overview.totalPoints')}</p>
-                <p className="text-2xl font-bold text-slate-900">{stats?.totalPointsDistributed?.toLocaleString() || 0}</p>
+                <p className="text-2xl font-bold text-slate-900">{stats?.total_points_issued?.toLocaleString() || 0}</p>
               </div>
             </div>
           </div>
@@ -214,7 +220,7 @@ export default function LoyaltyPage() {
               </div>
               <div>
                 <p className="text-sm text-slate-600">{t('loyalty.overview.totalRewards')}</p>
-                <p className="text-2xl font-bold text-slate-900">{stats?.totalRewardsRedeemed || 0}</p>
+                <p className="text-2xl font-bold text-slate-900">{stats?.total_rewards_redeemed || 0}</p>
               </div>
             </div>
           </div>
@@ -226,7 +232,7 @@ export default function LoyaltyPage() {
               </div>
               <div>
                 <p className="text-sm text-slate-600">{t('loyalty.overview.activeCards')}</p>
-                <p className="text-2xl font-bold text-slate-900">{stats?.activeClients || 0}</p>
+                <p className="text-2xl font-bold text-slate-900">{stats?.active_clients || 0}</p>
               </div>
             </div>
           </div>
