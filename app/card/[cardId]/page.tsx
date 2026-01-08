@@ -235,50 +235,29 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
     setDownloading(true);
     try {
-      // Dynamically import html2canvas
-      const html2canvasModule = await import('html2canvas');
-      const html2canvas = html2canvasModule.default;
+      // Use dom-to-image-more which handles modern CSS better
+      const domtoimage = await import('dom-to-image-more');
 
-      // Clone the element to avoid modifying the original
-      const clonedElement = cardRef.current.cloneNode(true) as HTMLElement;
-      clonedElement.style.position = 'absolute';
-      clonedElement.style.left = '-9999px';
-      clonedElement.style.top = '0';
-      document.body.appendChild(clonedElement);
-
-      // Replace any lab() colors with fallback colors in computed styles
-      const allElements = clonedElement.querySelectorAll('*');
-      allElements.forEach((el) => {
-        const htmlEl = el as HTMLElement;
-        const computedStyle = window.getComputedStyle(htmlEl);
-        // Force standard colors to avoid lab() parsing issues
-        if (computedStyle.backgroundColor.includes('lab')) {
-          htmlEl.style.backgroundColor = '#f8fafc';
-        }
-        if (computedStyle.color.includes('lab')) {
-          htmlEl.style.color = '#1e293b';
-        }
-      });
-
-      const canvas = await html2canvas(clonedElement, {
-        backgroundColor: '#fffbeb',
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        ignoreElements: (element) => {
-          // Ignore elements that might cause issues
-          return element.tagName === 'IFRAME' || element.tagName === 'VIDEO';
+      const dataUrl = await domtoimage.toPng(cardRef.current, {
+        quality: 1,
+        bgcolor: '#fffbeb',
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
+        },
+        filter: (node: Node) => {
+          // Filter out problematic elements
+          if (node instanceof Element) {
+            return node.tagName !== 'IFRAME' && node.tagName !== 'VIDEO';
+          }
+          return true;
         },
       });
 
-      // Remove the cloned element
-      document.body.removeChild(clonedElement);
-
-      // Convert to PNG and download
+      // Download the image
       const link = document.createElement('a');
       link.download = `${downloadShopName.replace(/\s+/g, '_')}_card_${client.card_id}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error('Download error:', err);
