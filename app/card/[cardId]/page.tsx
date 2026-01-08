@@ -245,9 +245,10 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
   // Generate PDF card
   const handleDownloadCard = async () => {
-    if (!client || !qrRef.current) return;
+    if (!client) return;
 
     const shopName = merchant?.business_name || 'StarSpin';
+    const cardImageUrl = merchant?.loyalty_card_image_url || merchant?.background_url;
     setDownloading(true);
 
     try {
@@ -259,117 +260,137 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       });
 
       const pageWidth = 105;
-      const pageHeight = 148;
-      const margin = 10;
+      const margin = 8;
+      const headerHeight = 45;
+      let contentY = headerHeight + 8;
 
-      // Header background (amber gradient simulation)
-      pdf.setFillColor(245, 158, 11); // amber-500
-      pdf.rect(0, 0, pageWidth, 40, 'F');
+      // Try to load the banner image
+      let bannerLoaded = false;
+      if (cardImageUrl) {
+        try {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = cardImageUrl;
+          });
 
-      // Shop name
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(18);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(`${shopName}`, margin, 15);
-
-      // Subtitle
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(t('loyalty.card.title'), margin, 22);
-
-      // Card ID badge
-      pdf.setFontSize(9);
-      pdf.text(client.card_id, margin, 32);
-
-      // Main content area
-      const contentY = 48;
-
-      // Client name
-      pdf.setTextColor(30, 41, 59); // slate-800
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(client.name || t('dashboard.recentReviews.anonymous'), margin, contentY);
-
-      // Contact info
-      let currentY = contentY + 8;
-      const contactInfo = client.phone || client.email;
-      if (contactInfo) {
-        pdf.setTextColor(100, 116, 139); // slate-500
-        pdf.setFontSize(9);
-        pdf.setFont('helvetica', 'normal');
-        const contactLabel = client.phone ? 'Tel: ' : 'Email: ';
-        pdf.text(contactLabel + contactInfo, margin, currentY);
-        currentY += 8;
+          // Draw banner image with dark overlay baked in
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+            // Add dark overlay directly on canvas for text visibility
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg', 0.9);
+            pdf.addImage(imgData, 'JPEG', 0, 0, pageWidth, headerHeight);
+            bannerLoaded = true;
+          }
+        } catch {
+          // If image fails to load, use default gradient
+          bannerLoaded = false;
+        }
       }
 
-      // Points section
-      currentY += 5;
-      pdf.setTextColor(245, 158, 11); // amber-500
-      pdf.setFontSize(28);
+      // Fallback: amber gradient header
+      if (!bannerLoaded) {
+        pdf.setFillColor(245, 158, 11);
+        pdf.rect(0, 0, pageWidth, headerHeight, 'F');
+      }
+
+      // Header text overlay
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(shopName, margin, 12);
+
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(t('loyalty.card.title'), margin, 19);
+
+      // Client name on banner
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(client.name || t('dashboard.recentReviews.anonymous'), margin, 30);
+
+      // Card ID
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(client.card_id, margin, 38);
+
+      // Contact info on banner
+      const contactInfo = client.phone || client.email;
+      if (contactInfo) {
+        pdf.setFontSize(8);
+        const contactLabel = client.phone ? 'Tel: ' : 'Email: ';
+        pdf.text(contactLabel + contactInfo, margin, 43);
+      }
+
+      // Points section - main highlight
+      pdf.setTextColor(245, 158, 11);
+      pdf.setFontSize(36);
       pdf.setFont('helvetica', 'bold');
       const pointsText = `${client.points}`;
-      pdf.text(pointsText, margin, currentY + 5);
+      pdf.text(pointsText, margin, contentY + 10);
 
-      // "points" label aligned with the baseline
       pdf.setTextColor(100, 116, 139);
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'normal');
       const pointsWidth = pdf.getTextWidth(pointsText);
-      pdf.text('points', margin + pointsWidth + 3, currentY + 5);
+      pdf.text('points', margin + pointsWidth + 2, contentY + 10);
 
       // Stats box
-      currentY += 20;
-      pdf.setFillColor(248, 250, 252); // slate-50
-      pdf.roundedRect(margin, currentY, pageWidth - 2 * margin, 20, 3, 3, 'F');
+      contentY += 20;
+      pdf.setFillColor(248, 250, 252);
+      pdf.roundedRect(margin, contentY, pageWidth - 2 * margin, 18, 2, 2, 'F');
 
-      pdf.setTextColor(71, 85, 105); // slate-600
-      pdf.setFontSize(8);
-      pdf.text('Achats', margin + 5, currentY + 6);
-      pdf.setFontSize(12);
+      pdf.setTextColor(71, 85, 105);
+      pdf.setFontSize(7);
+      pdf.text(t('loyalty.stats.purchases') || 'Achats', margin + 5, contentY + 5);
+      pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(`${client.total_purchases || 0}`, margin + 5, currentY + 14);
+      pdf.text(`${client.total_purchases || 0}`, margin + 5, contentY + 12);
 
       pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(8);
-      pdf.text('Membre depuis', margin + 35, currentY + 6);
-      pdf.setFontSize(10);
+      pdf.setFontSize(7);
+      pdf.text(t('loyalty.card.memberSince') || 'Membre depuis', margin + 35, contentY + 5);
+      pdf.setFontSize(9);
       pdf.setFont('helvetica', 'bold');
       const memberDate = client.created_at
         ? new Date(client.created_at).toLocaleDateString('fr-FR')
         : new Date().toLocaleDateString('fr-FR');
-      pdf.text(memberDate, margin + 35, currentY + 14);
+      pdf.text(memberDate, margin + 35, contentY + 12);
 
       // QR Code section
-      currentY += 25;
+      contentY += 24;
       pdf.setTextColor(71, 85, 105);
       pdf.setFontSize(8);
       pdf.setFont('helvetica', 'normal');
-      pdf.text(t('loyalty.card.scanToEarn'), pageWidth / 2, currentY, { align: 'center' });
+      pdf.text(t('loyalty.card.scanToEarn'), pageWidth / 2, contentY, { align: 'center' });
 
-      // Generate QR code directly as data URL using qrcode library
+      // Generate QR code
       const qrDataUrl = await QRCodeLib.toDataURL(client.qr_code_data, {
         width: 200,
         margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
+        color: { dark: '#000000', light: '#FFFFFF' }
       });
 
-      const qrSize = 35;
+      const qrSize = 32;
       const qrX = (pageWidth - qrSize) / 2;
-      pdf.addImage(qrDataUrl, 'PNG', qrX, currentY + 3, qrSize, qrSize);
+      pdf.addImage(qrDataUrl, 'PNG', qrX, contentY + 3, qrSize, qrSize);
 
-      // Footer - positioned below QR code with proper spacing
-      const footerY = currentY + 3 + qrSize + 8;
-      pdf.setTextColor(148, 163, 184); // slate-400
-      pdf.setFontSize(7);
+      // Footer
+      const footerY = contentY + qrSize + 10;
+      pdf.setTextColor(148, 163, 184);
+      pdf.setFontSize(6);
       pdf.setFont('helvetica', 'normal');
       pdf.text('Powered by StarSpin', pageWidth / 2, footerY, { align: 'center' });
-
-      // Card URL
       pdf.setFontSize(5);
-      pdf.text(`starspin.netlify.app/card/${client.qr_code_data}`, pageWidth / 2, footerY + 4, { align: 'center' });
+      pdf.text(`starspin.netlify.app/card/${client.qr_code_data}`, pageWidth / 2, footerY + 3, { align: 'center' });
 
       // Download PDF
       pdf.save(`${shopName.replace(/\s+/g, '_')}_card_${client.card_id}.pdf`);
