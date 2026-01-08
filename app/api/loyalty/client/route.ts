@@ -38,6 +38,29 @@ const LOYALTY_BUTTON_TEXTS: Record<string, string> = {
   pt: 'Abrir meu Cartão 🎁',
 };
 
+// Reminder message templates for existing clients
+const LOYALTY_REMINDER_MESSAGES: Record<string, (businessName: string, points: number, cardUrl: string) => string> = {
+  fr: (businessName, points, cardUrl) =>
+    `👋 *${businessName}* - Rappel Fidélité\n\nVous avez déjà une carte de fidélité chez nous !\n\n⭐ Votre solde actuel : *${points} points*\n\n📱 Consultez votre carte pour :\n• Voir vos points et récompenses disponibles\n• Échanger vos points\n• Ajouter la carte à votre Wallet\n\n👇 Accéder à ma carte :\n${cardUrl}`,
+  en: (businessName, points, cardUrl) =>
+    `👋 *${businessName}* - Loyalty Reminder\n\nYou already have a loyalty card with us!\n\n⭐ Your current balance: *${points} points*\n\n📱 Check your card to:\n• View your points and available rewards\n• Redeem your points\n• Add card to your Wallet\n\n👇 Access my card:\n${cardUrl}`,
+  th: (businessName, points, cardUrl) =>
+    `👋 *${businessName}* - แจ้งเตือนบัตรสมาชิก\n\nคุณมีบัตรสมาชิกกับเราแล้ว!\n\n⭐ ยอดแต้มปัจจุบัน: *${points} แต้ม*\n\n📱 ตรวจสอบบัตรของคุณเพื่อ:\n• ดูแต้มและรางวัลที่มี\n• แลกแต้ม\n• เพิ่มบัตรใน Wallet\n\n👇 เข้าถึงบัตรของฉัน:\n${cardUrl}`,
+  es: (businessName, points, cardUrl) =>
+    `👋 *${businessName}* - Recordatorio de Fidelidad\n\n¡Ya tienes una tarjeta de fidelidad con nosotros!\n\n⭐ Tu saldo actual: *${points} puntos*\n\n📱 Consulta tu tarjeta para:\n• Ver tus puntos y recompensas disponibles\n• Canjear tus puntos\n• Añadir la tarjeta a tu Wallet\n\n👇 Acceder a mi tarjeta:\n${cardUrl}`,
+  pt: (businessName, points, cardUrl) =>
+    `👋 *${businessName}* - Lembrete de Fidelidade\n\nVocê já tem um cartão fidelidade conosco!\n\n⭐ Seu saldo atual: *${points} pontos*\n\n📱 Consulte seu cartão para:\n• Ver seus pontos e recompensas disponíveis\n• Trocar seus pontos\n• Adicionar cartão ao Wallet\n\n👇 Acessar meu cartão:\n${cardUrl}`,
+};
+
+// Reminder button texts
+const LOYALTY_REMINDER_BUTTON_TEXTS: Record<string, string> = {
+  fr: 'Voir ma Carte 👀',
+  en: 'View my Card 👀',
+  th: 'ดูบัตรของฉัน 👀',
+  es: 'Ver mi Tarjeta 👀',
+  pt: 'Ver meu Cartão 👀',
+};
+
 /**
  * Envoie un message WhatsApp avec le lien de la carte fidélité
  */
@@ -135,6 +158,105 @@ async function sendLoyaltyCardWhatsApp(
     }
   } catch (error) {
     console.error('[LOYALTY] WhatsApp send error:', error);
+  }
+}
+
+/**
+ * Envoie un message WhatsApp de rappel pour un client existant
+ */
+async function sendLoyaltyReminderWhatsApp(
+  phone: string,
+  businessName: string,
+  currentPoints: number,
+  qrCodeData: string,
+  language: string = 'fr'
+): Promise<void> {
+  const globalWhapiKey = process.env.WHAPI_API_KEY;
+  if (!globalWhapiKey) {
+    console.log('[LOYALTY] WHAPI_API_KEY not configured, skipping WhatsApp reminder');
+    return;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
+  const cardUrl = `${baseUrl}/card/${qrCodeData}`;
+
+  // Format phone number for Whapi (remove + prefix)
+  const formattedPhone = phone.replace(/^\+/, '');
+
+  // Get reminder message template
+  const messageTemplate = LOYALTY_REMINDER_MESSAGES[language] || LOYALTY_REMINDER_MESSAGES['fr'];
+  const message = messageTemplate(businessName, currentPoints, cardUrl);
+
+  // Get button text
+  const buttonText = LOYALTY_REMINDER_BUTTON_TEXTS[language] || LOYALTY_REMINDER_BUTTON_TEXTS['fr'];
+
+  // Try interactive message first
+  try {
+    const interactivePayload = {
+      to: formattedPhone,
+      type: 'button',
+      header: {
+        type: 'text',
+        text: `👋 ${businessName}`
+      },
+      body: {
+        text: `Vous avez déjà une carte fidélité ! Votre solde : ${currentPoints} points ⭐`
+      },
+      footer: {
+        text: '📱 Consultez votre carte'
+      },
+      action: {
+        buttons: [
+          {
+            type: 'url',
+            title: buttonText.substring(0, 25),
+            id: `reminder_${Date.now()}`,
+            url: cardUrl
+          }
+        ]
+      }
+    };
+
+    const interactiveResponse = await fetch(WHAPI_INTERACTIVE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${globalWhapiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(interactivePayload),
+    });
+
+    if (interactiveResponse.ok) {
+      console.log('[LOYALTY] WhatsApp reminder interactive message sent successfully');
+      return;
+    }
+
+    console.log('[LOYALTY] Reminder interactive message failed, falling back to text');
+  } catch (error) {
+    console.log('[LOYALTY] Reminder interactive message error, falling back to text');
+  }
+
+  // Fallback to text message
+  try {
+    const textResponse = await fetch(WHAPI_TEXT_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${globalWhapiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: formattedPhone,
+        body: message,
+      }),
+    });
+
+    if (textResponse.ok) {
+      console.log('[LOYALTY] WhatsApp reminder text message sent successfully');
+    } else {
+      console.error('[LOYALTY] WhatsApp reminder text message failed:', await textResponse.text());
+    }
+  } catch (error) {
+    console.error('[LOYALTY] WhatsApp reminder send error:', error);
   }
 }
 
@@ -346,7 +468,7 @@ export async function POST(request: NextRequest) {
       existingClient = data;
     }
 
-    // Si existe, mettre à jour last_visit et retourner
+    // Si existe, mettre à jour last_visit et envoyer message de rappel
     if (existingClient) {
       const { data: updatedClient, error: updateError } = await supabaseAdmin
         .from('loyalty_clients')
@@ -363,9 +485,26 @@ export async function POST(request: NextRequest) {
         console.error('[LOYALTY CLIENT] Update error:', updateError);
       }
 
+      const clientData = updatedClient || existingClient;
+
+      // Envoyer message de rappel WhatsApp (si phone fourni)
+      if (phone && clientData.qr_code_data) {
+        // Fire and forget - ne pas bloquer la réponse
+        sendLoyaltyReminderWhatsApp(
+          phone,
+          merchant.business_name || 'StarSpin',
+          clientData.points || 0,
+          clientData.qr_code_data,
+          body.language || 'fr'
+        ).catch((error) => {
+          console.error('[LOYALTY CLIENT] WhatsApp reminder send error:', error);
+        });
+      }
+
       return NextResponse.json({
-        client: updatedClient || existingClient,
-        isNew: false
+        client: clientData,
+        isNew: false,
+        cardUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app'}/card/${clientData.qr_code_data}`
       });
     }
 
