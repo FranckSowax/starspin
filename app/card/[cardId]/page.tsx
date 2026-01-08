@@ -191,25 +191,9 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   };
 
   const handleAddToGoogleWallet = async () => {
-    setWalletStatus(prev => ({ ...prev, google: { ...prev.google, loading: true } }));
-    try {
-      const res = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
-      const data = await res.json();
-
-      if (data.configured && data.saveUrl) {
-        // Ouvrir le lien Google Wallet dans une nouvelle fenêtre
-        window.open(data.saveUrl, '_blank');
-        setWalletStatus(prev => ({ ...prev, google: { ...prev.google, added: true } }));
-      } else if (!data.configured) {
-        alert(t('loyalty.wallet.notConfigured'));
-      } else {
-        alert(t('loyalty.wallet.error'));
-      }
-    } catch {
-      alert(t('loyalty.wallet.error'));
-    } finally {
-      setWalletStatus(prev => ({ ...prev, google: { ...prev.google, loading: false } }));
-    }
+    // Google Wallet nécessite une approbation du compte marchand Google Pay
+    // En attendant l'approbation, afficher un message "Coming Soon"
+    alert(t('loyalty.wallet.googleComingSoon'));
   };
 
   const handleRedeem = async (reward: LoyaltyReward) => {
