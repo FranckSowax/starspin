@@ -277,8 +277,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Générer un nouveau card_id
-    let cardId = `STAR-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`;
+    // Générer un nouveau card_id unique
+    // Format: STAR-YYYY-XXXXXXXX (8 derniers chiffres du timestamp pour unicité)
+    const timestamp = Date.now();
+    let cardId = `STAR-${new Date().getFullYear()}-${timestamp.toString().slice(-8)}`;
 
     try {
       const { data: cardIdResult, error: rpcError } = await supabaseAdmin
