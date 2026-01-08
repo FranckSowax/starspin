@@ -26,6 +26,14 @@ export interface Merchant {
   // WhatsApp workflow fields
   workflow_mode?: 'web' | 'whatsapp';
   whatsapp_message_template?: string | null;
+  // Loyalty program fields
+  loyalty_enabled?: boolean;
+  loyalty_card_image_url?: string | null;
+  points_per_purchase?: number;
+  purchase_amount_threshold?: number;
+  loyalty_currency?: 'THB' | 'EUR' | 'USD' | 'XAF';
+  welcome_points?: number;
+  loyalty_message_template?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -102,4 +110,104 @@ export interface Notification {
   data: Record<string, any>;
   read: boolean;
   created_at: string;
+}
+
+// ============================================================================
+// LOYALTY SYSTEM TYPES
+// ============================================================================
+
+export type LoyaltyClientStatus = 'active' | 'suspended' | 'expired';
+
+export interface LoyaltyClient {
+  id: string;
+  merchant_id: string;
+  card_id: string; // Format: STAR-YYYY-XXXX
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  points: number;
+  total_purchases: number;
+  total_spent: number;
+  qr_code_data: string; // UUID unique pour le QR
+  user_token: string | null;
+  apple_pass_serial: string | null;
+  google_pass_id: string | null;
+  status: LoyaltyClientStatus;
+  last_visit: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PointsTransactionType = 'earn' | 'redeem' | 'bonus' | 'welcome' | 'adjustment';
+
+export interface PointsTransaction {
+  id: string;
+  client_id: string;
+  merchant_id: string;
+  type: PointsTransactionType;
+  points: number; // Positif = gain, Négatif = dépense
+  balance_after: number;
+  purchase_amount: number | null;
+  description: string | null;
+  reference_id: string | null;
+  staff_id: string | null;
+  created_at: string;
+}
+
+export type LoyaltyRewardType = 'discount' | 'product' | 'service' | 'cashback';
+
+export interface LoyaltyReward {
+  id: string;
+  merchant_id: string;
+  name: string;
+  description: string | null;
+  type: LoyaltyRewardType;
+  value: string; // "10" pour 10%, "Dessert gratuit", etc.
+  points_cost: number;
+  quantity_available: number | null; // null = illimité
+  image_url: string | null;
+  valid_from: string;
+  valid_until: string | null;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type RedeemedRewardStatus = 'pending' | 'used' | 'expired' | 'cancelled';
+
+export interface RedeemedReward {
+  id: string;
+  client_id: string;
+  reward_id: string | null;
+  merchant_id: string;
+  reward_name: string;
+  reward_value: string;
+  points_spent: number;
+  redemption_code: string; // Format: RWD-XXXXXX
+  status: RedeemedRewardStatus;
+  expires_at: string | null;
+  used_at: string | null;
+  used_by: string | null;
+  created_at: string;
+}
+
+// Extended types with relations
+export interface LoyaltyClientWithTransactions extends LoyaltyClient {
+  transactions?: PointsTransaction[];
+  redeemed_rewards?: RedeemedReward[];
+}
+
+export interface LoyaltyRewardWithStats extends LoyaltyReward {
+  times_redeemed?: number;
+}
+
+// Stats interfaces
+export interface LoyaltyStats {
+  total_clients: number;
+  active_clients: number;
+  total_points_issued: number;
+  total_points_redeemed: number;
+  total_rewards_redeemed: number;
+  average_points_per_client: number;
 }

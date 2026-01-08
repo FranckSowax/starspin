@@ -143,6 +143,19 @@ export default function RatingPage() {
           }),
         }).catch(() => {}); // Fire and forget
 
+        // Create loyalty card if merchant has loyalty enabled
+        if (merchant?.loyalty_enabled) {
+          fetch('/api/loyalty/client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              merchantId: sanitizedData.merchant_id,
+              phone: sanitizedPhone,
+              userToken: sanitizedData.user_token,
+            }),
+          }).catch(() => {}); // Fire and forget
+        }
+
         if (rating >= 4) {
           // Redirect to intermediate page with phone number for WhatsApp workflow
           router.push(`/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}&lang=${currentLang}`);
@@ -201,6 +214,19 @@ export default function RatingPage() {
             data: { rating: sanitizedData.rating, customerEmail: sanitizedData.customer_email, isPositive: sanitizedData.rating >= 4 },
           }),
         }).catch(() => {}); // Fire and forget
+
+        // Create loyalty card if merchant has loyalty enabled
+        if (merchant?.loyalty_enabled) {
+          fetch('/api/loyalty/client', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              merchantId: sanitizedData.merchant_id,
+              email: sanitizedData.customer_email,
+              userToken: sanitizedData.user_token,
+            }),
+          }).catch(() => {}); // Fire and forget
+        }
 
         if (rating >= 4) {
           // Redirect to intermediate page for positive ratings

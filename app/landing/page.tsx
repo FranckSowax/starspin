@@ -436,8 +436,142 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Benefits Section */}
+      {/* Loyalty Section */}
       <section className="py-24 px-4 bg-white">
+        <div className="container mx-auto max-w-7xl">
+          {/* Section header */}
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full mb-6">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+              <span className="text-sm font-semibold text-amber-600 uppercase tracking-wide">{t('landing.loyalty.tag')}</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
+              {t('landing.loyalty.title')}
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              {t('landing.loyalty.subtitle')}
+            </p>
+          </div>
+
+          {/* Loyalty cards grid */}
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {/* Card 1 - Automatic Program */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-amber-500 hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.loyalty.card1Title')}</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('landing.loyalty.card1Desc')}
+                </p>
+              </div>
+            </Card>
+
+            {/* Card 2 - Points & Rewards */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-amber-500 hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.loyalty.card2Title')}</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('landing.loyalty.card2Desc')}
+                </p>
+              </div>
+            </Card>
+
+            {/* Card 3 - Wallet Integration */}
+            <Card className="group bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-amber-500 hover:shadow-xl transition-all duration-300">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                  <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3">{t('landing.loyalty.card3Title')}</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {t('landing.loyalty.card3Desc')}
+                </p>
+              </div>
+            </Card>
+          </div>
+
+          {/* Visual Preview */}
+          <div className="mt-16 max-w-4xl mx-auto">
+            <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200/50 rounded-2xl p-8 md:p-12">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                {/* Loyalty Card Preview */}
+                <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-white shadow-xl transform hover:scale-105 transition-transform">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <p className="text-amber-100 text-sm">Loyalty Card</p>
+                      <p className="text-xl font-bold">Your Business</p>
+                    </div>
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="text-center py-4">
+                    <p className="text-amber-100 text-sm mb-1">Balance</p>
+                    <p className="text-4xl font-black">450 pts</p>
+                  </div>
+                  <div className="flex justify-between text-sm text-amber-100 mt-4 pt-4 border-t border-white/20">
+                    <span>STAR-2026-0001</span>
+                    <span>John Doe</span>
+                  </div>
+                </div>
+
+                {/* Features list */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">QR Code unique</p>
+                      <p className="text-sm text-gray-600">Chaque client a son propre code scannable</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">Votre branding</p>
+                      <p className="text-sm text-gray-600">Logo et couleurs personnalisés</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">Historique complet</p>
+                      <p className="text-sm text-gray-600">Suivi de tous les achats et récompenses</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-24 px-4 bg-gray-50">
         <div className="container mx-auto max-w-7xl">
           {/* Section header */}
           <div className="text-center mb-16">

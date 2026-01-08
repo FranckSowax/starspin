@@ -7,7 +7,9 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { CheckCircle2, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, RefreshCw, Award, Star, Coins } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import type { LoyaltyClient } from '@/lib/types/database';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 
@@ -18,10 +20,17 @@ export default function ScanPage() {
   const [merchant, setMerchant] = useState<any>(null);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [couponDetails, setCouponDetails] = useState<any>(null);
-  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'verifying' | 'valid' | 'invalid' | 'redeemed'>('idle');
+  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'verifying' | 'valid' | 'invalid' | 'redeemed' | 'loyalty'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sessionHistory, setSessionHistory] = useState<any[]>([]);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
+  // Loyalty card states
+  const [loyaltyClient, setLoyaltyClient] = useState<LoyaltyClient | null>(null);
+  const [purchaseAmount, setPurchaseAmount] = useState<string>('');
+  const [pointsToAdd, setPointsToAdd] = useState<number>(0);
+  const [addingPoints, setAddingPoints] = useState(false);
+  const [pointsAdded, setPointsAdded] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -82,7 +91,14 @@ export default function ScanPage() {
     setScanResult(null);
     setCouponDetails(null);
     setErrorMessage(null);
+    setLoyaltyClient(null);
+    setPurchaseAmount('');
+    setPointsToAdd(0);
+    setPointsAdded(false);
   };
+
+  // Check if data is a UUID (loyalty card QR code)
+  const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
 
   const onScanSuccess = async (decodedText: string) => {
     if (scannerRef.current) {
@@ -91,11 +107,105 @@ export default function ScanPage() {
     }
 
     setScanResult(decodedText);
-    verifyCoupon(decodedText);
+
+    // Detect scan type: UUID = loyalty card, otherwise = coupon
+    if (isUUID(decodedText) && merchant?.loyalty_enabled) {
+      verifyLoyaltyCard(decodedText);
+    } else {
+      verifyCoupon(decodedText);
+    }
   };
 
-  const onScanFailure = (error: any) => {
-    // console.warn(`Code scan error = ${error}`);
+  const onScanFailure = () => {
+    // Silent failure
+  };
+
+  // Verify loyalty card by QR code data (UUID)
+  const verifyLoyaltyCard = async (qrCodeData: string) => {
+    setScanStatus('verifying');
+
+    try {
+      const res = await fetch(`/api/loyalty/client?qrCode=${qrCodeData}&merchantId=${merchant.id}`);
+
+      if (!res.ok) {
+        setScanStatus('invalid');
+        setErrorMessage(t('loyalty.scan.loyaltyCardDetected') + ' - ' + t('common.error'));
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!data.client) {
+        setScanStatus('invalid');
+        setErrorMessage('Carte fidélité introuvable pour ce commerce.');
+        return;
+      }
+
+      setLoyaltyClient(data.client);
+      setScanStatus('loyalty');
+    } catch {
+      setScanStatus('invalid');
+      setErrorMessage(t('common.error'));
+    }
+  };
+
+  // Calculate points based on purchase amount
+  const calculatePoints = (amount: string) => {
+    const numAmount = parseFloat(amount) || 0;
+    const threshold = merchant?.purchase_amount_threshold || 1000;
+    const pointsPerUnit = merchant?.points_per_purchase || 10;
+    return Math.floor(numAmount / threshold) * pointsPerUnit;
+  };
+
+  // Handle purchase amount change
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setPurchaseAmount(value);
+    setPointsToAdd(calculatePoints(value));
+  };
+
+  // Add points to loyalty client
+  const handleAddPoints = async () => {
+    if (!loyaltyClient || pointsToAdd <= 0) return;
+
+    setAddingPoints(true);
+    try {
+      const res = await fetch('/api/loyalty/points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientId: loyaltyClient.id,
+          merchantId: merchant.id,
+          action: 'earn',
+          points: pointsToAdd,
+          purchaseAmount: parseFloat(purchaseAmount) || 0,
+          description: `Achat de ${purchaseAmount} ${merchant?.loyalty_currency || 'THB'}`
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setLoyaltyClient(prev => prev ? { ...prev, points: data.newBalance } : null);
+        setPointsAdded(true);
+
+        // Add to session history
+        setSessionHistory(prev => [{
+          type: 'loyalty',
+          clientName: loyaltyClient.name || 'Client',
+          cardId: loyaltyClient.card_id,
+          pointsAdded: pointsToAdd,
+          newBalance: data.newBalance,
+          timestamp: new Date().toISOString()
+        }, ...prev]);
+      } else {
+        const data = await res.json();
+        setErrorMessage(data.error || 'Erreur lors de l\'ajout des points');
+      }
+    } catch {
+      setErrorMessage('Erreur lors de l\'ajout des points');
+    } finally {
+      setAddingPoints(false);
+    }
   };
 
   const verifyCoupon = async (data: string) => {
@@ -266,7 +376,7 @@ export default function ScanPage() {
             </div>
           )}
 
-          {(scanStatus === 'invalid' || errorMessage) && (scanStatus !== 'valid') && (scanStatus !== 'redeemed') && (scanStatus !== 'scanning') && (scanStatus !== 'verifying') && (scanStatus !== 'idle') && (
+          {(scanStatus === 'invalid' || errorMessage) && (scanStatus !== 'valid') && (scanStatus !== 'redeemed') && (scanStatus !== 'scanning') && (scanStatus !== 'verifying') && (scanStatus !== 'idle') && (scanStatus !== 'loyalty') && (
             <div className="text-center py-8">
               <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <XCircle className="w-10 h-10" />
@@ -292,6 +402,106 @@ export default function ScanPage() {
               </Button>
             </div>
           )}
+
+          {/* Loyalty Card Mode */}
+          {scanStatus === 'loyalty' && loyaltyClient && (
+            <div className="py-6">
+              {!pointsAdded ? (
+                <>
+                  <div className="text-center mb-6">
+                    <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Award className="w-10 h-10" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-amber-700 mb-2">{t('loyalty.scan.loyaltyCardDetected')}</h2>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 rounded-xl text-white mb-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <p className="text-amber-100 text-sm">{t('loyalty.scan.clientName')}</p>
+                        <p className="text-xl font-bold">{loyaltyClient.name || 'Client'}</p>
+                        <p className="font-mono text-sm text-amber-200">{loyaltyClient.card_id}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-amber-100 text-sm">{t('loyalty.scan.currentPoints')}</p>
+                        <div className="flex items-center gap-1 justify-end">
+                          <Star className="w-5 h-5" />
+                          <span className="text-2xl font-bold">{loyaltyClient.points}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        {t('loyalty.scan.enterAmount')} ({merchant?.loyalty_currency || 'THB'})
+                      </label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={purchaseAmount}
+                        onChange={handleAmountChange}
+                        placeholder="0"
+                        className="text-2xl text-center font-bold h-16"
+                      />
+                    </div>
+
+                    {pointsToAdd > 0 && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                        <p className="text-sm text-amber-700 mb-1">{t('loyalty.scan.pointsToAdd')}</p>
+                        <div className="flex items-center justify-center gap-2">
+                          <Coins className="w-6 h-6 text-amber-500" />
+                          <span className="text-3xl font-bold text-amber-600">+{pointsToAdd}</span>
+                        </div>
+                        <p className="text-xs text-amber-600 mt-2">
+                          {merchant?.purchase_amount_threshold || 1000} {merchant?.loyalty_currency || 'THB'} = {merchant?.points_per_purchase || 10} points
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1">
+                        {t('dashboard.common.cancel')}
+                      </Button>
+                      <Button
+                        onClick={handleAddPoints}
+                        disabled={addingPoints || pointsToAdd <= 0}
+                        className="flex-1 bg-amber-500 hover:bg-amber-600"
+                      >
+                        {addingPoints ? (
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            <Coins className="w-4 h-4 mr-2" />
+                            {t('loyalty.scan.addPointsBtn')}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                    <CheckCircle2 className="w-10 h-10" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-green-700 mb-2">{t('loyalty.scan.pointsAdded')}</h2>
+                  <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-6 max-w-sm mx-auto">
+                    <p className="text-sm text-gray-500 mb-2">{t('loyalty.scan.newBalance')}</p>
+                    <div className="flex items-center justify-center gap-2">
+                      <Star className="w-8 h-8 text-amber-500" />
+                      <span className="text-4xl font-bold text-gray-900">{loyaltyClient.points}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">{loyaltyClient.name || 'Client'}</p>
+                  </div>
+                  <Button onClick={startScanning} size="lg" className="bg-teal-600 hover:bg-teal-700">
+                    Scanner un autre client
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
         </Card>
 
         {/* Session History */}
@@ -299,23 +509,47 @@ export default function ScanPage() {
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Historique de la session</h3>
             <div className="space-y-4">
-              {sessionHistory.map((coupon, index) => (
+              {sessionHistory.map((item, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                      <Gift className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{coupon.prize_name}</p>
-                      <p className="text-sm text-gray-500 font-mono">{coupon.code}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-green-600">Validé</p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(coupon.used_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
+                  {item.type === 'loyalty' ? (
+                    // Loyalty points entry
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
+                          <Award className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{item.clientName}</p>
+                          <p className="text-sm text-gray-500 font-mono">{item.cardId}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-amber-600">+{item.pointsAdded} pts</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    // Coupon entry
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                          <Gift className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{item.prize_name}</p>
+                          <p className="text-sm text-gray-500 font-mono">{item.code}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-green-600">Validé</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(item.used_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
