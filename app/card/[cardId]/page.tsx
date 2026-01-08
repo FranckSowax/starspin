@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
+import { jsPDF } from 'jspdf';
 import type { LoyaltyClient, LoyaltyReward, PointsTransaction, Merchant } from '@/lib/types/database';
 
 // Available languages
@@ -241,7 +242,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     }
   };
 
-  // Generate card image with Canvas
+  // Generate PDF card
   const handleDownloadCard = async () => {
     if (!client || !qrRef.current) return;
 
@@ -249,78 +250,100 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     setDownloading(true);
 
     try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas not supported');
+      // Create PDF (A6 format for a card-like size)
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: [105, 148] // A6 size
+      });
 
-      // Card dimensions (credit card ratio ~1.586)
-      const width = 800;
-      const height = 500;
-      canvas.width = width;
-      canvas.height = height;
+      const pageWidth = 105;
+      const pageHeight = 148;
+      const margin = 10;
 
-      // Background gradient
-      const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#f59e0b');
-      gradient.addColorStop(1, '#ea580c');
-      ctx.fillStyle = gradient;
-      ctx.roundRect(0, 0, width, height, 24);
-      ctx.fill();
+      // Header background (amber gradient simulation)
+      pdf.setFillColor(245, 158, 11); // amber-500
+      pdf.rect(0, 0, pageWidth, 40, 'F');
 
-      // Shop name header
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.font = 'bold 36px system-ui, -apple-system, sans-serif';
-      ctx.fillText(`${shopName} Card`, 40, 60);
+      // Shop name
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${shopName}`, margin, 15);
 
-      // Loyalty Card subtitle
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.font = '18px system-ui, -apple-system, sans-serif';
-      ctx.fillText(t('loyalty.card.title'), 40, 90);
+      // Subtitle
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(t('loyalty.card.title'), margin, 22);
 
-      // White card area
-      ctx.fillStyle = '#ffffff';
-      ctx.roundRect(30, 120, width - 60, height - 150, 16);
-      ctx.fill();
+      // Card ID badge
+      pdf.setFontSize(9);
+      pdf.text(client.card_id, margin, 32);
+
+      // Main content area
+      const contentY = 48;
 
       // Client name
-      ctx.fillStyle = '#1e293b';
-      ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
-      ctx.fillText(client.name || t('dashboard.recentReviews.anonymous'), 50, 160);
+      pdf.setTextColor(30, 41, 59); // slate-800
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(client.name || t('dashboard.recentReviews.anonymous'), margin, contentY);
 
-      // Card ID
-      ctx.fillStyle = '#64748b';
-      ctx.font = '16px monospace';
-      ctx.fillText(client.card_id, 50, 185);
-
-      // Contact (phone or email)
+      // Contact info
+      let currentY = contentY + 8;
       const contactInfo = client.phone || client.email;
       if (contactInfo) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '14px system-ui, -apple-system, sans-serif';
-        const contactLabel = client.phone ? '📱 ' : '✉️ ';
-        ctx.fillText(contactLabel + contactInfo, 50, 210);
+        pdf.setTextColor(100, 116, 139); // slate-500
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        const contactLabel = client.phone ? 'Tel: ' : 'Email: ';
+        pdf.text(contactLabel + contactInfo, margin, currentY);
+        currentY += 8;
       }
 
       // Points section
-      ctx.fillStyle = '#f59e0b';
-      ctx.font = 'bold 48px system-ui, -apple-system, sans-serif';
-      const pointsText = `${client.points}`;
-      ctx.fillText(pointsText, 50, contactInfo ? 280 : 260);
+      currentY += 5;
+      pdf.setTextColor(245, 158, 11); // amber-500
+      pdf.setFontSize(32);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${client.points}`, margin, currentY + 5);
 
-      const pointsY = contactInfo ? 280 : 260;
-      ctx.fillStyle = '#64748b';
-      ctx.font = '20px system-ui, -apple-system, sans-serif';
-      ctx.fillText('points', 50 + ctx.measureText(pointsText).width + 10, pointsY);
+      pdf.setTextColor(100, 116, 139);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      const pointsWidth = pdf.getTextWidth(`${client.points}`);
+      pdf.text(' points', margin + pointsWidth + 2, currentY + 5);
 
-      // Stats
-      ctx.fillStyle = '#64748b';
-      ctx.font = '14px system-ui, -apple-system, sans-serif';
-      ctx.fillText(`${client.total_purchases || 0} achats`, 50, pointsY + 40);
+      // Stats box
+      currentY += 20;
+      pdf.setFillColor(248, 250, 252); // slate-50
+      pdf.roundedRect(margin, currentY, pageWidth - 2 * margin, 20, 3, 3, 'F');
 
-      const memberDate = client.created_at ? new Date(client.created_at).toLocaleDateString('fr-FR') : '-';
-      ctx.fillText(`Membre depuis: ${memberDate}`, 50, pointsY + 65);
+      pdf.setTextColor(71, 85, 105); // slate-600
+      pdf.setFontSize(8);
+      pdf.text('Achats', margin + 5, currentY + 6);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(`${client.total_purchases || 0}`, margin + 5, currentY + 14);
 
-      // QR Code - get SVG from the ref and draw it
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(8);
+      pdf.text('Membre depuis', margin + 35, currentY + 6);
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'bold');
+      const memberDate = client.created_at
+        ? new Date(client.created_at).toLocaleDateString('fr-FR')
+        : new Date().toLocaleDateString('fr-FR');
+      pdf.text(memberDate, margin + 35, currentY + 14);
+
+      // QR Code section
+      currentY += 28;
+      pdf.setTextColor(71, 85, 105);
+      pdf.setFontSize(9);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(t('loyalty.card.scanToEarn'), pageWidth / 2, currentY, { align: 'center' });
+
+      // Generate QR code as image
       const svgElement = qrRef.current.querySelector('svg');
       if (svgElement) {
         const svgData = new XMLSerializer().serializeToString(svgElement);
@@ -334,39 +357,40 @@ export default function LoyaltyCardPage({ params }: PageProps) {
           qrImage.src = svgUrl;
         });
 
-        // Draw QR code on right side
-        const qrSize = 200;
-        const qrX = width - qrSize - 60;
-        const qrY = 150;
+        // Draw QR to canvas then to PDF
+        const qrCanvas = document.createElement('canvas');
+        qrCanvas.width = 200;
+        qrCanvas.height = 200;
+        const qrCtx = qrCanvas.getContext('2d');
+        if (qrCtx) {
+          qrCtx.fillStyle = 'white';
+          qrCtx.fillRect(0, 0, 200, 200);
+          qrCtx.drawImage(qrImage, 0, 0, 200, 200);
+          const qrDataUrl = qrCanvas.toDataURL('image/png');
 
-        // White background for QR
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+          const qrSize = 40;
+          const qrX = (pageWidth - qrSize) / 2;
+          pdf.addImage(qrDataUrl, 'PNG', qrX, currentY + 5, qrSize, qrSize);
+        }
 
-        ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
         URL.revokeObjectURL(svgUrl);
-
-        // QR code label
-        ctx.fillStyle = '#64748b';
-        ctx.font = '12px system-ui, -apple-system, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Scannez pour gagner des points', qrX + qrSize / 2, qrY + qrSize + 30);
-        ctx.textAlign = 'left';
       }
 
       // Footer
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.font = '12px system-ui, -apple-system, sans-serif';
-      ctx.fillText('Powered by StarSpin', 40, height - 15);
+      pdf.setTextColor(148, 163, 184); // slate-400
+      pdf.setFontSize(7);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Powered by StarSpin', pageWidth / 2, pageHeight - 5, { align: 'center' });
 
-      // Download as JPG
-      const link = document.createElement('a');
-      link.download = `${shopName.replace(/\s+/g, '_')}_card_${client.card_id}.jpg`;
-      link.href = canvas.toDataURL('image/jpeg', 0.95);
-      link.click();
+      // Card URL
+      pdf.setFontSize(6);
+      pdf.text(`starspin.netlify.app/card/${client.qr_code_data}`, pageWidth / 2, pageHeight - 2, { align: 'center' });
+
+      // Download PDF
+      pdf.save(`${shopName.replace(/\s+/g, '_')}_card_${client.card_id}.pdf`);
     } catch (err) {
       console.error('Download error:', err);
-      alert(t('loyalty.card.downloadError') || 'Failed to download card image');
+      alert(t('loyalty.card.downloadError') || 'Failed to download card');
     } finally {
       setDownloading(false);
     }
