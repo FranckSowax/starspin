@@ -1,16 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Vérification des variables d'environnement
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 // Service role client pour bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 /**
  * Génère un code de rédemption unique
  */
 async function generateRedemptionCode(): Promise<string> {
+  if (!supabaseAdmin) throw new Error('Supabase not configured');
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code: string;
   let exists = true;
@@ -48,6 +52,15 @@ async function generateRedemptionCode(): Promise<string> {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REDEEM GET] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error', redeemedRewards: [] },
+        { status: 200 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get('merchantId');
     const clientId = searchParams.get('clientId');
@@ -134,6 +147,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REDEEM POST] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { clientId, merchantId, rewardId } = body;
 
@@ -304,6 +326,15 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REDEEM PATCH] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { redemptionCode, merchantId, action } = body;
 

@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Vérification des variables d'environnement
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 // Service role client pour bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 /**
  * GET /api/loyalty/points
@@ -20,26 +23,42 @@ const supabaseAdmin = createClient(
  */
 export async function GET(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY POINTS GET] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error', transactions: [] },
+        { status: 200 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('clientId');
     const merchantId = searchParams.get('merchantId');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    if (!clientId || !merchantId) {
+    // clientId is required
+    if (!clientId) {
       return NextResponse.json(
-        { error: 'clientId and merchantId are required' },
-        { status: 400 }
+        { error: 'clientId is required', transactions: [] },
+        { status: 200 }
       );
     }
 
-    const { data: transactions, error, count } = await supabaseAdmin
+    // Build query - merchantId is optional for public card page
+    let query = supabaseAdmin
       .from('points_transactions')
       .select('*', { count: 'exact' })
       .eq('client_id', clientId)
-      .eq('merchant_id', merchantId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
+
+    if (merchantId) {
+      query = query.eq('merchant_id', merchantId);
+    }
+
+    const { data: transactions, error, count } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -85,6 +104,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY POINTS POST] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const {
       clientId,

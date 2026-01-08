@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 
+// Vérification des variables d'environnement
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 // Service role client pour bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 /**
  * GET /api/loyalty/rewards
@@ -19,6 +22,15 @@ const supabaseAdmin = createClient(
  */
 export async function GET(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REWARDS GET] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error', rewards: [] },
+        { status: 200 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get('merchantId');
     const activeOnly = searchParams.get('activeOnly') === 'true';
@@ -26,8 +38,8 @@ export async function GET(request: NextRequest) {
 
     if (!merchantId) {
       return NextResponse.json(
-        { error: 'merchantId is required' },
-        { status: 400 }
+        { error: 'merchantId is required', rewards: [] },
+        { status: 200 } // Return 200 with empty array to not break UI
       );
     }
 
@@ -103,6 +115,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REWARDS POST] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const {
       merchantId,
@@ -212,6 +233,15 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REWARDS PATCH] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { rewardId, merchantId, updates } = body;
 
@@ -281,9 +311,34 @@ export async function PATCH(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY REWARDS DELETE] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    // Support both query params and body for DELETE
+    let rewardId: string | null = null;
+    let merchantId: string | null = null;
+
+    // Try query params first
     const { searchParams } = new URL(request.url);
-    const rewardId = searchParams.get('rewardId');
-    const merchantId = searchParams.get('merchantId');
+    rewardId = searchParams.get('rewardId');
+    merchantId = searchParams.get('merchantId');
+
+    // If not in query params, try body
+    if (!rewardId || !merchantId) {
+      try {
+        const body = await request.json();
+        rewardId = body.rewardId || rewardId;
+        merchantId = body.merchantId || merchantId;
+      } catch {
+        // Body parsing failed, continue with query params
+      }
+    }
 
     if (!rewardId || !merchantId) {
       return NextResponse.json(
