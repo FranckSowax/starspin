@@ -1,15 +1,27 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 
-// Vérification des variables d'environnement
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Helper to get Supabase admin client
+function getSupabaseAdmin(): SupabaseClient | null {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Service role client pour bypass RLS
-const supabaseAdmin = supabaseUrl && supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey)
-  : null;
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('[LOYALTY CLIENT] Missing env vars:', {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseServiceKey
+    });
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
+}
 
 // NOTE: WhatsApp messages are now sent via /api/whatsapp/combined
 // This API no longer sends WhatsApp messages directly to avoid duplicate messages
@@ -30,8 +42,9 @@ const supabaseAdmin = supabaseUrl && supabaseServiceKey
 export async function GET(request: NextRequest) {
   try {
     // Vérifier que Supabase est configuré
+    const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
-      console.error('[LOYALTY CLIENT GET] Missing SUPABASE_SERVICE_ROLE_KEY');
+      console.error('[LOYALTY CLIENT GET] Failed to create Supabase client');
       return NextResponse.json(
         { error: 'Server configuration error', clients: [] },
         { status: 200 } // Return 200 with empty array to not break UI

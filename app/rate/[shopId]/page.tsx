@@ -145,14 +145,9 @@ export default function RatingPage() {
 
         // Create loyalty card if merchant has loyalty enabled
         let loyaltyCardQrCode = '';
-        let isNewLoyaltyClient = false;
-        let loyaltyClientPoints = 0;
-
-        console.log('[RATE] merchant?.loyalty_enabled:', merchant?.loyalty_enabled);
 
         if (merchant?.loyalty_enabled) {
           try {
-            console.log('[RATE] Creating loyalty card...');
             const loyaltyRes = await fetch('/api/loyalty/client', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -164,28 +159,21 @@ export default function RatingPage() {
               }),
             });
 
-            console.log('[RATE] loyaltyRes.ok:', loyaltyRes.ok);
             if (loyaltyRes.ok) {
               const loyaltyData = await loyaltyRes.json();
-              console.log('[RATE] loyaltyData:', loyaltyData);
               loyaltyCardQrCode = loyaltyData.client?.qr_code_data || '';
-              isNewLoyaltyClient = loyaltyData.isNew || false;
-              loyaltyClientPoints = loyaltyData.client?.points || 0;
-              console.log('[RATE] loyaltyCardQrCode:', loyaltyCardQrCode);
             }
-          } catch (err) {
-            console.error('[RATE] Loyalty card creation error:', err);
+          } catch {
             // Continue without loyalty card
           }
         }
 
         if (rating >= 4) {
-          // Redirect to intermediate page with phone number and loyalty card info for combined WhatsApp message
+          // Redirect to intermediate page with phone number and optional loyalty card QR
           let redirectUrl = `/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}&lang=${currentLang}`;
           if (loyaltyCardQrCode) {
-            redirectUrl += `&cardQr=${encodeURIComponent(loyaltyCardQrCode)}&isNew=${isNewLoyaltyClient}&points=${loyaltyClientPoints}`;
+            redirectUrl += `&cardQr=${encodeURIComponent(loyaltyCardQrCode)}`;
           }
-          console.log('[RATE] Redirecting to:', redirectUrl);
           router.push(redirectUrl);
         } else {
           alert(t('feedback.thankYou'));

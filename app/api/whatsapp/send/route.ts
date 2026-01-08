@@ -8,7 +8,7 @@ const WHAPI_INTERACTIVE_URL = 'https://gate.whapi.cloud/messages/interactive';
 const WHAPI_TEXT_URL = 'https://gate.whapi.cloud/messages/text';
 
 // Button text translations (max 25 characters for WhatsApp buttons)
-const BUTTON_TEXTS: Record<string, string> = {
+const SPIN_BUTTON_TEXTS: Record<string, string> = {
   fr: 'Tourner la Roue 🎰',
   en: 'Spin the Wheel 🎰',
   es: 'Girar la Rueda 🎰',
@@ -20,6 +20,21 @@ const BUTTON_TEXTS: Record<string, string> = {
   ja: 'ルーレット 🎰',
   ko: '룰렛 돌리기 🎰',
   th: 'หมุนวงล้อ 🎰',
+};
+
+// Card button text translations
+const CARD_BUTTON_TEXTS: Record<string, string> = {
+  fr: 'Ma Carte 🎁',
+  en: 'My Card 🎁',
+  es: 'Mi Tarjeta 🎁',
+  pt: 'Meu Cartão 🎁',
+  de: 'Meine Karte 🎁',
+  it: 'La Mia Carta 🎁',
+  ar: 'بطاقتي 🎁',
+  zh: '我的卡 🎁',
+  ja: 'マイカード 🎁',
+  ko: '내 카드 🎁',
+  th: 'บัตรของฉัน 🎁',
 };
 
 // Body text translations
@@ -62,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json();
-    const { merchantId, phoneNumber, language = 'fr' } = body;
+    const { merchantId, phoneNumber, language = 'fr', cardUrl } = body;
 
     // 3. Validate inputs
     if (!merchantId || !phoneNumber) {
@@ -146,36 +161,52 @@ export async function POST(request: NextRequest) {
     const formattedPhone = phoneNumber.replace(/^\+/, '');
 
     // 10. Get translated texts
-    const buttonText = BUTTON_TEXTS[language] || BUTTON_TEXTS['fr'];
+    const spinButtonText = SPIN_BUTTON_TEXTS[language] || SPIN_BUTTON_TEXTS['fr'];
+    const cardButtonText = CARD_BUTTON_TEXTS[language] || CARD_BUTTON_TEXTS['fr'];
     // Get body text and remove {{spin_url}} placeholder (URL is now in the button)
     let bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
     bodyText = bodyText.replace(/\{\{spin_url\}\}/gi, '').trim();
 
-    // 11. Try sending interactive message with URL button first
+    // 11. Build buttons array - always spin, optionally card
+    const timestamp = Date.now();
+    const buttons: Array<{ type: string; title: string; id: string; url: string }> = [
+      {
+        type: 'url',
+        title: spinButtonText.substring(0, 25),
+        id: `spin_${timestamp}`,
+        url: spinUrl
+      }
+    ];
+
+    // Add card button if cardUrl is provided
+    if (cardUrl) {
+      buttons.push({
+        type: 'url',
+        title: cardButtonText.substring(0, 25),
+        id: `card_${timestamp + 1}`,
+        url: cardUrl
+      });
+    }
+
+    // 12. Try sending interactive message with URL button(s)
     const interactivePayload = {
       to: formattedPhone,
       type: 'button',
       header: {
-        type: 'text',
-        text: merchant.business_name || 'StarSpin'
+        text: (merchant.business_name || 'StarSpin').substring(0, 60)
       },
       body: {
         text: bodyText
       },
       footer: {
-        text: '🎰 StarSpin'
+        text: '⭐ StarSpin'
       },
       action: {
-        buttons: [
-          {
-            type: 'url',
-            title: buttonText.substring(0, 25), // Max 25 chars for button title
-            id: `spin_${Date.now()}`,
-            url: spinUrl
-          }
-        ]
+        buttons
       }
     };
+
+    console.log('[WHATSAPP SEND] Sending with', buttons.length, 'button(s)');
 
     let whapiResponse = await fetch(WHAPI_INTERACTIVE_URL, {
       method: 'POST',
@@ -186,20 +217,30 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(interactivePayload),
     });
 
-    // 12. If interactive message fails, fallback to text message
+    // 13. If interactive message fails, fallback to text message
     if (!whapiResponse.ok) {
       const errorText = await whapiResponse.text();
       console.error('Interactive message failed, trying text fallback:', whapiResponse.status, errorText);
 
       // Prepare fallback text message
-      const textMessage = `🎉 *${merchant.business_name || 'StarSpin'}*
+      let textMessage = `🎉 *${merchant.business_name || 'StarSpin'}*
 
 ${bodyText}
 
-👉 ${buttonText}
-${spinUrl}
+👉 ${spinButtonText}
+${spinUrl}`;
 
-🎰 Bonne chance !`;
+      // Add card link if available
+      if (cardUrl) {
+        textMessage += `
+
+👉 ${cardButtonText}
+${cardUrl}`;
+      }
+
+      textMessage += `
+
+⭐ Bonne chance !`;
 
       whapiResponse = await fetch(WHAPI_TEXT_URL, {
         method: 'POST',
