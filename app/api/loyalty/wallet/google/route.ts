@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
+import jwt from 'jsonwebtoken';
 
 // Vérification des variables d'environnement
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,8 +11,8 @@ const supabaseAdmin = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null;
 
-// Google Wallet API URLs
-const GOOGLE_WALLET_API_URL = 'https://walletobjects.googleapis.com/walletobjects/v1';
+// Google Wallet constants
+const GOOGLE_WALLET_SAVE_URL = 'https://pay.google.com/gp/v/save';
 
 /**
  * GET /api/loyalty/wallet/google
@@ -20,10 +21,6 @@ const GOOGLE_WALLET_API_URL = 'https://walletobjects.googleapis.com/walletobject
  *
  * Query params:
  * - clientId: UUID du client fidélité (qr_code_data)
- *
- * Note: Cette API nécessite les credentials Google Cloud pour fonctionner
- * en production. Pour l'instant, elle retourne les informations nécessaires
- * pour la configuration future.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -80,7 +77,6 @@ export async function GET(request: NextRequest) {
     const googlePrivateKey = process.env.GOOGLE_WALLET_PRIVATE_KEY;
 
     if (!googleIssuerId || !googleServiceAccountEmail || !googlePrivateKey) {
-      // Retourner les infos pour configuration future
       return NextResponse.json({
         configured: false,
         message: 'Google Wallet not configured. Please set the following environment variables:',
@@ -88,81 +84,182 @@ export async function GET(request: NextRequest) {
           'GOOGLE_WALLET_ISSUER_ID',
           'GOOGLE_WALLET_SERVICE_ACCOUNT_EMAIL',
           'GOOGLE_WALLET_PRIVATE_KEY'
-        ],
-        passData: {
-          // LoyaltyClass (template pour tous les passes du merchant)
-          loyaltyClass: {
-            id: `${googleIssuerId || 'ISSUER_ID'}.starspin_${merchant.id}`,
-            issuerName: merchant.business_name,
-            programName: `Programme Fidélité ${merchant.business_name}`,
-            programLogo: {
-              sourceUri: {
-                uri: merchant.logo_url || 'https://starspin.netlify.app/logo.png'
-              }
-            },
-            heroImage: merchant.loyalty_card_image_url || merchant.background_url ? {
-              sourceUri: {
-                uri: merchant.loyalty_card_image_url || merchant.background_url
-              }
-            } : undefined,
-            hexBackgroundColor: '#f59e0b',
-            localizedProgramName: {
-              defaultValue: {
-                language: 'fr',
-                value: `Programme Fidélité ${merchant.business_name}`
-              }
-            },
-            reviewStatus: 'UNDER_REVIEW'
-          },
-          // LoyaltyObject (instance pour ce client spécifique)
-          loyaltyObject: {
-            id: `${googleIssuerId || 'ISSUER_ID'}.starspin_${client.id}`,
-            classId: `${googleIssuerId || 'ISSUER_ID'}.starspin_${merchant.id}`,
-            state: 'ACTIVE',
-            accountId: client.card_id,
-            accountName: client.name || 'Client fidèle',
-            loyaltyPoints: {
-              label: 'Points',
-              balance: {
-                int: client.points
-              }
-            },
-            barcode: {
-              type: 'QR_CODE',
-              value: client.qr_code_data,
-              alternateText: client.card_id
-            },
-            textModulesData: [
-              {
-                header: 'N° Carte',
-                body: client.card_id
-              },
-              {
-                header: 'Membre depuis',
-                body: client.created_at ? new Date(client.created_at).toLocaleDateString('fr-FR') : 'Aujourd\'hui'
-              }
-            ]
-          }
-        }
+        ]
       });
     }
 
-    // TODO: Implémenter la génération du JWT et du lien Google Wallet
-    // avec googleapis et jsonwebtoken
+    // Créer les IDs uniques
+    const classId = `${googleIssuerId}.starspin_loyalty_${merchant.id.replace(/-/g, '_')}`;
+    const objectId = `${googleIssuerId}.starspin_card_${client.id.replace(/-/g, '_')}`;
+
+    // LoyaltyClass (template pour tous les passes du merchant)
+    const loyaltyClass = {
+      id: classId,
+      issuerName: 'StarSpin',
+      programName: `${merchant.business_name} - Fidélité`,
+      programLogo: {
+        sourceUri: {
+          uri: merchant.logo_url || 'https://starspin.netlify.app/logo.png'
+        },
+        contentDescription: {
+          defaultValue: {
+            language: 'fr',
+            value: merchant.business_name || 'Logo'
+          }
+        }
+      },
+      hexBackgroundColor: '#f59e0b',
+      reviewStatus: 'UNDER_REVIEW',
+      countryCode: 'TH',
+      classTemplateInfo: {
+        cardTemplateOverride: {
+          cardRowTemplateInfos: [
+            {
+              twoItems: {
+                startItem: {
+                  firstValue: {
+                    fields: [
+                      {
+                        fieldPath: 'object.loyaltyPoints.balance.int'
+                      }
+                    ]
+                  }
+                },
+                endItem: {
+                  firstValue: {
+                    fields: [
+                      {
+                        fieldPath: 'object.textModulesData[\'purchases\']'
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    };
+
+    // Ajouter l'image hero si disponible
+    const heroImageUrl = merchant.loyalty_card_image_url || merchant.background_url;
+    if (heroImageUrl) {
+      (loyaltyClass as any).heroImage = {
+        sourceUri: {
+          uri: heroImageUrl
+        },
+        contentDescription: {
+          defaultValue: {
+            language: 'fr',
+            value: `${merchant.business_name} Carte Fidélité`
+          }
+        }
+      };
+    }
+
+    // LoyaltyObject (instance pour ce client spécifique)
+    const loyaltyObject = {
+      id: objectId,
+      classId: classId,
+      state: 'ACTIVE',
+      accountId: client.card_id,
+      accountName: client.name || 'Client fidèle',
+      loyaltyPoints: {
+        label: 'Points',
+        balance: {
+          int: client.points || 0
+        }
+      },
+      barcode: {
+        type: 'QR_CODE',
+        value: client.qr_code_data,
+        alternateText: client.card_id
+      },
+      textModulesData: [
+        {
+          id: 'card_id',
+          header: 'N° Carte',
+          body: client.card_id
+        },
+        {
+          id: 'purchases',
+          header: 'Achats',
+          body: `${client.total_purchases || 0}`
+        },
+        {
+          id: 'member_since',
+          header: 'Membre depuis',
+          body: client.created_at
+            ? new Date(client.created_at).toLocaleDateString('fr-FR')
+            : new Date().toLocaleDateString('fr-FR')
+        }
+      ],
+      linksModuleData: {
+        uris: [
+          {
+            uri: `https://starspin.netlify.app/card/${client.qr_code_data}`,
+            description: 'Voir ma carte en ligne',
+            id: 'card_link'
+          }
+        ]
+      }
+    };
+
+    // Créer le JWT pour le lien "Add to Google Wallet"
+    const claims = {
+      iss: googleServiceAccountEmail,
+      aud: 'google',
+      origins: ['https://starspin.netlify.app'],
+      typ: 'savetowallet',
+      payload: {
+        loyaltyClasses: [loyaltyClass],
+        loyaltyObjects: [loyaltyObject]
+      }
+    };
+
+    // Décoder la clé privée (qui peut être encodée en base64 ou avec des \n échappés)
+    let privateKey = googlePrivateKey;
+
+    // Si la clé est en base64
+    if (!privateKey.includes('-----BEGIN')) {
+      try {
+        privateKey = Buffer.from(privateKey, 'base64').toString('utf8');
+      } catch {
+        // Si ce n'est pas du base64, remplacer les \n échappés
+        privateKey = privateKey.replace(/\\n/g, '\n');
+      }
+    } else {
+      // Remplacer les \n échappés si présents
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
+
+    // Signer le JWT
+    const token = jwt.sign(claims, privateKey, {
+      algorithm: 'RS256'
+    });
+
+    // Générer le lien Google Wallet
+    const saveUrl = `${GOOGLE_WALLET_SAVE_URL}/${token}`;
+
     return NextResponse.json({
       configured: true,
-      message: 'Google Wallet pass generation coming soon',
+      saveUrl,
       passData: {
         cardId: client.card_id,
         points: client.points,
-        merchantName: merchant.business_name
+        merchantName: merchant.business_name,
+        classId,
+        objectId
       }
     });
 
   } catch (error) {
     console.error('[GOOGLE WALLET] Error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      {
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

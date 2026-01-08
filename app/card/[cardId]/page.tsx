@@ -193,7 +193,16 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     try {
       const res = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
       const data = await res.json();
-      alert(data.configured ? t('loyalty.wallet.googleComingSoon') : t('loyalty.wallet.notConfigured'));
+
+      if (data.configured && data.saveUrl) {
+        // Ouvrir le lien Google Wallet dans une nouvelle fenêtre
+        window.open(data.saveUrl, '_blank');
+        setWalletStatus(prev => ({ ...prev, google: { ...prev.google, added: true } }));
+      } else if (!data.configured) {
+        alert(t('loyalty.wallet.notConfigured'));
+      } else {
+        alert(t('loyalty.wallet.error'));
+      }
     } catch {
       alert(t('loyalty.wallet.error'));
     } finally {
