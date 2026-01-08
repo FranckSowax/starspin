@@ -191,10 +191,18 @@ export default function RedirectPage() {
     setWhatsappSending(true);
     setWhatsappError('');
 
+    // Debug logging
+    console.log('[REDIRECT] sendWhatsAppMessage called');
+    console.log('[REDIRECT] cardQrCode:', cardQrCode);
+    console.log('[REDIRECT] isNewLoyaltyClient:', isNewLoyaltyClient);
+    console.log('[REDIRECT] loyaltyClientPoints:', loyaltyClientPoints);
+    console.log('[REDIRECT] merchant?.loyalty_enabled:', merchant?.loyalty_enabled);
+
     try {
       let response;
 
       if (cardQrCode) {
+        console.log('[REDIRECT] Using COMBINED API (2 buttons)');
         // Use combined API with both Spin Wheel and Loyalty Card buttons
         response = await fetch('/api/whatsapp/combined', {
           method: 'POST',
@@ -211,6 +219,7 @@ export default function RedirectPage() {
           }),
         });
       } else {
+        console.log('[REDIRECT] Using SIMPLE API (1 button - no cardQrCode)');
         // Fallback to simple spin wheel message (no loyalty card)
         response = await fetch('/api/whatsapp/send', {
           method: 'POST',

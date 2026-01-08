@@ -148,8 +148,11 @@ export default function RatingPage() {
         let isNewLoyaltyClient = false;
         let loyaltyClientPoints = 0;
 
+        console.log('[RATE] merchant?.loyalty_enabled:', merchant?.loyalty_enabled);
+
         if (merchant?.loyalty_enabled) {
           try {
+            console.log('[RATE] Creating loyalty card...');
             const loyaltyRes = await fetch('/api/loyalty/client', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -161,13 +164,17 @@ export default function RatingPage() {
               }),
             });
 
+            console.log('[RATE] loyaltyRes.ok:', loyaltyRes.ok);
             if (loyaltyRes.ok) {
               const loyaltyData = await loyaltyRes.json();
+              console.log('[RATE] loyaltyData:', loyaltyData);
               loyaltyCardQrCode = loyaltyData.client?.qr_code_data || '';
               isNewLoyaltyClient = loyaltyData.isNew || false;
               loyaltyClientPoints = loyaltyData.client?.points || 0;
+              console.log('[RATE] loyaltyCardQrCode:', loyaltyCardQrCode);
             }
-          } catch {
+          } catch (err) {
+            console.error('[RATE] Loyalty card creation error:', err);
             // Continue without loyalty card
           }
         }
@@ -178,6 +185,7 @@ export default function RatingPage() {
           if (loyaltyCardQrCode) {
             redirectUrl += `&cardQr=${encodeURIComponent(loyaltyCardQrCode)}&isNew=${isNewLoyaltyClient}&points=${loyaltyClientPoints}`;
           }
+          console.log('[RATE] Redirecting to:', redirectUrl);
           router.push(redirectUrl);
         } else {
           alert(t('feedback.thankYou'));
