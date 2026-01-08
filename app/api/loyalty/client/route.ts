@@ -2,11 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 
+// Vérification des variables d'environnement
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 // Service role client pour bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = supabaseUrl && supabaseServiceKey
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 /**
  * GET /api/loyalty/client
@@ -22,6 +25,15 @@ const supabaseAdmin = createClient(
  */
 export async function GET(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY CLIENT GET] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error', clients: [] },
+        { status: 200 } // Return 200 with empty array to not break UI
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const merchantId = searchParams.get('merchantId');
     const clientId = searchParams.get('clientId');
@@ -29,9 +41,9 @@ export async function GET(request: NextRequest) {
     const phone = searchParams.get('phone');
     const email = searchParams.get('email');
 
-    if (!merchantId) {
+    if (!merchantId && !qrCode) {
       return NextResponse.json(
-        { error: 'merchantId is required' },
+        { error: 'merchantId or qrCode is required' },
         { status: 400 }
       );
     }
@@ -137,6 +149,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY CLIENT POST] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { merchantId, name, phone, email, userToken } = body;
 
@@ -301,6 +322,15 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
+    // Vérifier que Supabase est configuré
+    if (!supabaseAdmin) {
+      console.error('[LOYALTY CLIENT PATCH] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { clientId, merchantId, updates } = body;
 
