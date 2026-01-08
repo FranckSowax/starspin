@@ -626,35 +626,49 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { clientId, merchantId, updates } = body;
+    const { clientId, merchantId, qrCode, updates } = body;
 
-    if (!clientId || !merchantId) {
+    // Mode 1: Mise à jour par merchant (clientId + merchantId)
+    // Mode 2: Mise à jour par client lui-même (qrCode)
+    if (!qrCode && (!clientId || !merchantId)) {
       return NextResponse.json(
-        { error: 'clientId and merchantId are required' },
+        { error: 'qrCode or (clientId and merchantId) are required' },
         { status: 400 }
       );
     }
 
     // Champs autorisés pour mise à jour
-    const allowedFields = ['name', 'phone', 'email', 'status'];
+    const allowedFields = ['name', 'phone', 'email', 'birthday', 'status', 'preferred_language'];
     const sanitizedUpdates: Record<string, any> = {};
 
     for (const key of allowedFields) {
       if (updates[key] !== undefined) {
-        sanitizedUpdates[key] = key === 'email' ? updates[key]?.toLowerCase() : updates[key];
+        if (key === 'email') {
+          sanitizedUpdates[key] = updates[key]?.toLowerCase() || null;
+        } else if (key === 'birthday') {
+          // Valider le format de date
+          sanitizedUpdates[key] = updates[key] || null;
+        } else {
+          sanitizedUpdates[key] = updates[key];
+        }
       }
     }
 
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('loyalty_clients')
       .update({
         ...sanitizedUpdates,
         updated_at: new Date().toISOString()
-      })
-      .eq('id', clientId)
-      .eq('merchant_id', merchantId)
-      .select()
-      .single();
+      });
+
+    // Utiliser qrCode ou clientId+merchantId selon le mode
+    if (qrCode) {
+      query = query.eq('qr_code_data', qrCode);
+    } else {
+      query = query.eq('id', clientId).eq('merchant_id', merchantId);
+    }
+
+    const { data, error } = await query.select().single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

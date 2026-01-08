@@ -126,6 +126,7 @@ export interface LoyaltyClient {
   name: string | null;
   phone: string | null;
   email: string | null;
+  birthday: string | null; // Date de naissance pour cadeaux anniversaire
   points: number;
   total_purchases: number;
   total_spent: number;

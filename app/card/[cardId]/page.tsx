@@ -17,7 +17,10 @@ import {
   Download,
   Phone,
   Mail,
-  Globe
+  Globe,
+  User,
+  Cake,
+  Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
@@ -47,12 +50,19 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   const [transactions, setTransactions] = useState<PointsTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'card' | 'rewards' | 'history'>('card');
+  const [activeTab, setActiveTab] = useState<'card' | 'rewards' | 'history' | 'profile'>('card');
   const [redeeming, setRedeeming] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [currentLang, setCurrentLang] = useState(i18n.language || 'fr');
   const qrRef = useRef<HTMLDivElement>(null);
+
+  // Profile edit state
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editBirthday, setEditBirthday] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
 
   // Change language function
   const changeLanguage = (langCode: string) => {
@@ -116,6 +126,56 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Initialize profile form when client is loaded
+  useEffect(() => {
+    if (client) {
+      setEditName(client.name || '');
+      setEditEmail(client.email || '');
+      setEditPhone(client.phone || '');
+      setEditBirthday(client.birthday || '');
+    }
+  }, [client]);
+
+  // Save profile function
+  const handleSaveProfile = async () => {
+    if (!client) return;
+
+    // Validate: at least email or phone required
+    if (!editEmail && !editPhone) {
+      alert(t('loyalty.card.contactRequired'));
+      return;
+    }
+
+    setSavingProfile(true);
+    try {
+      const res = await fetch('/api/loyalty/client', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          qrCode: cardId,
+          updates: {
+            name: editName || null,
+            email: editEmail || null,
+            phone: editPhone || null,
+            birthday: editBirthday || null
+          }
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setClient(data.client);
+        alert(t('loyalty.card.profileSaved'));
+      } else {
+        alert(t('loyalty.card.profileError'));
+      }
+    } catch {
+      alert(t('loyalty.card.profileError'));
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const handleRedeem = async (reward: LoyaltyReward) => {
     if (!client || !merchant) return;
@@ -473,7 +533,8 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                   {[
                     { id: 'card' as const, icon: QrCode, label: 'QR Code' },
                     { id: 'rewards' as const, icon: Gift, label: t('loyalty.rewards.title') },
-                    { id: 'history' as const, icon: History, label: t('loyalty.clients.history') }
+                    { id: 'history' as const, icon: History, label: t('loyalty.clients.history') },
+                    { id: 'profile' as const, icon: User, label: t('loyalty.card.editProfile') }
                   ].map(tab => (
                     <button
                       key={tab.id}
@@ -645,6 +706,94 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                         </div>
                       ))
                     )}
+                  </div>
+                )}
+
+                {activeTab === 'profile' && (
+                  <div className="max-w-md mx-auto">
+                    <div className="text-center mb-6">
+                      <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <User className="w-8 h-8 text-amber-600" />
+                      </div>
+                      <h3 className="font-semibold text-slate-900">{t('loyalty.card.editProfile')}</h3>
+                      <p className="text-sm text-slate-500 mt-1">{t('loyalty.card.editProfileDesc')}</p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Name */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          <User className="w-4 h-4 inline mr-1" />
+                          {t('loyalty.card.name')}
+                        </label>
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder={t('loyalty.card.namePlaceholder')}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          <Mail className="w-4 h-4 inline mr-1" />
+                          {t('loyalty.card.email')}
+                        </label>
+                        <input
+                          type="email"
+                          value={editEmail}
+                          onChange={(e) => setEditEmail(e.target.value)}
+                          placeholder={t('loyalty.card.emailPlaceholder')}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+
+                      {/* WhatsApp */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          <Phone className="w-4 h-4 inline mr-1" />
+                          {t('loyalty.card.whatsapp')}
+                        </label>
+                        <input
+                          type="tel"
+                          value={editPhone}
+                          onChange={(e) => setEditPhone(e.target.value)}
+                          placeholder={t('loyalty.card.whatsappPlaceholder')}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                        />
+                      </div>
+
+                      {/* Birthday */}
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">
+                          <Cake className="w-4 h-4 inline mr-1" />
+                          {t('loyalty.card.birthday')}
+                        </label>
+                        <input
+                          type="date"
+                          value={editBirthday}
+                          onChange={(e) => setEditBirthday(e.target.value)}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none transition-all"
+                        />
+                        <p className="text-xs text-slate-500 mt-1">{t('loyalty.card.birthdayDesc')}</p>
+                      </div>
+
+                      {/* Save Button */}
+                      <Button
+                        onClick={handleSaveProfile}
+                        disabled={savingProfile}
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-xl mt-4"
+                      >
+                        {savingProfile ? (
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        ) : (
+                          <Save className="w-5 h-5 mr-2" />
+                        )}
+                        {t('loyalty.card.saveProfile')}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>

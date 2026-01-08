@@ -445,7 +445,21 @@
       "availableRewards": "Récompenses disponibles",
       "nextReward": "Prochaine récompense",
       "morePointsNeeded": "{{count}} points restants",
-      "canRedeemAll": "Vous pouvez échanger toutes les récompenses !"
+      "canRedeemAll": "Vous pouvez échanger toutes les récompenses !",
+      "editProfile": "Modifier mon profil",
+      "editProfileDesc": "Complétez votre profil pour recevoir des offres personnalisées",
+      "name": "Nom",
+      "namePlaceholder": "Votre nom",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+33 6 12 34 56 78",
+      "birthday": "Date de naissance",
+      "birthdayDesc": "Pour recevoir un cadeau le jour de votre anniversaire",
+      "saveProfile": "Enregistrer",
+      "profileSaved": "Profil enregistré avec succès !",
+      "profileError": "Erreur lors de l'enregistrement",
+      "contactRequired": "Email ou WhatsApp requis"
     },
     "wallet": {
       "added": "Ajouté au portefeuille",

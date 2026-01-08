@@ -445,7 +445,21 @@
       "availableRewards": "Available Rewards",
       "nextReward": "Next Reward",
       "morePointsNeeded": "{{count}} more points needed",
-      "canRedeemAll": "You can redeem all available rewards!"
+      "canRedeemAll": "You can redeem all available rewards!",
+      "editProfile": "Edit my profile",
+      "editProfileDesc": "Complete your profile to receive personalized offers",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+1 234 567 8900",
+      "birthday": "Birthday",
+      "birthdayDesc": "To receive a gift on your birthday",
+      "saveProfile": "Save",
+      "profileSaved": "Profile saved successfully!",
+      "profileError": "Error saving profile",
+      "contactRequired": "Email or WhatsApp required"
     },
     "wallet": {
       "added": "Added to wallet",
