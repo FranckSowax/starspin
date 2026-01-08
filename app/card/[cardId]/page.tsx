@@ -330,21 +330,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
         pdf.text(contactLabel + contactInfo, margin, 43);
       }
 
-      // Points section - main highlight
-      pdf.setTextColor(245, 158, 11);
-      pdf.setFontSize(36);
-      pdf.setFont('helvetica', 'bold');
-      const pointsText = `${client.points}`;
-      pdf.text(pointsText, margin, contentY + 10);
-
-      pdf.setTextColor(100, 116, 139);
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica', 'normal');
-      const pointsWidth = pdf.getTextWidth(pointsText);
-      pdf.text('points', margin + pointsWidth + 2, contentY + 10);
-
       // Stats box
-      contentY += 20;
       pdf.setFillColor(248, 250, 252);
       pdf.roundedRect(margin, contentY, pageWidth - 2 * margin, 18, 2, 2, 'F');
 
