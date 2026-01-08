@@ -42,7 +42,7 @@ const AppleWalletIcon = ({ className }: { className?: string }) => (
     <rect x="2" y="4" width="20" height="4" fill="#FF3B30"/>
     <rect x="2" y="8" width="20" height="4" fill="#FF9500"/>
     <rect x="2" y="12" width="20" height="4" fill="#34C759"/>
-    <rect x="2" y="16" width="20" height="4" rx="0 0 2 2" fill="#007AFF"/>
+    <path d="M2 16h20v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2z" fill="#007AFF"/>
   </svg>
 );
 
