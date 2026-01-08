@@ -151,7 +151,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
         <div className={`relative ${cardImageUrl ? 'pt-6' : 'pt-8 bg-gradient-to-r from-amber-500 to-orange-500'} px-4 pb-24`}>
           <div className="flex items-center gap-3 mb-4">
             {merchant?.logo_url && (
-              <img src={merchant.logo_url} alt={merchant.business_name} className="h-10 w-10 object-contain bg-white rounded-lg p-1" />
+              <img src={merchant.logo_url ?? undefined} alt={merchant.business_name ?? 'Logo'} className="h-10 w-10 object-contain bg-white rounded-lg p-1" />
             )}
             <div>
               <h1 className="text-xl font-bold text-white">{merchant?.business_name || 'Loyalty Card'}</h1>
