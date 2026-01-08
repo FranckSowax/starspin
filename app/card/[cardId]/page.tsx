@@ -239,25 +239,40 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   }
 
   const cardImageUrl = merchant?.loyalty_card_image_url || merchant?.background_url;
+  const shopName = merchant?.business_name || 'StarSpin';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
+      {/* Top Banner Image */}
+      {cardImageUrl && (
+        <div className="relative w-full h-48 overflow-hidden">
+          <img
+            src={cardImageUrl}
+            alt={`${shopName} Card`}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-amber-50/90" />
+        </div>
+      )}
+
       {/* Header */}
-      <div className="relative">
-        {cardImageUrl && (
-          <div className="absolute inset-0 h-48">
-            <img src={cardImageUrl} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/80" />
-          </div>
-        )}
-        <div className={`relative ${cardImageUrl ? 'pt-6' : 'pt-8 bg-gradient-to-r from-amber-500 to-orange-500'} px-4 pb-24`}>
+      <div className={`relative ${cardImageUrl ? '-mt-16' : 'pt-8'}`}>
+        <div className={`${!cardImageUrl ? 'bg-gradient-to-r from-amber-500 to-orange-500 pt-8' : ''} px-4 pb-24`}>
           <div className="flex items-center gap-3 mb-4">
             {merchant?.logo_url && (
-              <img src={merchant.logo_url ?? undefined} alt={merchant.business_name ?? 'Logo'} className="h-10 w-10 object-contain bg-white rounded-lg p-1" />
+              <img
+                src={merchant.logo_url ?? undefined}
+                alt={shopName}
+                className="h-14 w-14 object-contain bg-white rounded-xl p-1.5 shadow-lg"
+              />
             )}
             <div>
-              <h1 className="text-xl font-bold text-white">{merchant?.business_name || 'Loyalty Card'}</h1>
-              <p className="text-white/80 text-sm">{t('loyalty.card.title')}</p>
+              <h1 className={`text-2xl font-bold ${cardImageUrl ? 'text-slate-900' : 'text-white'}`}>
+                {shopName} Card
+              </h1>
+              <p className={`text-sm ${cardImageUrl ? 'text-slate-600' : 'text-white/80'}`}>
+                {t('loyalty.card.title')}
+              </p>
             </div>
           </div>
         </div>
