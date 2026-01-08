@@ -36,6 +36,7 @@ export async function GET(request: NextRequest) {
         business_name,
         email,
         logo_url,
+        logo_background_color,
         background_url,
         google_review_url,
         tripadvisor_url,

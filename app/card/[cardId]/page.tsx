@@ -337,6 +337,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
   const cardImageUrl = merchant?.loyalty_card_image_url || merchant?.background_url;
   const shopName = merchant?.business_name || 'StarSpin';
+  const logoBackgroundColor = merchant?.logo_background_color || '#FFFFFF';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100">
@@ -345,11 +346,16 @@ export default function LoyaltyCardPage({ params }: PageProps) {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           {merchant?.logo_url && (
-            <img
-              src={merchant.logo_url}
-              alt={shopName}
-              className="h-16 w-16 object-contain bg-white rounded-xl p-2 shadow-lg"
-            />
+            <div
+              className="w-16 h-16 rounded-full border-4 border-[#ffd700] flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: logoBackgroundColor }}
+            >
+              <img
+                src={merchant.logo_url}
+                alt={shopName}
+                className="w-12 h-12 object-contain rounded-full"
+              />
+            </div>
           )}
           <div>
             <h1 className="text-3xl font-bold text-slate-900">{shopName} Card</h1>

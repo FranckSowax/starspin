@@ -4,6 +4,7 @@ export interface Merchant {
   name: string | null;
   business_name: string | null;
   logo_url: string | null;
+  logo_background_color?: string | null;
   background_url: string | null;
   qr_code_url: string | null;
   branding: Record<string, any>;

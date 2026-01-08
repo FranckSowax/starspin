@@ -330,7 +330,7 @@ export async function GET(request: NextRequest) {
       if (data?.merchant_id) {
         const { data: merchant } = await supabaseAdmin
           .from('merchants')
-          .select('id, business_name, logo_url, background_url, loyalty_card_image_url, loyalty_enabled')
+          .select('id, business_name, logo_url, logo_background_color, background_url, loyalty_card_image_url, loyalty_enabled')
           .eq('id', data.merchant_id)
           .single();
         merchantData = merchant;
