@@ -425,6 +425,7 @@
     "card": {
       "title": "My Loyalty Card",
       "balance": "Balance",
+      "purchases": "Purchases",
       "memberSince": "Member since",
       "scanToEarn": "Show this QR code to earn points",
       "addToWallet": "Add to wallet",

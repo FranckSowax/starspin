@@ -425,6 +425,7 @@
     "card": {
       "title": "Ma Carte Fidélité",
       "balance": "Solde",
+      "purchases": "Achats",
       "memberSince": "Membre depuis",
       "scanToEarn": "Présentez ce QR code pour gagner des points",
       "addToWallet": "Ajouter au portefeuille",

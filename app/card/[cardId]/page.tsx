@@ -241,7 +241,7 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
       pdf.setTextColor(71, 85, 105);
       pdf.setFontSize(7);
-      pdf.text(t('loyalty.stats.purchases') || 'Achats', margin + 5, contentY + 5);
+      pdf.text(t('loyalty.card.purchases') || 'Achats', margin + 5, contentY + 5);
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.text(`${client.total_purchases || 0}`, margin + 5, contentY + 12);
