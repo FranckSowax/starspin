@@ -544,6 +544,7 @@ export async function POST(request: NextRequest) {
         total_spent: 0,
         qr_code_data: qrCodeData,
         user_token: userToken || null,
+        preferred_language: body.language || 'fr',
         status: 'active',
         last_visit: new Date().toISOString()
       })

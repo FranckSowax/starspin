@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, use, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import '@/lib/i18n/config';
+import i18n from '@/lib/i18n/config';
 import {
   Award,
   Star,
@@ -17,11 +17,21 @@ import {
   CheckCircle,
   Download,
   Phone,
-  Mail
+  Mail,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
 import type { LoyaltyClient, LoyaltyReward, PointsTransaction, Merchant } from '@/lib/types/database';
+
+// Available languages
+const LANGUAGES = [
+  { code: 'fr', flag: '🇫🇷', name: 'Français' },
+  { code: 'en', flag: '🇬🇧', name: 'English' },
+  { code: 'th', flag: '🇹🇭', name: 'ไทย' },
+  { code: 'es', flag: '🇪🇸', name: 'Español' },
+  { code: 'pt', flag: '🇵🇹', name: 'Português' }
+];
 
 // Apple Wallet Icon SVG
 const AppleWalletIcon = ({ className }: { className?: string }) => (
@@ -70,7 +80,16 @@ export default function LoyaltyCardPage({ params }: PageProps) {
     google: { configured: false, loading: false, added: false }
   });
   const [downloading, setDownloading] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [currentLang, setCurrentLang] = useState(i18n.language || 'fr');
   const qrRef = useRef<HTMLDivElement>(null);
+
+  // Change language function
+  const changeLanguage = (langCode: string) => {
+    i18n.changeLanguage(langCode);
+    setCurrentLang(langCode);
+    setShowLanguageMenu(false);
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -82,6 +101,15 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       }
       const clientData = await clientRes.json();
       setClient(clientData.client);
+
+      // Apply client's preferred language
+      if (clientData.client?.preferred_language) {
+        const clientLang = clientData.client.preferred_language;
+        if (LANGUAGES.some(l => l.code === clientLang)) {
+          i18n.changeLanguage(clientLang);
+          setCurrentLang(clientLang);
+        }
+      }
 
       if (clientData.merchant) {
         setMerchant(clientData.merchant);
@@ -364,22 +392,55 @@ export default function LoyaltyCardPage({ params }: PageProps) {
       {/* Desktop Layout Container */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          {merchant?.logo_url && (
-            <div
-              className="w-16 h-16 rounded-full border-4 border-[#ffd700] flex items-center justify-center shadow-lg"
-              style={{ backgroundColor: logoBackgroundColor }}
-            >
-              <img
-                src={merchant.logo_url}
-                alt={shopName}
-                className="w-12 h-12 object-contain rounded-full"
-              />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            {merchant?.logo_url && (
+              <div
+                className="w-16 h-16 rounded-full border-4 border-[#ffd700] flex items-center justify-center shadow-lg"
+                style={{ backgroundColor: logoBackgroundColor }}
+              >
+                <img
+                  src={merchant.logo_url}
+                  alt={shopName}
+                  className="w-12 h-12 object-contain rounded-full"
+                />
+              </div>
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">{shopName} Card</h1>
+              <p className="text-slate-600">{t('loyalty.card.title')}</p>
             </div>
-          )}
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">{shopName} Card</h1>
-            <p className="text-slate-600">{t('loyalty.card.title')}</p>
+          </div>
+
+          {/* Language Selector */}
+          <div className="relative">
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="flex items-center gap-2 px-3 py-2 bg-white rounded-full shadow-md hover:shadow-lg transition-all border border-slate-200"
+            >
+              <Globe className="w-4 h-4 text-slate-500" />
+              <span className="text-lg">{LANGUAGES.find(l => l.code === currentLang)?.flag || '🇬🇧'}</span>
+              <span className="text-sm font-medium text-slate-700 hidden sm:inline">
+                {currentLang.toUpperCase()}
+              </span>
+            </button>
+
+            {showLanguageMenu && (
+              <div className="absolute right-0 top-full mt-2 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50 min-w-[160px]">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={`w-full flex items-center gap-3 px-4 py-2 hover:bg-amber-50 transition-colors ${
+                      currentLang === lang.code ? 'bg-amber-100 text-amber-700' : 'text-slate-700'
+                    }`}
+                  >
+                    <span className="text-xl">{lang.flag}</span>
+                    <span className="font-medium">{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

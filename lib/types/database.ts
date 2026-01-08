@@ -133,6 +133,7 @@ export interface LoyaltyClient {
   user_token: string | null;
   apple_pass_serial: string | null;
   google_pass_id: string | null;
+  preferred_language: string | null; // Language preference (fr, en, th, es, pt)
   status: LoyaltyClientStatus;
   last_visit: string | null;
   created_at: string;
