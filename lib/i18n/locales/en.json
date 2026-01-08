@@ -431,7 +431,18 @@
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet",
       "viewRewards": "View rewards",
-      "myRewards": "My rewards"
+      "myRewards": "My rewards",
+      "share": "Share my card",
+      "shareTitle": "My Loyalty Card",
+      "shareText": "Here's my loyalty card!",
+      "linkCopied": "Link copied to clipboard!"
+    },
+    "wallet": {
+      "added": "Added to wallet",
+      "error": "Error adding to wallet",
+      "notConfigured": "This feature will be available soon!",
+      "appleComingSoon": "Apple Wallet integration coming soon!",
+      "googleComingSoon": "Google Wallet integration coming soon!"
     },
     "settings": {
       "title": "Loyalty Settings",

@@ -11,6 +11,133 @@ const supabaseAdmin = supabaseUrl && supabaseServiceKey
   ? createClient(supabaseUrl, supabaseServiceKey)
   : null;
 
+// Whapi API endpoint for standard text messages
+const WHAPI_TEXT_URL = 'https://gate.whapi.cloud/messages/text';
+const WHAPI_INTERACTIVE_URL = 'https://gate.whapi.cloud/messages/interactive';
+
+// Loyalty card message templates by language
+const LOYALTY_CARD_MESSAGES: Record<string, (businessName: string, points: number, cardUrl: string) => string> = {
+  fr: (businessName, points, cardUrl) =>
+    `🎁 *CARTE FIDÉLITÉ - ${businessName}* 🎁\n\nFélicitations ! Votre carte de fidélité a été créée.\n\n⭐ *${points} points de bienvenue* offerts !\n\n📱 Accédez à votre carte pour :\n• Consulter votre solde de points\n• Échanger vos points contre des récompenses\n• Ajouter la carte à votre Wallet\n\n👇 Ouvrir ma carte :\n${cardUrl}`,
+  en: (businessName, points, cardUrl) =>
+    `🎁 *LOYALTY CARD - ${businessName}* 🎁\n\nCongratulations! Your loyalty card has been created.\n\n⭐ *${points} welcome points* offered!\n\n📱 Access your card to:\n• Check your points balance\n• Redeem points for rewards\n• Add card to your Wallet\n\n👇 Open my card:\n${cardUrl}`,
+  th: (businessName, points, cardUrl) =>
+    `🎁 *บัตรสมาชิก - ${businessName}* 🎁\n\nยินดีด้วย! บัตรสมาชิกของคุณถูกสร้างแล้ว\n\n⭐ *${points} แต้มต้อนรับ* ฟรี!\n\n📱 เข้าถึงบัตรของคุณเพื่อ:\n• ตรวจสอบยอดแต้ม\n• แลกแต้มรับรางวัล\n• เพิ่มบัตรใน Wallet\n\n👇 เปิดบัตรของฉัน:\n${cardUrl}`,
+  es: (businessName, points, cardUrl) =>
+    `🎁 *TARJETA DE FIDELIDAD - ${businessName}* 🎁\n\n¡Felicidades! Tu tarjeta de fidelidad ha sido creada.\n\n⭐ *${points} puntos de bienvenida* ofrecidos!\n\n📱 Accede a tu tarjeta para:\n• Consultar tu saldo de puntos\n• Canjear puntos por recompensas\n• Añadir la tarjeta a tu Wallet\n\n👇 Abrir mi tarjeta:\n${cardUrl}`,
+  pt: (businessName, points, cardUrl) =>
+    `🎁 *CARTÃO FIDELIDADE - ${businessName}* 🎁\n\nParabéns! Seu cartão fidelidade foi criado.\n\n⭐ *${points} pontos de boas-vindas* oferecidos!\n\n📱 Acesse seu cartão para:\n• Consultar seu saldo de pontos\n• Trocar pontos por recompensas\n• Adicionar cartão ao Wallet\n\n👇 Abrir meu cartão:\n${cardUrl}`,
+};
+
+// Button texts for interactive messages
+const LOYALTY_BUTTON_TEXTS: Record<string, string> = {
+  fr: 'Ouvrir ma Carte 🎁',
+  en: 'Open my Card 🎁',
+  th: 'เปิดบัตรของฉัน 🎁',
+  es: 'Abrir mi Tarjeta 🎁',
+  pt: 'Abrir meu Cartão 🎁',
+};
+
+/**
+ * Envoie un message WhatsApp avec le lien de la carte fidélité
+ */
+async function sendLoyaltyCardWhatsApp(
+  phone: string,
+  merchantId: string,
+  businessName: string,
+  welcomePoints: number,
+  qrCodeData: string,
+  language: string = 'fr'
+): Promise<void> {
+  const globalWhapiKey = process.env.WHAPI_API_KEY;
+  if (!globalWhapiKey) {
+    console.log('[LOYALTY] WHAPI_API_KEY not configured, skipping WhatsApp');
+    return;
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app';
+  const cardUrl = `${baseUrl}/card/${qrCodeData}`;
+
+  // Format phone number for Whapi (remove + prefix)
+  const formattedPhone = phone.replace(/^\+/, '');
+
+  // Get message template
+  const messageTemplate = LOYALTY_CARD_MESSAGES[language] || LOYALTY_CARD_MESSAGES['fr'];
+  const message = messageTemplate(businessName, welcomePoints, cardUrl);
+
+  // Get button text
+  const buttonText = LOYALTY_BUTTON_TEXTS[language] || LOYALTY_BUTTON_TEXTS['fr'];
+
+  // Try interactive message first
+  try {
+    const interactivePayload = {
+      to: formattedPhone,
+      type: 'button',
+      header: {
+        type: 'text',
+        text: `🎁 ${businessName}`
+      },
+      body: {
+        text: `Félicitations ! Votre carte de fidélité a été créée avec ${welcomePoints} points de bienvenue !`
+      },
+      footer: {
+        text: '⭐ Programme Fidélité'
+      },
+      action: {
+        buttons: [
+          {
+            type: 'url',
+            title: buttonText.substring(0, 25),
+            id: `card_${Date.now()}`,
+            url: cardUrl
+          }
+        ]
+      }
+    };
+
+    const interactiveResponse = await fetch(WHAPI_INTERACTIVE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${globalWhapiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(interactivePayload),
+    });
+
+    if (interactiveResponse.ok) {
+      console.log('[LOYALTY] WhatsApp interactive message sent successfully');
+      return;
+    }
+
+    console.log('[LOYALTY] Interactive message failed, falling back to text');
+  } catch (error) {
+    console.log('[LOYALTY] Interactive message error, falling back to text');
+  }
+
+  // Fallback to text message
+  try {
+    const textResponse = await fetch(WHAPI_TEXT_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${globalWhapiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: formattedPhone,
+        body: message,
+      }),
+    });
+
+    if (textResponse.ok) {
+      console.log('[LOYALTY] WhatsApp text message sent successfully');
+    } else {
+      console.error('[LOYALTY] WhatsApp text message failed:', await textResponse.text());
+    }
+  } catch (error) {
+    console.error('[LOYALTY] WhatsApp send error:', error);
+  }
+}
+
 /**
  * GET /api/loyalty/client
  *
@@ -295,10 +422,26 @@ export async function POST(request: NextRequest) {
         });
     }
 
+    // Envoyer le message WhatsApp avec le lien de la carte (si phone fourni)
+    if (phone) {
+      // Fire and forget - ne pas bloquer la réponse
+      sendLoyaltyCardWhatsApp(
+        phone,
+        merchantId,
+        merchant.business_name || 'StarSpin',
+        welcomePoints,
+        qrCodeData,
+        body.language || 'fr'
+      ).catch((error) => {
+        console.error('[LOYALTY CLIENT] WhatsApp send error:', error);
+      });
+    }
+
     return NextResponse.json({
       client: newClient,
       isNew: true,
-      welcomePoints
+      welcomePoints,
+      cardUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://starspin.netlify.app'}/card/${qrCodeData}`
     });
   } catch (error) {
     console.error('[LOYALTY CLIENT POST] Error:', error);

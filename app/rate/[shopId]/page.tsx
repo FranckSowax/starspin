@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { StarRating } from '@/components/molecules/StarRating';
 import { Button } from '@/components/atoms/Button';
@@ -152,6 +152,7 @@ export default function RatingPage() {
               merchantId: sanitizedData.merchant_id,
               phone: sanitizedPhone,
               userToken: sanitizedData.user_token,
+              language: currentLang, // Pass language for WhatsApp message
             }),
           }).catch(() => {}); // Fire and forget
         }
@@ -224,6 +225,7 @@ export default function RatingPage() {
               merchantId: sanitizedData.merchant_id,
               email: sanitizedData.customer_email,
               userToken: sanitizedData.user_token,
+              language: currentLang, // Pass language for notifications
             }),
           }).catch(() => {}); // Fire and forget
         }

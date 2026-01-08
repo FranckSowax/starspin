@@ -17,11 +17,18 @@ import {
   Smartphone,
   Store,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  ExternalLink,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import QRCode from 'react-qr-code';
 import type { LoyaltyClient, LoyaltyReward, PointsTransaction, Merchant } from '@/lib/types/database';
+
+interface WalletStatus {
+  apple: { configured: boolean; loading: boolean; added: boolean };
+  google: { configured: boolean; loading: boolean; added: boolean };
+}
 
 interface PageProps {
   params: Promise<{ cardId: string }>;
@@ -38,6 +45,10 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'card' | 'rewards' | 'history'>('card');
   const [redeeming, setRedeeming] = useState<string | null>(null);
+  const [walletStatus, setWalletStatus] = useState<WalletStatus>({
+    apple: { configured: false, loading: false, added: false },
+    google: { configured: false, loading: false, added: false }
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -83,6 +94,97 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Check wallet configuration status
+  useEffect(() => {
+    const checkWalletStatus = async () => {
+      if (!cardId) return;
+
+      // Check Apple Wallet
+      try {
+        const appleRes = await fetch(`/api/loyalty/wallet/apple?clientId=${cardId}`);
+        if (appleRes.ok) {
+          const data = await appleRes.json();
+          setWalletStatus(prev => ({
+            ...prev,
+            apple: { ...prev.apple, configured: data.configured || false }
+          }));
+        }
+      } catch {
+        // Apple Wallet not configured
+      }
+
+      // Check Google Wallet
+      try {
+        const googleRes = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
+        if (googleRes.ok) {
+          const data = await googleRes.json();
+          setWalletStatus(prev => ({
+            ...prev,
+            google: { ...prev.google, configured: data.configured || false }
+          }));
+        }
+      } catch {
+        // Google Wallet not configured
+      }
+    };
+
+    checkWalletStatus();
+  }, [cardId]);
+
+  const handleAddToAppleWallet = async () => {
+    setWalletStatus(prev => ({
+      ...prev,
+      apple: { ...prev.apple, loading: true }
+    }));
+
+    try {
+      const res = await fetch(`/api/loyalty/wallet/apple?clientId=${cardId}`);
+      const data = await res.json();
+
+      if (data.configured) {
+        // TODO: Télécharger le .pkpass quand implémenté
+        alert(t('loyalty.wallet.appleComingSoon'));
+      } else {
+        // Afficher message configuration requise
+        alert(t('loyalty.wallet.notConfigured'));
+      }
+    } catch {
+      alert(t('loyalty.wallet.error'));
+    } finally {
+      setWalletStatus(prev => ({
+        ...prev,
+        apple: { ...prev.apple, loading: false }
+      }));
+    }
+  };
+
+  const handleAddToGoogleWallet = async () => {
+    setWalletStatus(prev => ({
+      ...prev,
+      google: { ...prev.google, loading: true }
+    }));
+
+    try {
+      const res = await fetch(`/api/loyalty/wallet/google?clientId=${cardId}`);
+      const data = await res.json();
+
+      if (data.configured) {
+        // TODO: Ouvrir le lien Google Wallet quand implémenté
+        alert(t('loyalty.wallet.googleComingSoon'));
+      } else {
+        // Afficher message configuration requise
+        alert(t('loyalty.wallet.notConfigured'));
+      }
+    } catch {
+      alert(t('loyalty.wallet.error'));
+    } finally {
+      setWalletStatus(prev => ({
+        ...prev,
+        google: { ...prev.google, loading: false }
+      }));
+    }
+  };
 
   const handleRedeem = async (reward: LoyaltyReward) => {
     if (!client || !merchant) return;
@@ -253,21 +355,68 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                 <div className="mt-6 space-y-3">
                   <Button
                     variant="outline"
-                    className="w-full border-slate-300"
-                    disabled
+                    className="w-full border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+                    onClick={handleAddToAppleWallet}
+                    disabled={walletStatus.apple.loading || walletStatus.apple.added}
                   >
-                    <Apple className="w-5 h-5 mr-2" />
-                    {t('loyalty.card.appleWallet')}
-                    <span className="ml-2 text-xs text-slate-400">(Coming soon)</span>
+                    {walletStatus.apple.loading ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : walletStatus.apple.added ? (
+                      <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                    ) : (
+                      <Apple className="w-5 h-5 mr-2" />
+                    )}
+                    {walletStatus.apple.added
+                      ? t('loyalty.wallet.added')
+                      : t('loyalty.card.appleWallet')
+                    }
+                    {!walletStatus.apple.configured && !walletStatus.apple.added && (
+                      <span className="ml-2 text-xs text-amber-500">(Beta)</span>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
-                    className="w-full border-slate-300"
-                    disabled
+                    className="w-full border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+                    onClick={handleAddToGoogleWallet}
+                    disabled={walletStatus.google.loading || walletStatus.google.added}
                   >
-                    <Smartphone className="w-5 h-5 mr-2" />
-                    {t('loyalty.card.googleWallet')}
-                    <span className="ml-2 text-xs text-slate-400">(Coming soon)</span>
+                    {walletStatus.google.loading ? (
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    ) : walletStatus.google.added ? (
+                      <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
+                    ) : (
+                      <Smartphone className="w-5 h-5 mr-2" />
+                    )}
+                    {walletStatus.google.added
+                      ? t('loyalty.wallet.added')
+                      : t('loyalty.card.googleWallet')
+                    }
+                    {!walletStatus.google.configured && !walletStatus.google.added && (
+                      <span className="ml-2 text-xs text-amber-500">(Beta)</span>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Share Button */}
+                <div className="mt-4">
+                  <Button
+                    variant="ghost"
+                    className="w-full text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                    onClick={() => {
+                      if (navigator.share) {
+                        navigator.share({
+                          title: t('loyalty.card.shareTitle'),
+                          text: t('loyalty.card.shareText'),
+                          url: window.location.href
+                        }).catch(() => {});
+                      } else {
+                        navigator.clipboard.writeText(window.location.href);
+                        alert(t('loyalty.card.linkCopied'));
+                      }
+                    }}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    {t('loyalty.card.share')}
                   </Button>
                 </div>
               </div>

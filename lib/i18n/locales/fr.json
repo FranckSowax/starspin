@@ -431,7 +431,18 @@
       "appleWallet": "Apple Wallet",
       "googleWallet": "Google Wallet",
       "viewRewards": "Voir les récompenses",
-      "myRewards": "Mes récompenses"
+      "myRewards": "Mes récompenses",
+      "share": "Partager ma carte",
+      "shareTitle": "Ma Carte Fidélité",
+      "shareText": "Voici ma carte fidélité !",
+      "linkCopied": "Lien copié dans le presse-papiers !"
+    },
+    "wallet": {
+      "added": "Ajouté au portefeuille",
+      "error": "Erreur lors de l'ajout au portefeuille",
+      "notConfigured": "Cette fonctionnalité sera bientôt disponible !",
+      "appleComingSoon": "L'intégration Apple Wallet arrive bientôt !",
+      "googleComingSoon": "L'intégration Google Wallet arrive bientôt !"
     },
     "settings": {
       "title": "Paramètres Fidélité",
