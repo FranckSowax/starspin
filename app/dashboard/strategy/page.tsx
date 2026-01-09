@@ -26,9 +26,6 @@ export default function StrategyPage() {
   // Workflow mode: 'web' or 'whatsapp'
   const [workflowMode, setWorkflowMode] = useState<'web' | 'whatsapp'>('web');
 
-  // WhatsApp configuration
-  const [whatsappMessageTemplate, setWhatsappMessageTemplate] = useState('');
-
   // Logo background color
   const [logoBackgroundColor, setLogoBackgroundColor] = useState('#FFFFFF');
 
@@ -72,9 +69,8 @@ export default function StrategyPage() {
 
       setMerchant(merchantData);
       
-      // Load workflow mode and WhatsApp config
+      // Load workflow mode
       setWorkflowMode(merchantData?.workflow_mode || 'web');
-      setWhatsappMessageTemplate(merchantData?.whatsapp_message_template || 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}');
 
       // Load logo background color
       setLogoBackgroundColor(merchantData?.logo_background_color || '#FFFFFF');
@@ -116,7 +112,6 @@ export default function StrategyPage() {
     try {
       const updates: any = {
         workflow_mode: workflowMode,
-        whatsapp_message_template: whatsappMessageTemplate || null,
         logo_background_color: logoBackgroundColor || '#FFFFFF',
         google_maps_url: googleMapsUrl || null,
         tripadvisor_url: tripadvisorUrl || null,
@@ -263,28 +258,40 @@ export default function StrategyPage() {
                 Configuration WhatsApp
               </h4>
 
-              {/* WhatsApp Message Template */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Modèle de Message WhatsApp
-                </label>
-                <textarea
-                  value={whatsappMessageTemplate}
-                  onChange={(e) => setWhatsappMessageTemplate(e.target.value)}
-                  rows={3}
-                  placeholder="Merci pour votre avis ! Tournez la roue : {{spin_url}}"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Utilisez <code className="bg-gray-100 px-1 rounded">{'{{spin_url}}'}</code> comme espace réservé pour le lien de la roue
+              {/* Auto message info */}
+              <div className="bg-white border border-green-200 rounded-lg p-4 space-y-3">
+                <p className="text-sm text-gray-700">
+                  <strong>📱 Messages automatiques</strong> — Le contenu du message WhatsApp s'adapte automatiquement selon le contexte :
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  {/* New client message */}
+                  <div className="bg-green-50 rounded-lg p-3 border border-green-100">
+                    <p className="font-medium text-green-800 mb-1">🎉 Nouveau client</p>
+                    <p className="text-gray-600 text-xs">
+                      "Merci pour votre avis ! Tournez la roue pour gagner un cadeau. Votre carte fidélité est prête !"
+                    </p>
+                  </div>
+
+                  {/* Returning client message */}
+                  <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
+                    <p className="font-medium text-blue-800 mb-1">👋 Client fidèle</p>
+                    <p className="text-gray-600 text-xs">
+                      "Bon retour ! Tournez la roue pour tenter de gagner un cadeau. Consultez votre carte fidélité."
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-500 italic">
+                  ✅ Les messages sont traduits automatiquement (FR, EN, TH, ES, PT) selon la langue du client
                 </p>
               </div>
 
               {/* Info box */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>Fonctionnement :</strong> Dans ce mode, le client entre son numéro WhatsApp au lieu de son email.
-                  Après avoir laissé un avis, il reçoit automatiquement un message WhatsApp avec le lien vers la roue.
+                  💡 <strong>Fonctionnement :</strong> Le client entre son numéro WhatsApp au lieu de son email.
+                  Après l'avis, il reçoit un message WhatsApp avec 2 boutons : <strong>Tourner la Roue</strong> et <strong>Ma Carte Fidélité</strong>.
                 </p>
               </div>
             </div>
@@ -525,7 +532,6 @@ export default function StrategyPage() {
             variant="outline"
             onClick={() => {
               setWorkflowMode(merchant.workflow_mode || 'web');
-              setWhatsappMessageTemplate(merchant.whatsapp_message_template || 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau : {{spin_url}}');
               setLogoBackgroundColor(merchant.logo_background_color || '#FFFFFF');
               setGoogleMapsUrl(merchant.google_maps_url || '');
               setTripadvisorUrl(merchant.tripadvisor_url || '');
