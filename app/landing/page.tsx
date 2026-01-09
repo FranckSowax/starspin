@@ -907,14 +907,14 @@ export default function LandingPage() {
               </Link>
             </Card>
 
-            {/* Enterprise Plan */}
+            {/* Multi Store Plan */}
             <Card className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-xl transition-all">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('landing.pricing.enterprise')}</h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('landing.pricing.multiStore')}</h3>
                 <div className="mb-2">
-                  <span className="text-5xl font-black text-gray-900">{t('landing.pricing.enterprisePrice')}</span>
+                  <span className="text-5xl font-black text-gray-900">{t('landing.pricing.multiStorePrice')}</span>
                 </div>
-                <p className="text-gray-600">{t('landing.pricing.enterprisePeriod')}</p>
+                <p className="text-gray-600">{t('landing.pricing.multiStorePeriod')}</p>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start gap-3">
@@ -934,12 +934,6 @@ export default function LandingPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span className="text-gray-700">{t('landing.pricing.centralizedDashboard')}</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="text-gray-700">{t('landing.pricing.customApi')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
