@@ -28,7 +28,11 @@ import {
   Clock,
   Archive,
   Reply,
-  Trash2
+  Trash2,
+  Award,
+  CreditCard,
+  Coins,
+  ShoppingBag
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import {
@@ -111,6 +115,38 @@ interface ContactMessage {
   replied_at: string | null;
 }
 
+interface LoyaltyClient {
+  id: string;
+  merchant_id: string;
+  card_id: string;
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  points: number;
+  total_purchases: number;
+  total_spent: number;
+  qr_code_data: string;
+  status: 'active' | 'suspended' | 'expired';
+  last_visit: string | null;
+  created_at: string;
+  updated_at: string;
+  merchant?: {
+    business_name: string;
+    logo_url: string | null;
+  };
+}
+
+interface LoyaltyStats {
+  totalCards: number;
+  activeCards: number;
+  totalPoints: number;
+  totalPurchases: number;
+  totalSpent: number;
+  cardsThisMonth: number;
+  pointsDistributed: number;
+  pointsRedeemed: number;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -136,7 +172,7 @@ export default function AdminDashboard() {
 
   const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
   const [merchantStats, setMerchantStats] = useState<Record<string, MerchantStats>>({});
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'merchants' | 'messages'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'merchants' | 'messages' | 'loyalty'>('dashboard');
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month'>('week');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [tierFilter, setTierFilter] = useState<'all' | 'starter' | 'premium'>('all');
@@ -150,11 +186,29 @@ export default function AdminDashboard() {
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [messagesCounts, setMessagesCounts] = useState({ new: 0, read: 0, replied: 0, archived: 0 });
 
+  // Loyalty state
+  const [loyaltyClients, setLoyaltyClients] = useState<LoyaltyClient[]>([]);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [loyaltyStats, setLoyaltyStats] = useState<LoyaltyStats>({
+    totalCards: 0,
+    activeCards: 0,
+    totalPoints: 0,
+    totalPurchases: 0,
+    totalSpent: 0,
+    cardsThisMonth: 0,
+    pointsDistributed: 0,
+    pointsRedeemed: 0
+  });
+  const [loyaltySearch, setLoyaltySearch] = useState('');
+  const [loyaltyStatusFilter, setLoyaltyStatusFilter] = useState<'all' | 'active' | 'suspended' | 'expired'>('all');
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setError(null);
     if (activeSection === 'messages') {
       await loadMessages();
+    } else if (activeSection === 'loyalty') {
+      await loadLoyaltyData();
     } else {
       await loadMerchants();
     }
@@ -213,6 +267,44 @@ export default function AdminDashboard() {
     }
   };
 
+  // Load loyalty data
+  const loadLoyaltyData = async () => {
+    setLoyaltyLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const params = new URLSearchParams();
+      if (loyaltySearch) params.append('search', loyaltySearch);
+      if (loyaltyStatusFilter !== 'all') params.append('status', loyaltyStatusFilter);
+
+      const response = await fetch(`/api/admin/loyalty?${params.toString()}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLoyaltyClients(data.clients || []);
+        setLoyaltyStats(data.stats || {
+          totalCards: 0,
+          activeCards: 0,
+          totalPoints: 0,
+          totalPurchases: 0,
+          totalSpent: 0,
+          cardsThisMonth: 0,
+          pointsDistributed: 0,
+          pointsRedeemed: 0
+        });
+      }
+    } catch (err) {
+      console.error('Error loading loyalty data:', err);
+    } finally {
+      setLoyaltyLoading(false);
+    }
+  };
+
   // Track if data has been loaded to prevent duplicate calls
   const [dataLoaded, setDataLoaded] = useState(false);
 
@@ -241,6 +333,13 @@ export default function AdminDashboard() {
       loadMessages();
     }
   }, [activeSection, messageStatusFilter, user]);
+
+  // Load loyalty data when switching to loyalty section or when filters change
+  useEffect(() => {
+    if (activeSection === 'loyalty' && user) {
+      loadLoyaltyData();
+    }
+  }, [activeSection, loyaltyStatusFilter, loyaltySearch, user]);
 
   useEffect(() => {
     let filtered = merchants;
@@ -494,6 +593,23 @@ export default function AdminDashboard() {
               </span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveSection('loyalty')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeSection === 'loyalty'
+                ? 'bg-purple-500/20 text-white border border-purple-500/30'
+                : 'text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <CreditCard className="w-5 h-5" />
+            <span className="font-medium">Cartes Fidélité</span>
+            {loyaltyStats.totalCards > 0 && (
+              <span className="ml-auto bg-emerald-500/80 text-white text-xs px-2 py-0.5 rounded-full">
+                {loyaltyStats.totalCards}
+              </span>
+            )}
+          </button>
         </nav>
 
         {/* Sign Out */}
@@ -515,13 +631,17 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
-                  {activeSection === 'dashboard' ? 'Tableau de Bord' : activeSection === 'merchants' ? 'Gestion des Marchands' : 'Messages'}
+                  {activeSection === 'dashboard' ? 'Tableau de Bord' :
+                   activeSection === 'merchants' ? 'Gestion des Marchands' :
+                   activeSection === 'loyalty' ? 'Cartes Fidélité' : 'Messages'}
                 </h2>
                 <p className="text-white/70 text-sm mt-0.5">
                   {activeSection === 'dashboard'
                     ? 'Statistiques et analytics'
                     : activeSection === 'merchants'
                     ? 'Liste et gestion des marchands'
+                    : activeSection === 'loyalty'
+                    ? 'Gestion des cartes de fidélité clients'
                     : 'Demandes de contact Multi Store'}
                 </p>
               </div>
@@ -659,6 +779,67 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+
+            {/* Loyalty Stats Section */}
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-amber-400" />
+                Statistiques Fidélité
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 border border-amber-500/20">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-amber-500/20 rounded-lg">
+                      <CreditCard className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-white/60">Cartes créées</p>
+                      <p className="text-2xl font-bold text-white">{loyaltyStats.totalCards}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-amber-400">+{loyaltyStats.cardsThisMonth} ce mois</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-4 border border-emerald-500/20">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-emerald-500/20 rounded-lg">
+                      <Coins className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-white/60">Points en circulation</p>
+                      <p className="text-2xl font-bold text-white">{loyaltyStats.totalPoints.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-emerald-400">{loyaltyStats.pointsDistributed.toLocaleString()} distribués</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-500/20">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <ShoppingBag className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-white/60">Achats totaux</p>
+                      <p className="text-2xl font-bold text-white">{loyaltyStats.totalPurchases}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-400">{loyaltyStats.totalSpent.toLocaleString()} THB dépensés</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-500/20">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 bg-purple-500/20 rounded-lg">
+                      <Award className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-white/60">Points échangés</p>
+                      <p className="text-2xl font-bold text-white">{loyaltyStats.pointsRedeemed.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-purple-400">{loyaltyStats.activeCards} cartes actives</p>
+                </div>
+              </div>
+            </div>
 
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -1292,6 +1473,213 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+            </div>
+          </>
+        )}
+
+        {/* Loyalty Cards Section */}
+        {activeSection === 'loyalty' && (
+          <>
+            {/* Loyalty Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-xl p-4 border border-amber-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-amber-500/20 rounded-lg">
+                    <CreditCard className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/60">Total Cartes</p>
+                    <p className="text-2xl font-bold text-white">{loyaltyStats.totalCards}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 rounded-xl p-4 border border-emerald-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-500/20 rounded-lg">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/60">Cartes Actives</p>
+                    <p className="text-2xl font-bold text-white">{loyaltyStats.activeCards}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-xl p-4 border border-blue-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <Coins className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/60">Points Total</p>
+                    <p className="text-2xl font-bold text-white">{loyaltyStats.totalPoints.toLocaleString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <ShoppingBag className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-white/60">Montant Total</p>
+                    <p className="text-2xl font-bold text-white">{loyaltyStats.totalSpent.toLocaleString()} THB</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl p-4 mb-6 border border-slate-700/50">
+              <div className="flex items-center gap-2 mb-4">
+                <Filter className="w-5 h-5 text-white/70" />
+                <span className="text-sm font-semibold text-white">Filtres</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher par nom, email, téléphone, card ID..."
+                    value={loyaltySearch}
+                    onChange={(e) => setLoyaltySearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Status Filter */}
+                <select
+                  value={loyaltyStatusFilter}
+                  onChange={(e) => setLoyaltyStatusFilter(e.target.value as typeof loyaltyStatusFilter)}
+                  className="px-4 py-2 bg-slate-900/50 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="all">Tous les statuts</option>
+                  <option value="active">Actives</option>
+                  <option value="suspended">Suspendues</option>
+                  <option value="expired">Expirées</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Loyalty Cards Table */}
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-2xl border border-slate-700/50 overflow-hidden">
+              <div className="p-6 border-b border-slate-700/50">
+                <h2 className="text-xl font-bold text-white">Liste des Cartes Fidélité</h2>
+                <p className="text-sm text-white/70 mt-1">{loyaltyClients.length} carte(s) trouvée(s)</p>
+              </div>
+
+              {loyaltyLoading ? (
+                <div className="p-12 text-center">
+                  <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-white/70">Chargement des cartes fidélité...</p>
+                </div>
+              ) : loyaltyClients.length === 0 ? (
+                <div className="p-12 text-center">
+                  <CreditCard className="w-16 h-16 text-white/30 mx-auto mb-4" />
+                  <p className="text-white/70 mb-2">Aucune carte fidélité trouvée</p>
+                  <p className="text-sm text-white/50">Les cartes seront créées automatiquement lors des premiers feedbacks clients</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-900/50">
+                      <tr>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Card ID</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Client</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Merchant</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Points</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Achats</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Statut</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Créée le</th>
+                        <th className="text-left px-6 py-4 text-xs font-semibold text-white/70 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50">
+                      {loyaltyClients.map((client) => (
+                        <tr key={client.id} className="hover:bg-slate-700/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <code className="text-sm text-amber-400 bg-amber-500/10 px-2 py-1 rounded">
+                              {client.card_id}
+                            </code>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="text-white font-medium">{client.name || 'N/A'}</p>
+                              <p className="text-xs text-white/50">{client.email || client.phone || 'N/A'}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              {client.merchant?.logo_url ? (
+                                <img src={client.merchant.logo_url} alt="" className="w-6 h-6 rounded-full object-cover" />
+                              ) : (
+                                <div className="w-6 h-6 bg-purple-500/30 rounded-full flex items-center justify-center">
+                                  <Store className="w-3 h-3 text-purple-400" />
+                                </div>
+                              )}
+                              <span className="text-white text-sm">{client.merchant?.business_name || 'N/A'}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-1">
+                              <Coins className="w-4 h-4 text-amber-400" />
+                              <span className="text-white font-semibold">{client.points.toLocaleString()}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div>
+                              <p className="text-white">{client.total_purchases} achats</p>
+                              <p className="text-xs text-white/50">{Number(client.total_spent).toLocaleString()} THB</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <Badge className={`${
+                              client.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                              client.status === 'suspended' ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' :
+                              'bg-red-500/20 text-red-400 border-red-500/30'
+                            }`}>
+                              {client.status === 'active' ? 'Active' :
+                               client.status === 'suspended' ? 'Suspendue' : 'Expirée'}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-white/70">
+                            {new Date(client.created_at).toLocaleDateString('fr-FR', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => window.open(`/card/${client.qr_code_data}`, '_blank')}
+                                className="gap-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border-purple-500/30"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Voir
+                              </Button>
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL}/card/${client.qr_code_data}`);
+                                  alert('Lien copié!');
+                                }}
+                                className="gap-1 bg-slate-700 hover:bg-slate-600 text-white border-slate-600"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </>
         )}
