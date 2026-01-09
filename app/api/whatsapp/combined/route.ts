@@ -34,6 +34,21 @@ const NEW_CLIENT_MESSAGES: Record<string, { header: string; body: string; footer
     body: 'Obrigado pela sua avaliação! Seu cartão fidelidade foi criado com pontos de boas-vindas!\n\n🎰 Gire a roda para ganhar um presente\n🎁 Consulte seu cartão fidelidade',
     footer: '⭐ StarSpin'
   },
+  zh: {
+    header: '🎉 欢迎！',
+    body: '感谢您的评价！您的会员卡已创建并赠送欢迎积分！\n\n🎰 转动轮盘赢取礼物\n🎁 查看您的会员卡',
+    footer: '⭐ StarSpin'
+  },
+  ru: {
+    header: '🎉 Добро пожаловать!',
+    body: 'Спасибо за отзыв! Ваша карта лояльности создана с приветственными баллами!\n\n🎰 Крутите колесо, чтобы выиграть подарок\n🎁 Проверьте вашу карту лояльности',
+    footer: '⭐ StarSpin'
+  },
+  ar: {
+    header: '🎉 أهلاً وسهلاً!',
+    body: 'شكراً لتقييمك! تم إنشاء بطاقة الولاء الخاصة بك مع نقاط ترحيبية!\n\n🎰 أدر العجلة للفوز بهدية\n🎁 تحقق من بطاقة الولاء الخاصة بك',
+    footer: '⭐ StarSpin'
+  },
 };
 
 // Message templates for EXISTING clients (returning)
@@ -63,6 +78,21 @@ const RETURNING_CLIENT_MESSAGES: Record<string, { header: string; body: (points:
     body: (points) => `Obrigado pela sua visita! Você tem ${points} pontos no seu cartão.\n\n🎰 Gire a roda para ganhar um presente\n🎁 Consulte seu saldo e recompensas`,
     footer: '⭐ StarSpin'
   },
+  zh: {
+    header: '👋 欢迎回来！',
+    body: (points) => `感谢您的光临！您的会员卡有 ${points} 积分。\n\n🎰 转动轮盘赢取礼物\n🎁 查看您的余额和奖励`,
+    footer: '⭐ StarSpin'
+  },
+  ru: {
+    header: '👋 С возвращением!',
+    body: (points) => `Спасибо за визит! У вас ${points} баллов на карте лояльности.\n\n🎰 Крутите колесо, чтобы выиграть подарок\n🎁 Проверьте ваш баланс и награды`,
+    footer: '⭐ StarSpin'
+  },
+  ar: {
+    header: '👋 أهلاً بعودتك!',
+    body: (points) => `شكراً لزيارتك! لديك ${points} نقطة على بطاقة الولاء.\n\n🎰 أدر العجلة للفوز بهدية\n🎁 تحقق من رصيدك ومكافآتك`,
+    footer: '⭐ StarSpin'
+  },
 };
 
 // Button texts (max 20 characters for WhatsApp)
@@ -72,6 +102,9 @@ const BUTTON_TEXTS: Record<string, { spin: string; card: string }> = {
   th: { spin: 'หมุนวงล้อ 🎰', card: 'บัตรของฉัน 🎁' },
   es: { spin: 'Girar Rueda 🎰', card: 'Mi Tarjeta 🎁' },
   pt: { spin: 'Girar Roda 🎰', card: 'Meu Cartão 🎁' },
+  zh: { spin: '转动轮盘 🎰', card: '我的卡 🎁' },
+  ru: { spin: 'Крутить колесо 🎰', card: 'Моя карта 🎁' },
+  ar: { spin: 'أدر العجلة 🎰', card: 'بطاقتي 🎁' },
 };
 
 /**

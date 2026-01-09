@@ -20,6 +20,7 @@ const SPIN_BUTTON_TEXTS: Record<string, string> = {
   ja: 'ルーレット 🎰',
   ko: '룰렛 돌리기 🎰',
   th: 'หมุนวงล้อ 🎰',
+  ru: 'Крутить колесо 🎰',
 };
 
 // Card button text translations
@@ -35,6 +36,7 @@ const CARD_BUTTON_TEXTS: Record<string, string> = {
   ja: 'マイカード 🎁',
   ko: '내 카드 🎁',
   th: 'บัตรของฉัน 🎁',
+  ru: 'Моя карта 🎁',
 };
 
 // Body text translations - NEW CLIENT (first scan, with loyalty card)
@@ -65,6 +67,21 @@ const NEW_CLIENT_BODY_TEXTS: Record<string, string> = {
 🎰 Gire a roda para ganhar um presente de {{business_name}}
 
 🎁 Seu cartão fidelidade está pronto! Acumule pontos a cada visita e desbloqueie recompensas exclusivas.`,
+  zh: `感谢您的评价！🎉
+
+🎰 转动轮盘赢取 {{business_name}} 礼物
+
+🎁 您的会员卡已准备好！每次光临都能积累积分并解锁专属奖励。`,
+  ru: `Спасибо за отзыв! 🎉
+
+🎰 Крутите колесо, чтобы выиграть подарок от {{business_name}}
+
+🎁 Ваша карта лояльности готова! Накапливайте баллы при каждом посещении и получайте эксклюзивные награды.`,
+  ar: `شكراً لتقييمك! 🎉
+
+🎰 أدر العجلة للفوز بهدية من {{business_name}}
+
+🎁 بطاقة الولاء الخاصة بك جاهزة! اجمع النقاط مع كل زيارة واحصل على مكافآت حصرية.`,
 };
 
 // Body text translations - RETURNING CLIENT (already has loyalty card)
@@ -94,6 +111,21 @@ const RETURNING_CLIENT_BODY_TEXTS: Record<string, string> = {
 🎰 Gire a roda para tentar ganhar um presente
 
 🎁 Consulte seu cartão fidelidade para ver seu saldo de pontos.`,
+  zh: `欢迎回来！👋
+
+🎰 转动轮盘赢取礼物
+
+🎁 查看您的会员卡余额。`,
+  ru: `С возвращением! 👋
+
+🎰 Крутите колесо, чтобы выиграть подарок
+
+🎁 Проверьте баланс баллов на вашей карте лояльности.`,
+  ar: `أهلاً بعودتك! 👋
+
+🎰 أدر العجلة للفوز بهدية
+
+🎁 تحقق من رصيد نقاطك على بطاقة الولاء.`,
 };
 
 // Legacy body texts (fallback when no loyalty card)
@@ -109,6 +141,7 @@ const BODY_TEXTS: Record<string, string> = {
   ja: 'レビューありがとうございます！🎉 ルーレットを回して景品をゲット。',
   ko: '리뷰 감사합니다! 🎉 룰렛을 돌려 선물을 받으세요.',
   th: 'ขอบคุณสำหรับรีวิว! 🎉 หมุนวงล้อเพื่อรับของรางวัล',
+  ru: 'Спасибо за отзыв! 🎉 Крутите колесо, чтобы выиграть подарок.',
 };
 
 export async function POST(request: NextRequest) {
@@ -137,6 +170,14 @@ export async function POST(request: NextRequest) {
     // 2. Parse request body
     const body = await request.json();
     const { merchantId, phoneNumber, language = 'fr', cardUrl, isNewClient = true } = body;
+
+    // Debug: Log received language
+    console.log('[WHATSAPP SEND] Received params:', {
+      language,
+      isNewClient,
+      hasCardUrl: !!cardUrl,
+      availableLanguages: Object.keys(RETURNING_CLIENT_BODY_TEXTS)
+    });
 
     // 3. Validate inputs
     if (!merchantId || !phoneNumber) {
@@ -232,13 +273,18 @@ export async function POST(request: NextRequest) {
 
     if (cardUrl && isNewClient) {
       // New client with loyalty card
+      const hasTranslation = language in NEW_CLIENT_BODY_TEXTS;
+      console.log('[WHATSAPP SEND] NEW_CLIENT message:', { language, hasTranslation });
       bodyText = NEW_CLIENT_BODY_TEXTS[language] || NEW_CLIENT_BODY_TEXTS['fr'];
       bodyText = bodyText.replace(/\{\{business_name\}\}/gi, businessName);
     } else if (cardUrl && !isNewClient) {
       // Returning client with loyalty card
+      const hasTranslation = language in RETURNING_CLIENT_BODY_TEXTS;
+      console.log('[WHATSAPP SEND] RETURNING_CLIENT message:', { language, hasTranslation });
       bodyText = RETURNING_CLIENT_BODY_TEXTS[language] || RETURNING_CLIENT_BODY_TEXTS['fr'];
     } else {
       // No loyalty card - use legacy message or merchant template
+      console.log('[WHATSAPP SEND] LEGACY message:', { language });
       bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
     }
 

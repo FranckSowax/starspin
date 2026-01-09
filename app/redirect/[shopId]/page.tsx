@@ -203,7 +203,13 @@ export default function RedirectPage() {
       ? `${window.location.origin}/card/${cardQrCode}`
       : undefined;
 
-    console.log('[REDIRECT] Sending WhatsApp with cardUrl:', cardUrl, 'isNewClient:', isNewClient);
+    console.log('[REDIRECT] Sending WhatsApp:', {
+      cardUrl,
+      isNewClient,
+      language: currentLang,
+      langFromUrl,
+      i18nLanguage: i18n.language
+    });
 
     try {
       const response = await fetch('/api/whatsapp/send', {
