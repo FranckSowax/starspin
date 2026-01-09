@@ -290,7 +290,10 @@
       "centralizedDashboard": "Dashboard centralisé",
       "customApi": "API personnalisée",
       "dedicatedManager": "Account manager dédié",
-      "unlimited": "Illimité"
+      "unlimited": "Illimité",
+      "digitalLoyaltyCard": "Carte fidélité digitale",
+      "digitalLoyaltyCardPro": "Carte fidélité personnalisée",
+      "autoWhatsappEmail": "Envoi auto WhatsApp/Email"
     },
     "faq": {
       "tag": "FAQ",

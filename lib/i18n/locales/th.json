@@ -266,7 +266,10 @@
       "centralizedDashboard": "แดชบอร์ดรวมศูนย์",
       "customApi": "API ที่กำหนดเอง",
       "dedicatedManager": "ผู้จัดการบัญชีเฉพาะ",
-      "unlimited": "ไม่จำกัด"
+      "unlimited": "ไม่จำกัด",
+      "digitalLoyaltyCard": "บัตรสมาชิกดิจิทัล",
+      "digitalLoyaltyCardPro": "บัตรสมาชิกแบบกำหนดเอง",
+      "autoWhatsappEmail": "ส่ง WhatsApp/Email อัตโนมัติ"
     },
     "faq": {
       "tag": "คำถามที่พบบ่อย",

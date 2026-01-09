@@ -290,7 +290,10 @@
       "centralizedDashboard": "Centralized dashboard",
       "customApi": "Custom API",
       "dedicatedManager": "Dedicated account manager",
-      "unlimited": "Unlimited"
+      "unlimited": "Unlimited",
+      "digitalLoyaltyCard": "Digital loyalty card",
+      "digitalLoyaltyCardPro": "Custom loyalty card",
+      "autoWhatsappEmail": "Auto WhatsApp/Email"
     },
     "faq": {
       "tag": "FAQ",

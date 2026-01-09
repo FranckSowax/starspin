@@ -824,6 +824,12 @@ export default function LandingPage() {
                   </svg>
                   <span className="text-gray-700">{t('landing.pricing.essentialStats')}</span>
                 </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#2D6A4F] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-gray-700">{t('landing.pricing.digitalLoyaltyCard')}</span>
+                </li>
               </ul>
               <Link href="/auth/signup" className="w-full">
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
@@ -873,13 +879,19 @@ export default function LandingPage() {
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">{t('landing.pricing.fullDashboard')}</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.digitalLoyaltyCardPro')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-white font-semibold">{t('landing.pricing.prioritySupport')}</span>
+                  <span className="text-white font-semibold">{t('landing.pricing.autoWhatsappEmail')}</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-white font-semibold">{t('landing.pricing.fullDashboard')}</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <svg className="w-6 h-6 text-[#52B788] flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
