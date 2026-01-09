@@ -526,7 +526,7 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="dark min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-lg text-white/70">Loading admin dashboard...</p>
@@ -536,7 +536,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex">
+    <div className="dark min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex text-white">
       {/* Sidebar */}
       <div className="w-64 bg-slate-900/50 border-r border-slate-700/50 backdrop-blur-xl flex flex-col">
         {/* Logo */}
