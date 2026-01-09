@@ -782,7 +782,7 @@ export default function AdminDashboard() {
 
             {/* Loyalty Stats Section */}
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-semibold !text-white mb-4 flex items-center gap-2" style={{ color: 'white' }}>
                 <Award className="w-5 h-5 text-amber-400" />
                 Statistiques Fidélité
               </h3>
@@ -845,7 +845,7 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Activity Chart */}
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4">Activité Récente</h3>
+                <h3 className="text-lg font-semibold !text-white mb-4" style={{ color: 'white' }}>Activité Récente</h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
@@ -928,7 +928,7 @@ export default function AdminDashboard() {
 
               {/* Subscription Distribution */}
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white mb-4">Répartition des Abonnements</h3>
+                <h3 className="text-lg font-semibold !text-white mb-4" style={{ color: 'white' }}>Répartition des Abonnements</h3>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -983,7 +983,7 @@ export default function AdminDashboard() {
 
             {/* Top Merchants */}
             <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4">Top Marchands par Reviews</h3>
+              <h3 className="text-lg font-semibold !text-white mb-4" style={{ color: 'white' }}>Top Marchands par Reviews</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
