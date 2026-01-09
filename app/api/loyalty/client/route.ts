@@ -278,22 +278,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Générer un nouveau card_id unique
-    // Format: STAR-YYYY-XXXXXXXX (8 derniers chiffres du timestamp pour unicité)
+    // Format: STAR-YYYY-XXXXXXXX (timestamp + random pour unicité garantie)
+    // Note: L'ancien RPC generate_loyalty_card_id utilisait un compteur séquentiel par merchant
+    // ce qui causait des collisions entre merchants. On utilise maintenant timestamp + random.
     const timestamp = Date.now();
-    let cardId = `STAR-${new Date().getFullYear()}-${timestamp.toString().slice(-8)}`;
-
-    try {
-      const { data: cardIdResult, error: rpcError } = await supabaseAdmin
-        .rpc('generate_loyalty_card_id', { p_merchant_id: merchantId });
-
-      if (rpcError) {
-        console.error('[LOYALTY CLIENT] RPC error (using fallback):', rpcError);
-      } else if (cardIdResult) {
-        cardId = cardIdResult;
-      }
-    } catch (rpcErr) {
-      console.error('[LOYALTY CLIENT] RPC exception (using fallback):', rpcErr);
-    }
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const cardId = `STAR-${new Date().getFullYear()}-${timestamp.toString().slice(-6)}${randomSuffix}`;
 
     // Générer un QR code unique
     const qrCodeData = uuidv4();
