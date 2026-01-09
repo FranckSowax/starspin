@@ -37,19 +37,78 @@ const CARD_BUTTON_TEXTS: Record<string, string> = {
   th: 'บัตรของฉัน 🎁',
 };
 
-// Body text translations
+// Body text translations - NEW CLIENT (first scan, with loyalty card)
+// {{business_name}} will be replaced with merchant name
+const NEW_CLIENT_BODY_TEXTS: Record<string, string> = {
+  fr: `Merci pour votre avis ! 🎉
+
+🎰 Tournez la roue pour gagner un cadeau {{business_name}}
+
+🎁 Votre carte fidélité est prête ! Cumulez des points à chaque visite et débloquez des récompenses exclusives.`,
+  en: `Thank you for your review! 🎉
+
+🎰 Spin the wheel to win a {{business_name}} gift
+
+🎁 Your loyalty card is ready! Earn points with every visit and unlock exclusive rewards.`,
+  th: `ขอบคุณสำหรับรีวิว! 🎉
+
+🎰 หมุนวงล้อเพื่อรับของรางวัลจาก {{business_name}}
+
+🎁 บัตรสมาชิกของคุณพร้อมแล้ว! สะสมแต้มทุกครั้งที่มาและรับรางวัลพิเศษ`,
+  es: `¡Gracias por tu opinión! 🎉
+
+🎰 Gira la rueda para ganar un regalo de {{business_name}}
+
+🎁 ¡Tu tarjeta de fidelidad está lista! Acumula puntos en cada visita y desbloquea recompensas exclusivas.`,
+  pt: `Obrigado pela sua avaliação! 🎉
+
+🎰 Gire a roda para ganhar um presente de {{business_name}}
+
+🎁 Seu cartão fidelidade está pronto! Acumule pontos a cada visita e desbloqueie recompensas exclusivas.`,
+};
+
+// Body text translations - RETURNING CLIENT (already has loyalty card)
+const RETURNING_CLIENT_BODY_TEXTS: Record<string, string> = {
+  fr: `Bon retour ! 👋
+
+🎰 Tournez la roue pour tenter de gagner un cadeau
+
+🎁 Consultez votre carte fidélité pour voir votre solde de points.`,
+  en: `Welcome back! 👋
+
+🎰 Spin the wheel to try and win a gift
+
+🎁 Check your loyalty card to see your points balance.`,
+  th: `ยินดีต้อนรับกลับ! 👋
+
+🎰 หมุนวงล้อเพื่อลุ้นรับของรางวัล
+
+🎁 ตรวจสอบบัตรสมาชิกเพื่อดูยอดแต้มของคุณ`,
+  es: `¡Bienvenido de nuevo! 👋
+
+🎰 Gira la rueda para intentar ganar un regalo
+
+🎁 Consulta tu tarjeta de fidelidad para ver tu saldo de puntos.`,
+  pt: `Bem-vindo de volta! 👋
+
+🎰 Gire a roda para tentar ganhar um presente
+
+🎁 Consulte seu cartão fidelidade para ver seu saldo de pontos.`,
+};
+
+// Legacy body texts (fallback when no loyalty card)
 const BODY_TEXTS: Record<string, string> = {
-  fr: 'Merci pour votre avis ! 🎉 Cliquez sur le bouton pour tourner la roue et gagner un cadeau.',
-  en: 'Thank you for your review! 🎉 Click the button to spin the wheel and win a gift.',
-  es: '¡Gracias por tu opinión! 🎉 Haz clic en el botón para girar la rueda y ganar un regalo.',
-  pt: 'Obrigado pela sua avaliação! 🎉 Clique no botão para girar a roda e ganhar um presente.',
-  de: 'Danke für Ihre Bewertung! 🎉 Klicken Sie auf den Button, um das Rad zu drehen.',
-  it: 'Grazie per la tua recensione! 🎉 Clicca il pulsante per girare la ruota e vincere.',
-  ar: 'شكراً لتقييمك! 🎉 انقر على الزر لتدوير العجلة والفوز بهدية.',
-  zh: '感谢您的评价！🎉 点击按钮转动轮盘赢取礼物。',
-  ja: 'レビューありがとうございます！🎉 ボタンをクリックしてルーレットを回そう。',
-  ko: '리뷰 감사합니다! 🎉 버튼을 클릭하여 룰렛을 돌리고 선물을 받으세요.',
-  th: 'ขอบคุณสำหรับรีวิว! 🎉 คลิกปุ่มเพื่อหมุนวงล้อและรับของรางวัล',
+  fr: 'Merci pour votre avis ! 🎉 Tournez la roue pour gagner un cadeau.',
+  en: 'Thank you for your review! 🎉 Spin the wheel to win a gift.',
+  es: '¡Gracias por tu opinión! 🎉 Gira la rueda para ganar un regalo.',
+  pt: 'Obrigado pela sua avaliação! 🎉 Gire a roda para ganhar um presente.',
+  de: 'Danke für Ihre Bewertung! 🎉 Drehen Sie das Rad, um zu gewinnen.',
+  it: 'Grazie per la tua recensione! 🎉 Gira la ruota per vincere.',
+  ar: 'شكراً لتقييمك! 🎉 أدر العجلة للفوز بهدية.',
+  zh: '感谢您的评价！🎉 转动轮盘赢取礼物。',
+  ja: 'レビューありがとうございます！🎉 ルーレットを回して景品をゲット。',
+  ko: '리뷰 감사합니다! 🎉 룰렛을 돌려 선물을 받으세요.',
+  th: 'ขอบคุณสำหรับรีวิว! 🎉 หมุนวงล้อเพื่อรับของรางวัล',
 };
 
 export async function POST(request: NextRequest) {
@@ -77,7 +136,7 @@ export async function POST(request: NextRequest) {
 
     // 2. Parse request body
     const body = await request.json();
-    const { merchantId, phoneNumber, language = 'fr', cardUrl } = body;
+    const { merchantId, phoneNumber, language = 'fr', cardUrl, isNewClient = true } = body;
 
     // 3. Validate inputs
     if (!merchantId || !phoneNumber) {
@@ -163,8 +222,27 @@ export async function POST(request: NextRequest) {
     // 10. Get translated texts
     const spinButtonText = SPIN_BUTTON_TEXTS[language] || SPIN_BUTTON_TEXTS['fr'];
     const cardButtonText = CARD_BUTTON_TEXTS[language] || CARD_BUTTON_TEXTS['fr'];
-    // Get body text and remove {{spin_url}} placeholder (URL is now in the button)
-    let bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
+    const businessName = merchant.business_name || 'StarSpin';
+
+    // Select body text based on context:
+    // - If cardUrl provided + isNewClient: use NEW_CLIENT message (welcome + loyalty card)
+    // - If cardUrl provided + !isNewClient: use RETURNING_CLIENT message
+    // - Otherwise: use legacy BODY_TEXTS or merchant template
+    let bodyText: string;
+
+    if (cardUrl && isNewClient) {
+      // New client with loyalty card
+      bodyText = NEW_CLIENT_BODY_TEXTS[language] || NEW_CLIENT_BODY_TEXTS['fr'];
+      bodyText = bodyText.replace(/\{\{business_name\}\}/gi, businessName);
+    } else if (cardUrl && !isNewClient) {
+      // Returning client with loyalty card
+      bodyText = RETURNING_CLIENT_BODY_TEXTS[language] || RETURNING_CLIENT_BODY_TEXTS['fr'];
+    } else {
+      // No loyalty card - use legacy message or merchant template
+      bodyText = merchant.whatsapp_message_template || BODY_TEXTS[language] || BODY_TEXTS['fr'];
+    }
+
+    // Clean up any remaining placeholders
     bodyText = bodyText.replace(/\{\{spin_url\}\}/gi, '').trim();
 
     // 11. Build buttons array - always spin, optionally card
@@ -188,12 +266,22 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 12. Try sending interactive message with URL button(s)
+    // 12. Build header text based on context
+    let headerText: string;
+    if (cardUrl && isNewClient) {
+      headerText = `🎉 ${businessName}`;
+    } else if (cardUrl && !isNewClient) {
+      headerText = `👋 ${businessName}`;
+    } else {
+      headerText = businessName;
+    }
+
+    // 13. Try sending interactive message with URL button(s)
     const interactivePayload = {
       to: formattedPhone,
       type: 'button',
       header: {
-        text: (merchant.business_name || 'StarSpin').substring(0, 60)
+        text: headerText.substring(0, 60)
       },
       body: {
         text: bodyText
@@ -206,7 +294,7 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    console.log('[WHATSAPP SEND] Sending with', buttons.length, 'button(s)');
+    console.log('[WHATSAPP SEND] Sending with', buttons.length, 'button(s), isNewClient:', isNewClient);
 
     let whapiResponse = await fetch(WHAPI_INTERACTIVE_URL, {
       method: 'POST',
@@ -217,13 +305,13 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(interactivePayload),
     });
 
-    // 13. If interactive message fails, fallback to text message
+    // 14. If interactive message fails, fallback to text message
     if (!whapiResponse.ok) {
       const errorText = await whapiResponse.text();
       console.error('Interactive message failed, trying text fallback:', whapiResponse.status, errorText);
 
-      // Prepare fallback text message
-      let textMessage = `🎉 *${merchant.business_name || 'StarSpin'}*
+      // Prepare fallback text message with header
+      let textMessage = `*${headerText}*
 
 ${bodyText}
 
@@ -240,7 +328,7 @@ ${cardUrl}`;
 
       textMessage += `
 
-⭐ Bonne chance !`;
+⭐ StarSpin`;
 
       whapiResponse = await fetch(WHAPI_TEXT_URL, {
         method: 'POST',

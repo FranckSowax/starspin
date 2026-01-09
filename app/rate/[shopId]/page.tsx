@@ -145,6 +145,7 @@ export default function RatingPage() {
 
         // Create loyalty card if merchant has loyalty enabled
         let loyaltyCardQrCode = '';
+        let isNewLoyaltyClient = true;
 
         if (merchant?.loyalty_enabled) {
           try {
@@ -162,6 +163,7 @@ export default function RatingPage() {
             if (loyaltyRes.ok) {
               const loyaltyData = await loyaltyRes.json();
               loyaltyCardQrCode = loyaltyData.client?.qr_code_data || '';
+              isNewLoyaltyClient = loyaltyData.isNew !== false; // Default to true if not specified
             }
           } catch {
             // Continue without loyalty card
@@ -173,6 +175,7 @@ export default function RatingPage() {
           let redirectUrl = `/redirect/${shopId}?phone=${encodeURIComponent(sanitizedPhone)}&lang=${currentLang}`;
           if (loyaltyCardQrCode) {
             redirectUrl += `&cardQr=${encodeURIComponent(loyaltyCardQrCode)}`;
+            redirectUrl += `&newClient=${isNewLoyaltyClient ? '1' : '0'}`;
           }
           router.push(redirectUrl);
         } else {

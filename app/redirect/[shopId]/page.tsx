@@ -69,6 +69,8 @@ export default function RedirectPage() {
 
   // Loyalty card QR code for 2nd WhatsApp button
   const cardQrCode = searchParams.get('cardQr');
+  // Is this a new loyalty client? (affects WhatsApp message content)
+  const isNewClient = searchParams.get('newClient') !== '0'; // Default to true
 
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);
@@ -194,7 +196,7 @@ export default function RedirectPage() {
       ? `${window.location.origin}/card/${cardQrCode}`
       : undefined;
 
-    console.log('[REDIRECT] Sending WhatsApp with cardUrl:', cardUrl);
+    console.log('[REDIRECT] Sending WhatsApp with cardUrl:', cardUrl, 'isNewClient:', isNewClient);
 
     try {
       const response = await fetch('/api/whatsapp/send', {
@@ -207,6 +209,7 @@ export default function RedirectPage() {
           phoneNumber: phoneNumber,
           language: currentLang,
           cardUrl, // If provided, API will add 2nd button
+          isNewClient, // Affects message content (welcome vs returning)
         }),
       });
 
