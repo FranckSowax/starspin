@@ -388,8 +388,40 @@ export default function AdminDashboard() {
 
     setUser(user);
     await loadMerchants();
+    // Load loyalty stats for dashboard display
+    await loadLoyaltyStats();
     setDataLoaded(true);
     setLoading(false);
+  };
+
+  // Load only loyalty stats (for dashboard display without full client list)
+  const loadLoyaltyStats = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch('/api/admin/loyalty?limit=0', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setLoyaltyStats(data.stats || {
+          totalCards: 0,
+          activeCards: 0,
+          totalPoints: 0,
+          totalPurchases: 0,
+          totalSpent: 0,
+          cardsThisMonth: 0,
+          pointsDistributed: 0,
+          pointsRedeemed: 0
+        });
+      }
+    } catch (err) {
+      console.error('Error loading loyalty stats:', err);
+    }
   };
 
   const loadMerchants = async () => {
