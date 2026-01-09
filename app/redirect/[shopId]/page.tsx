@@ -70,7 +70,14 @@ export default function RedirectPage() {
   // Loyalty card QR code for 2nd WhatsApp button
   const cardQrCode = searchParams.get('cardQr');
   // Is this a new loyalty client? (affects WhatsApp message content)
-  const isNewClient = searchParams.get('newClient') !== '0'; // Default to true
+  // newClient=1 means new, newClient=0 means returning, absence means new (fallback)
+  const newClientParam = searchParams.get('newClient');
+  const isNewClient = newClientParam === '1' || newClientParam === null; // Only true if explicitly '1' or not set
+
+  // Debug log
+  if (typeof window !== 'undefined') {
+    console.log('[REDIRECT] Client status:', { newClientParam, isNewClient, cardQrCode });
+  }
 
   const [merchant, setMerchant] = useState<any>(null);
   const [isClient, setIsClient] = useState(false);

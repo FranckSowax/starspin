@@ -163,7 +163,13 @@ export default function RatingPage() {
             if (loyaltyRes.ok) {
               const loyaltyData = await loyaltyRes.json();
               loyaltyCardQrCode = loyaltyData.client?.qr_code_data || '';
-              isNewLoyaltyClient = loyaltyData.isNew !== false; // Default to true if not specified
+              isNewLoyaltyClient = loyaltyData.isNew === true; // Only true if explicitly new
+              console.log('[RATE] Loyalty API response:', {
+                isNew: loyaltyData.isNew,
+                isNewLoyaltyClient,
+                phone: sanitizedPhone,
+                qrCode: loyaltyCardQrCode
+              });
             }
           } catch {
             // Continue without loyalty card
