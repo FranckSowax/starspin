@@ -831,7 +831,7 @@ export default function LandingPage() {
                   <span className="text-gray-700">{t('landing.pricing.digitalLoyaltyCard')}</span>
                 </li>
               </ul>
-              <Link href="/auth/signup" className="w-full">
+              <Link href="/auth/signup?plan=discovery" className="w-full">
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
                   {t('landing.pricing.startFree')}
                 </Button>
@@ -900,7 +900,7 @@ export default function LandingPage() {
                   <span className="text-white font-semibold">{t('landing.pricing.multilingualSupport')}</span>
                 </li>
               </ul>
-              <Link href="/auth/signup" className="w-full">
+              <Link href="/auth/signup?plan=pro" className="w-full">
                 <Button className="w-full bg-white text-[#2D6A4F] hover:bg-gray-100 font-bold">
                   {t('landing.pricing.try14Days')}
                 </Button>
@@ -942,11 +942,11 @@ export default function LandingPage() {
                   <span className="text-gray-700">{t('landing.pricing.dedicatedManager')}</span>
                 </li>
               </ul>
-              <a href="mailto:contact@starspin.app" className="w-full block">
+              <Link href="/contact" className="w-full block">
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white">
                   {t('landing.pricing.contactUs')}
                 </Button>
-              </a>
+              </Link>
             </Card>
           </div>
 
