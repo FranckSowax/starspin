@@ -278,12 +278,17 @@ export async function POST(request: NextRequest) {
     }
 
     // Générer un nouveau card_id unique
-    // Format: STAR-YYYY-XXXXXXXX (timestamp + random pour unicité garantie)
-    // Note: L'ancien RPC generate_loyalty_card_id utilisait un compteur séquentiel par merchant
-    // ce qui causait des collisions entre merchants. On utilise maintenant timestamp + random.
+    // Format: XXXX-YYYY-XXXXXXXX (4 premières lettres du merchant + année + timestamp + random)
+    // Exemple: WEED-2026-123456AB pour "Weedin Coffee"
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const cardId = `STAR-${new Date().getFullYear()}-${timestamp.toString().slice(-6)}${randomSuffix}`;
+    // Extraire les 4 premières lettres du nom du merchant (en majuscules, sans espaces/caractères spéciaux)
+    const merchantPrefix = (merchant.business_name || 'STAR')
+      .replace(/[^a-zA-Z]/g, '') // Garder seulement les lettres
+      .substring(0, 4)
+      .toUpperCase()
+      .padEnd(4, 'X'); // Compléter avec X si moins de 4 lettres
+    const cardId = `${merchantPrefix}-${new Date().getFullYear()}-${timestamp.toString().slice(-6)}${randomSuffix}`;
 
     // Générer un QR code unique
     const qrCodeData = uuidv4();
