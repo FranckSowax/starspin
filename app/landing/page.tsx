@@ -65,9 +65,9 @@ export default function LandingPage() {
           </div>
           
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#demo" className="text-white/90 hover:text-white transition text-sm no-underline">{t('landing.nav.howItWorks')}</a>
-            <a href="#pricing" className="text-white/90 hover:text-white transition text-sm no-underline">{t('landing.nav.pricing')}</a>
-            <a href="#testimonials" className="text-white/90 hover:text-white transition text-sm no-underline">{t('landing.nav.testimonials')}</a>
+            <a href="#demo" className="!text-white hover:!text-[#FFD700] transition-colors duration-200 text-sm font-medium px-2 py-1">{t('landing.nav.howItWorks')}</a>
+            <a href="#pricing" className="!text-white hover:!text-[#FFD700] transition-colors duration-200 text-sm font-medium px-2 py-1">{t('landing.nav.pricing')}</a>
+            <a href="#testimonials" className="!text-white hover:!text-[#FFD700] transition-colors duration-200 text-sm font-medium px-2 py-1">{t('landing.nav.testimonials')}</a>
           </nav>
 
           <div className="flex items-center gap-4">
