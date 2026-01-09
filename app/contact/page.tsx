@@ -19,27 +19,40 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate form submission - in production, send to your backend
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          company: formData.company,
+          establishments: formData.establishments,
+          message: formData.message,
+          source: 'contact_page'
+        }),
+      });
 
-    // Open mailto with form data
-    const subject = encodeURIComponent(`[Multi Store] Demande de ${formData.company || formData.name}`);
-    const body = encodeURIComponent(
-      `Nom: ${formData.name}\n` +
-      `Email: ${formData.email}\n` +
-      `Entreprise: ${formData.company}\n` +
-      `Nombre d'établissements: ${formData.establishments}\n\n` +
-      `Message:\n${formData.message}`
-    );
-    window.location.href = `mailto:contact@starspin.app?subject=${subject}&body=${body}`;
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
-    setIsSubmitting(false);
-    setSubmitted(true);
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Contact form error:', err);
+      setError(t('contact.form.error') || 'An error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -103,6 +116,11 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {error && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                      {error}
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t('contact.form.name')} *

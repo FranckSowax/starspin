@@ -21,7 +21,14 @@ import {
   LayoutDashboard,
   Filter,
   Calendar,
-  RotateCw
+  RotateCw,
+  MessageSquare,
+  Mail,
+  Building2,
+  Clock,
+  Archive,
+  Reply,
+  Trash2
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import {
@@ -88,6 +95,22 @@ type TierPricing = {
   [key: string]: number;
 };
 
+interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  establishments: string | null;
+  message: string | null;
+  status: 'new' | 'read' | 'replied' | 'archived';
+  source: string;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  read_at: string | null;
+  replied_at: string | null;
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -113,19 +136,81 @@ export default function AdminDashboard() {
 
   const [selectedMerchant, setSelectedMerchant] = useState<string | null>(null);
   const [merchantStats, setMerchantStats] = useState<Record<string, MerchantStats>>({});
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'merchants'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'merchants' | 'messages'>('dashboard');
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month'>('week');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [tierFilter, setTierFilter] = useState<'all' | 'starter' | 'premium'>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
+  // Messages state
+  const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+  const [messageStatusFilter, setMessageStatusFilter] = useState<'all' | 'new' | 'read' | 'replied' | 'archived'>('all');
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+  const [messagesCounts, setMessagesCounts] = useState({ new: 0, read: 0, replied: 0, archived: 0 });
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     setError(null);
-    await loadMerchants();
+    if (activeSection === 'messages') {
+      await loadMessages();
+    } else {
+      await loadMerchants();
+    }
     setLastUpdated(new Date());
     setIsRefreshing(false);
+  };
+
+  // Load contact messages
+  const loadMessages = async () => {
+    setMessagesLoading(true);
+    try {
+      const response = await fetch(`/api/contact?status=${messageStatusFilter}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+        setMessagesCounts(data.statusCounts || { new: 0, read: 0, replied: 0, archived: 0 });
+      }
+    } catch (err) {
+      console.error('Error loading messages:', err);
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
+
+  // Update message status
+  const updateMessageStatus = async (id: string, status: ContactMessage['status']) => {
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status })
+      });
+      if (response.ok) {
+        await loadMessages();
+      }
+    } catch (err) {
+      console.error('Error updating message:', err);
+    }
+  };
+
+  // Delete message
+  const deleteMessage = async (id: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) return;
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (response.ok) {
+        setSelectedMessage(null);
+        await loadMessages();
+      }
+    } catch (err) {
+      console.error('Error deleting message:', err);
+    }
   };
 
   // Track if data has been loaded to prevent duplicate calls
@@ -149,6 +234,13 @@ export default function AdminDashboard() {
 
     return () => clearInterval(interval);
   }, [user]);
+
+  // Load messages when switching to messages section or when filter changes
+  useEffect(() => {
+    if (activeSection === 'messages' && user) {
+      loadMessages();
+    }
+  }, [activeSection, messageStatusFilter, user]);
 
   useEffect(() => {
     let filtered = merchants;
@@ -385,6 +477,23 @@ export default function AdminDashboard() {
             <Store className="w-5 h-5" />
             <span className="font-medium">Marchands</span>
           </button>
+
+          <button
+            onClick={() => setActiveSection('messages')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              activeSection === 'messages'
+                ? 'bg-purple-500/20 text-white border border-purple-500/30'
+                : 'text-white hover:bg-slate-800/50'
+            }`}
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="font-medium">Messages</span>
+            {messagesCounts.new > 0 && (
+              <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                {messagesCounts.new}
+              </span>
+            )}
+          </button>
         </nav>
 
         {/* Sign Out */}
@@ -406,12 +515,14 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
-                  {activeSection === 'dashboard' ? 'Tableau de Bord' : 'Gestion des Marchands'}
+                  {activeSection === 'dashboard' ? 'Tableau de Bord' : activeSection === 'merchants' ? 'Gestion des Marchands' : 'Messages'}
                 </h2>
                 <p className="text-white/70 text-sm mt-0.5">
                   {activeSection === 'dashboard'
                     ? 'Statistiques et analytics'
-                    : 'Liste et gestion des marchands'}
+                    : activeSection === 'merchants'
+                    ? 'Liste et gestion des marchands'
+                    : 'Demandes de contact Multi Store'}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -976,6 +1087,212 @@ export default function AdminDashboard() {
             )}
           </div>
         </div>
+          </>
+        )}
+
+        {/* Messages Section */}
+        {activeSection === 'messages' && (
+          <>
+            {/* Status Filter Tabs */}
+            <div className="flex gap-2 mb-6">
+              {(['all', 'new', 'read', 'replied', 'archived'] as const).map((status) => (
+                <button
+                  key={status}
+                  onClick={() => setMessageStatusFilter(status)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    messageStatusFilter === status
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-800/50 text-white/70 hover:bg-slate-700/50'
+                  }`}
+                >
+                  {status === 'all' ? 'Tous' : status === 'new' ? 'Nouveaux' : status === 'read' ? 'Lus' : status === 'replied' ? 'Répondus' : 'Archivés'}
+                  {status !== 'all' && messagesCounts[status] > 0 && (
+                    <span className={`ml-2 px-1.5 py-0.5 rounded text-xs ${
+                      status === 'new' ? 'bg-red-500' : 'bg-slate-600'
+                    }`}>
+                      {messagesCounts[status]}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Messages List */}
+              <div className="lg:col-span-1 bg-slate-800/30 rounded-xl border border-slate-700/50 overflow-hidden">
+                <div className="p-4 border-b border-slate-700/50">
+                  <h3 className="font-semibold text-white">Liste des messages</h3>
+                  <p className="text-xs text-white/50 mt-1">{messages.length} message(s)</p>
+                </div>
+                <div className="max-h-[600px] overflow-y-auto">
+                  {messagesLoading ? (
+                    <div className="p-8 text-center">
+                      <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    </div>
+                  ) : messages.length === 0 ? (
+                    <div className="p-8 text-center text-white/50">
+                      <Mail className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>Aucun message</p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => (
+                      <button
+                        key={msg.id}
+                        onClick={() => {
+                          setSelectedMessage(msg);
+                          if (msg.status === 'new') {
+                            updateMessageStatus(msg.id, 'read');
+                          }
+                        }}
+                        className={`w-full text-left p-4 border-b border-slate-700/30 hover:bg-slate-700/30 transition-all ${
+                          selectedMessage?.id === msg.id ? 'bg-slate-700/50' : ''
+                        } ${msg.status === 'new' ? 'bg-purple-500/10' : ''}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className={`font-medium truncate ${msg.status === 'new' ? 'text-white' : 'text-white/80'}`}>
+                              {msg.name}
+                            </p>
+                            <p className="text-xs text-white/50 truncate">{msg.email}</p>
+                            {msg.company && (
+                              <p className="text-xs text-purple-400 truncate mt-1">
+                                <Building2 className="w-3 h-3 inline mr-1" />
+                                {msg.company}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            {msg.status === 'new' && (
+                              <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                            )}
+                            <span className="text-xs text-white/40">
+                              {new Date(msg.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Message Detail */}
+              <div className="lg:col-span-2 bg-slate-800/30 rounded-xl border border-slate-700/50">
+                {selectedMessage ? (
+                  <div className="h-full flex flex-col">
+                    {/* Header */}
+                    <div className="p-6 border-b border-slate-700/50">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <h3 className="text-xl font-bold text-white">{selectedMessage.name}</h3>
+                          <a href={`mailto:${selectedMessage.email}`} className="text-purple-400 hover:underline text-sm">
+                            {selectedMessage.email}
+                          </a>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge className={`${
+                            selectedMessage.status === 'new' ? 'bg-red-500/20 text-red-400' :
+                            selectedMessage.status === 'read' ? 'bg-blue-500/20 text-blue-400' :
+                            selectedMessage.status === 'replied' ? 'bg-green-500/20 text-green-400' :
+                            'bg-slate-500/20 text-slate-400'
+                          }`}>
+                            {selectedMessage.status === 'new' ? 'Nouveau' :
+                             selectedMessage.status === 'read' ? 'Lu' :
+                             selectedMessage.status === 'replied' ? 'Répondu' : 'Archivé'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 p-6 overflow-y-auto">
+                      <div className="space-y-4">
+                        {selectedMessage.company && (
+                          <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg">
+                            <Building2 className="w-5 h-5 text-purple-400" />
+                            <div>
+                              <p className="text-xs text-white/50">Entreprise</p>
+                              <p className="text-white font-medium">{selectedMessage.company}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {selectedMessage.establishments && (
+                          <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg">
+                            <Store className="w-5 h-5 text-purple-400" />
+                            <div>
+                              <p className="text-xs text-white/50">Nombre d&apos;établissements</p>
+                              <p className="text-white font-medium">{selectedMessage.establishments}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-lg">
+                          <Clock className="w-5 h-5 text-purple-400" />
+                          <div>
+                            <p className="text-xs text-white/50">Date de réception</p>
+                            <p className="text-white font-medium">
+                              {new Date(selectedMessage.created_at).toLocaleDateString('fr-FR', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                        </div>
+
+                        {selectedMessage.message && (
+                          <div className="mt-6">
+                            <h4 className="text-sm font-semibold text-white/70 mb-2">Message</h4>
+                            <div className="p-4 bg-slate-900/50 rounded-lg">
+                              <p className="text-white whitespace-pre-wrap">{selectedMessage.message}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="p-4 border-t border-slate-700/50 flex gap-3">
+                      <a
+                        href={`mailto:${selectedMessage.email}?subject=Re: Demande Multi Store - ${selectedMessage.company || selectedMessage.name}`}
+                        onClick={() => updateMessageStatus(selectedMessage.id, 'replied')}
+                        className="flex-1"
+                      >
+                        <Button className="w-full bg-purple-500 hover:bg-purple-600 text-white">
+                          <Reply className="w-4 h-4 mr-2" />
+                          Répondre par email
+                        </Button>
+                      </a>
+                      <Button
+                        onClick={() => updateMessageStatus(selectedMessage.id, 'archived')}
+                        variant="outline"
+                        className="border-slate-600 text-white hover:bg-slate-700"
+                      >
+                        <Archive className="w-4 h-4 mr-2" />
+                        Archiver
+                      </Button>
+                      <Button
+                        onClick={() => deleteMessage(selectedMessage.id)}
+                        variant="outline"
+                        className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-white/50">
+                    <div className="text-center">
+                      <Mail className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                      <p>Sélectionnez un message pour voir les détails</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         )}
         </div>

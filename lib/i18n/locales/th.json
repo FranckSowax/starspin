@@ -394,35 +394,36 @@
       "saveFailed": "บันทึกล้มเหลว",
       "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบแคมเปญนี้?",
       "sentTimes": "ส่งแล้ว {{count}} ครั้ง"
+    }
+  },
+  "contact": {
+    "title": "ติดต่อเรา",
+    "subtitle": "คุณจัดการหลายสาขาหรือไม่? ค้นพบข้อเสนอ Multi Store ที่ปรับแต่งได้",
+    "backToHome": "กลับไปหน้าแรก",
+    "thankYou": "ขอบคุณ!",
+    "willContact": "เราจะติดต่อกลับโดยเร็วที่สุด",
+    "directContact": "ติดต่อโดยตรง",
+    "form": {
+      "name": "ชื่อเต็ม",
+      "namePlaceholder": "สมชาย ใจดี",
+      "email": "อีเมลธุรกิจ",
+      "emailPlaceholder": "somchai@company.com",
+      "company": "ชื่อบริษัท",
+      "companyPlaceholder": "เครือร้านอาหารของฉัน",
+      "establishments": "จำนวนสาขา",
+      "selectEstablishments": "เลือก...",
+      "message": "ข้อความ (ไม่บังคับ)",
+      "messagePlaceholder": "อธิบายความต้องการของคุณ...",
+      "sending": "กำลังส่ง...",
+      "submit": "ส่งคำขอ",
+      "error": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
     },
-    "contact": {
-      "title": "ติดต่อเรา",
-      "subtitle": "คุณจัดการหลายสาขาหรือไม่? ค้นพบข้อเสนอ Multi Store ที่ปรับแต่งได้",
-      "backToHome": "กลับไปหน้าแรก",
-      "thankYou": "ขอบคุณ!",
-      "willContact": "เราจะติดต่อกลับโดยเร็วที่สุด",
-      "directContact": "ติดต่อโดยตรง",
-      "form": {
-        "name": "ชื่อเต็ม",
-        "namePlaceholder": "สมชาย ใจดี",
-        "email": "อีเมลธุรกิจ",
-        "emailPlaceholder": "somchai@company.com",
-        "company": "ชื่อบริษัท",
-        "companyPlaceholder": "เครือร้านอาหารของฉัน",
-        "establishments": "จำนวนสาขา",
-        "selectEstablishments": "เลือก...",
-        "message": "ข้อความ (ไม่บังคับ)",
-        "messagePlaceholder": "อธิบายความต้องการของคุณ...",
-        "sending": "กำลังส่ง...",
-        "submit": "ส่งคำขอ"
-      },
-      "multiStore": {
-        "title": "สิทธิประโยชน์ Multi Store",
-        "feature1": "แดชบอร์ดรวมศูนย์สำหรับทุกสาขา",
-        "feature2": "สถิติรวมและเปรียบเทียบ",
-        "feature3": "ผู้จัดการบัญชีเฉพาะ",
-        "feature4": "ราคาพิเศษตามจำนวน"
-      }
+    "multiStore": {
+      "title": "สิทธิประโยชน์ Multi Store",
+      "feature1": "แดชบอร์ดรวมศูนย์สำหรับทุกสาขา",
+      "feature2": "สถิติรวมและเปรียบเทียบ",
+      "feature3": "ผู้จัดการบัญชีเฉพาะ",
+      "feature4": "ราคาพิเศษตามจำนวน"
     }
   }
 }

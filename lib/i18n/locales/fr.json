@@ -583,35 +583,36 @@
       "saveFailed": "Échec de l'enregistrement",
       "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette campagne ?",
       "sentTimes": "Envoyée {{count}} fois"
+    }
+  },
+  "contact": {
+    "title": "Contactez-nous",
+    "subtitle": "Vous gérez plusieurs établissements ? Découvrez notre offre Multi Store sur mesure.",
+    "backToHome": "Retour à l'accueil",
+    "thankYou": "Merci !",
+    "willContact": "Nous vous répondrons dans les plus brefs délais.",
+    "directContact": "Contact direct",
+    "form": {
+      "name": "Nom complet",
+      "namePlaceholder": "Jean Dupont",
+      "email": "Email professionnel",
+      "emailPlaceholder": "jean@entreprise.com",
+      "company": "Nom de l'entreprise",
+      "companyPlaceholder": "Ma Chaîne de Restaurants",
+      "establishments": "Nombre d'établissements",
+      "selectEstablishments": "Sélectionnez...",
+      "message": "Message (optionnel)",
+      "messagePlaceholder": "Décrivez vos besoins...",
+      "sending": "Envoi en cours...",
+      "submit": "Envoyer ma demande",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
     },
-    "contact": {
-      "title": "Contactez-nous",
-      "subtitle": "Vous gérez plusieurs établissements ? Découvrez notre offre Multi Store sur mesure.",
-      "backToHome": "Retour à l'accueil",
-      "thankYou": "Merci !",
-      "willContact": "Nous vous répondrons dans les plus brefs délais.",
-      "directContact": "Contact direct",
-      "form": {
-        "name": "Nom complet",
-        "namePlaceholder": "Jean Dupont",
-        "email": "Email professionnel",
-        "emailPlaceholder": "jean@entreprise.com",
-        "company": "Nom de l'entreprise",
-        "companyPlaceholder": "Ma Chaîne de Restaurants",
-        "establishments": "Nombre d'établissements",
-        "selectEstablishments": "Sélectionnez...",
-        "message": "Message (optionnel)",
-        "messagePlaceholder": "Décrivez vos besoins...",
-        "sending": "Envoi en cours...",
-        "submit": "Envoyer ma demande"
-      },
-      "multiStore": {
-        "title": "Avantages Multi Store",
-        "feature1": "Dashboard centralisé pour tous vos établissements",
-        "feature2": "Statistiques consolidées et comparatives",
-        "feature3": "Account manager dédié",
-        "feature4": "Tarifs dégressifs selon le volume"
-      }
+    "multiStore": {
+      "title": "Avantages Multi Store",
+      "feature1": "Dashboard centralisé pour tous vos établissements",
+      "feature2": "Statistiques consolidées et comparatives",
+      "feature3": "Account manager dédié",
+      "feature4": "Tarifs dégressifs selon le volume"
     }
   }
 }
