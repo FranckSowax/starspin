@@ -11,6 +11,7 @@ import { SpinningWheel } from '@/components/animations/SpinningWheel';
 import { FloatingParticles } from '@/components/animations/FloatingParticles';
 import { GradientText } from '@/components/animations/GradientText';
 import { ShineBorder } from '@/components/animations/ShineBorder';
+import { ScrollReveal, StaggeredReveal } from '@/components/animations/ScrollReveal';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
@@ -138,20 +139,30 @@ export default function LandingPage() {
             {/* Right column - DESIGNSPIN Image (2/3) */}
             <div className="md:col-span-2 flex items-center justify-center">
               <div className="relative w-full max-w-3xl">
-                <img 
-                  src="/DESIGNSPIN.png" 
-                  alt="StarSpin Wheel" 
-                  className="w-full h-auto drop-shadow-2xl animate-pulse"
-                  style={{
-                    filter: 'drop-shadow(0 0 80px rgba(82, 183, 136, 0.5))'
-                  }}
+                {/* Animated glow rings */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-[80%] h-[80%] rounded-full bg-gradient-to-r from-[#52B788]/30 via-[#FFD700]/20 to-[#52B788]/30 blur-3xl animate-pulse"></div>
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-[60%] h-[60%] rounded-full bg-[#52B788]/40 blur-2xl animate-ping" style={{ animationDuration: '3s' }}></div>
+                </div>
+
+                {/* Main wheel image with float + glow animation */}
+                <img
+                  src="/DESIGNSPIN.png"
+                  alt="StarSpin Wheel"
+                  className="relative z-10 w-full h-auto animate-hero-float animate-hero-glow"
                 />
-                {/* Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#52B788]/20 to-transparent rounded-full blur-3xl"></div>
-                
+
+                {/* Sparkle particles */}
+                <div className="absolute top-[10%] left-[15%] w-2 h-2 bg-[#FFD700] rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '0.5s' }}></div>
+                <div className="absolute top-[20%] right-[20%] w-3 h-3 bg-white rounded-full animate-ping" style={{ animationDuration: '2.5s', animationDelay: '1s' }}></div>
+                <div className="absolute bottom-[25%] left-[10%] w-2 h-2 bg-[#52B788] rounded-full animate-ping" style={{ animationDuration: '3s', animationDelay: '0.3s' }}></div>
+                <div className="absolute bottom-[15%] right-[15%] w-2 h-2 bg-[#FFD700] rounded-full animate-ping" style={{ animationDuration: '2s', animationDelay: '1.5s' }}></div>
+
                 {/* Decorative elements */}
-                <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-[#52B788]/20 rounded-full blur-3xl"></div>
-                <div className="absolute -top-12 -right-12 w-40 h-40 bg-[#52B788]/10 rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-gradient-to-br from-[#52B788]/30 to-[#FFD700]/20 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-bl from-[#52B788]/20 to-[#2D6A4F]/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
               </div>
             </div>
           </div>
@@ -179,56 +190,63 @@ export default function LandingPage() {
       </section>
 
       {/* Demo Video Section */}
-      <section id="demo" className="py-24 px-4 bg-gradient-to-br from-slate-50 to-white scroll-mt-20">
-        <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-12">
+      <section id="demo" className="py-24 px-4 bg-gradient-to-br from-slate-50 to-white scroll-mt-20 relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#52B788]/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FFD700]/5 rounded-full blur-3xl"></div>
+
+        <div className="container mx-auto max-w-7xl relative z-10">
+          <ScrollReveal className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#2D6A4F]/10 rounded-full mb-6">
-              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#2D6A4F] rounded-full animate-pulse"></div>
               <span className="text-sm font-semibold text-[#2D6A4F] uppercase tracking-wide">{t('landing.demo.tag')}</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight" style={{ fontFamily: 'ARCO, sans-serif' }}>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 max-w-3xl mx-auto leading-tight">
               {t('landing.demo.title')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               {t('landing.demo.subtitle')}
             </p>
-          </div>
+          </ScrollReveal>
 
           {/* Video Player */}
-          <div className="max-w-5xl mx-auto">
+          <ScrollReveal delay={200} className="max-w-5xl mx-auto">
             <DemoVideoPlayer className="aspect-video" />
-          </div>
+          </ScrollReveal>
 
           {/* Video Features */}
-          <div className="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <StaggeredReveal
+            className="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto"
+            staggerDelay={150}
+          >
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-[#52B788]/30 transition-all duration-300 group">
+              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#2D6A4F] group-hover:scale-110 transition-all duration-300">
+                <svg className="w-6 h-6 text-[#2D6A4F] group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
               </div>
               <h3 className="font-bold text-gray-900 mb-2">{t('landing.demo.feature1')}</h3>
               <p className="text-sm text-gray-600">{t('landing.demo.feature1Desc')}</p>
             </div>
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-[#52B788]/30 transition-all duration-300 group">
+              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#2D6A4F] group-hover:scale-110 transition-all duration-300">
+                <svg className="w-6 h-6 text-[#2D6A4F] group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <h3 className="font-bold text-gray-900 mb-2">{t('landing.demo.feature2')}</h3>
               <p className="text-sm text-gray-600">{t('landing.demo.feature2Desc')}</p>
             </div>
-            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-[#2D6A4F]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-[#52B788]/30 transition-all duration-300 group">
+              <div className="w-12 h-12 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#2D6A4F] group-hover:scale-110 transition-all duration-300">
+                <svg className="w-6 h-6 text-[#2D6A4F] group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <h3 className="font-bold text-gray-900 mb-2">{t('landing.demo.feature3')}</h3>
               <p className="text-sm text-gray-600">{t('landing.demo.feature3Desc')}</p>
             </div>
-          </div>
+          </StaggeredReveal>
         </div>
       </section>
 

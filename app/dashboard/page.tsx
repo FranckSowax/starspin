@@ -226,81 +226,123 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid - Modernized */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Total Reviews */}
-          <Card className="p-6 border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                <MessageSquare className="w-6 h-6" />
-              </div>
-              {stats.reviewsTrend !== 0 && (
-                <Badge className={`${stats.reviewsTrend > 0 ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100'} hover:opacity-80`}>
-                  <TrendingUp className={`w-3 h-3 mr-1 ${stats.reviewsTrend < 0 ? 'rotate-180' : ''}`} />
-                  {stats.reviewsTrend > 0 ? '+' : ''}{stats.reviewsTrend}%
-                </Badge>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">{t('dashboard.totalReviews')}</p>
-              <h3 className="text-3xl font-bold text-slate-900 mt-1">{stats.totalReviews}</h3>
-            </div>
-          </Card>
+          {/* Total Reviews - Enhanced */}
+          <Card className="relative p-6 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden bg-gradient-to-br from-white to-blue-50/30">
+            {/* Gradient border on hover */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-[2px] bg-gradient-to-br from-white to-blue-50/30 rounded-[inherit]" />
 
-          {/* Average Rating */}
-          <Card className="p-6 border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                <Star className="w-6 h-6" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform duration-300">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                {stats.reviewsTrend !== 0 && (
+                  <Badge className={`${stats.reviewsTrend > 0 ? 'bg-green-100 text-green-700 border-green-200' : 'bg-red-100 text-red-700 border-red-200'} shadow-sm`}>
+                    <TrendingUp className={`w-3 h-3 mr-1 ${stats.reviewsTrend < 0 ? 'rotate-180' : ''}`} />
+                    {stats.reviewsTrend > 0 ? '+' : ''}{stats.reviewsTrend}%
+                  </Badge>
+                )}
               </div>
-              {stats.avgRating >= 4.5 && (
-                <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-green-100">
-                  ⭐ Excellent
-                </Badge>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">{t('dashboard.avgRating')}</p>
-              <div className="flex items-baseline gap-2 mt-1">
-                <h3 className="text-3xl font-bold text-slate-900">{stats.avgRating}</h3>
-                <span className="text-sm text-slate-400">/ 5.0</span>
+              <div>
+                <p className="text-sm font-medium text-slate-500">{t('dashboard.totalReviews')}</p>
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mt-1">{stats.totalReviews}</h3>
               </div>
             </div>
           </Card>
 
-          {/* Total Spins */}
-          <Card className="p-6 border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                <RotateCw className="w-6 h-6" />
+          {/* Average Rating - With Progress Ring */}
+          <Card className="relative p-6 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden bg-gradient-to-br from-white to-amber-50/30">
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-[2px] bg-gradient-to-br from-white to-amber-50/30 rounded-[inherit]" />
+
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="relative">
+                  {/* Progress Ring */}
+                  <svg className="w-14 h-14 -rotate-90">
+                    <circle cx="28" cy="28" r="24" fill="none" stroke="#fef3c7" strokeWidth="4"/>
+                    <circle
+                      cx="28" cy="28" r="24"
+                      fill="none"
+                      stroke="url(#ratingGradient)"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(stats.avgRating / 5) * 150.8} 150.8`}
+                      className="transition-all duration-1000"
+                    />
+                    <defs>
+                      <linearGradient id="ratingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#f59e0b" />
+                        <stop offset="100%" stopColor="#22c55e" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Star className="w-5 h-5 text-amber-500" />
+                  </div>
+                </div>
+                {stats.avgRating >= 4.5 && (
+                  <Badge className="bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border-amber-200 shadow-sm">
+                    Excellent
+                  </Badge>
+                )}
               </div>
-              {stats.totalSpins > 0 && (
-                <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-100">
-                  {t('dashboard.common.online')}
-                </Badge>
-              )}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">{t('dashboard.totalSpins')}</p>
-              <h3 className="text-3xl font-bold text-slate-900 mt-1">{stats.totalSpins}</h3>
+              <div>
+                <p className="text-sm font-medium text-slate-500">{t('dashboard.avgRating')}</p>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">{stats.avgRating}</h3>
+                  <span className="text-sm text-slate-400">/ 5.0</span>
+                </div>
+              </div>
             </div>
           </Card>
 
-          {/* Prizes Redeemed */}
-          <Card className="p-6 border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                <Gift className="w-6 h-6" />
+          {/* Total Spins - With Animation */}
+          <Card className="relative p-6 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden bg-gradient-to-br from-white to-purple-50/30">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-[2px] bg-gradient-to-br from-white to-purple-50/30 rounded-[inherit]" />
+
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-xl shadow-lg shadow-purple-500/30 group-hover:animate-spin-slow transition-transform duration-300">
+                  <RotateCw className="w-6 h-6" />
+                </div>
+                {stats.totalSpins > 0 && (
+                  <Badge className="bg-purple-100 text-purple-700 border-purple-200 shadow-sm">
+                    {t('dashboard.common.online')}
+                  </Badge>
+                )}
               </div>
-              {stats.positiveRatio > 0 && (
-                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-100">
-                  {stats.positiveRatio}% positifs
-                </Badge>
-              )}
+              <div>
+                <p className="text-sm font-medium text-slate-500">{t('dashboard.totalSpins')}</p>
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mt-1">{stats.totalSpins}</h3>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">{t('dashboard.rewards')}</p>
-              <h3 className="text-3xl font-bold text-slate-900 mt-1">{stats.rewardsRedeemed}</h3>
+          </Card>
+
+          {/* Prizes Redeemed - Enhanced */}
+          <Card className="relative p-6 border-0 shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden bg-gradient-to-br from-white to-emerald-50/30">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-[2px] bg-gradient-to-br from-white to-emerald-50/30 rounded-[inherit]" />
+
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform duration-300">
+                  <Gift className="w-6 h-6" />
+                </div>
+                {stats.positiveRatio > 0 && (
+                  <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 shadow-sm">
+                    {stats.positiveRatio}% positifs
+                  </Badge>
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">{t('dashboard.rewards')}</p>
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mt-1">{stats.rewardsRedeemed}</h3>
+              </div>
             </div>
           </Card>
         </div>
