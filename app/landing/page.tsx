@@ -520,54 +520,76 @@ export default function LandingPage() {
             </Card>
           </div>
 
-          {/* Visual Preview */}
-          <div className="mt-16 max-w-4xl mx-auto">
+          {/* Visual Preview - 3 Columns */}
+          <div className="mt-16 max-w-6xl mx-auto">
             <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200/50 rounded-2xl p-8 md:p-12">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                {/* Loyalty Card Preview */}
+              <div className="grid md:grid-cols-3 gap-6 items-center">
+                {/* Column 1 - QR Code Screen */}
                 <div className="relative rounded-2xl overflow-hidden shadow-xl transform hover:scale-105 transition-transform">
                   <Image
-                    src="/loyalty-card-preview.jpeg"
-                    alt="StarSpin Loyalty Card Preview"
-                    width={400}
-                    height={300}
+                    src="/loyalty-card-qr.jpg"
+                    alt="Carte fidélité avec QR Code"
+                    width={300}
+                    height={600}
                     className="w-full h-auto object-contain"
                   />
                 </div>
 
-                {/* Features list */}
-                <div className="space-y-4">
+                {/* Column 2 - History Screen */}
+                <div className="relative rounded-2xl overflow-hidden shadow-xl transform hover:scale-105 transition-transform">
+                  <Image
+                    src="/loyalty-card-history.jpg"
+                    alt="Historique des points fidélité"
+                    width={300}
+                    height={600}
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+
+                {/* Column 3 - Features list */}
+                <div className="space-y-5">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">QR Code unique</p>
-                      <p className="text-sm text-gray-600">Chaque client a son propre code scannable</p>
+                      <p className="font-bold text-gray-900 text-lg">QR Code unique</p>
+                      <p className="text-gray-600">Chaque client a son propre code scannable pour accumuler des points</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Votre branding</p>
-                      <p className="text-sm text-gray-600">Logo et couleurs personnalisés</p>
+                      <p className="font-bold text-gray-900 text-lg">Votre branding</p>
+                      <p className="text-gray-600">Logo et couleurs personnalisés pour une expérience unique</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                     <div>
-                      <p className="font-semibold text-gray-900">Historique complet</p>
-                      <p className="text-sm text-gray-600">Suivi de tous les achats et récompenses</p>
+                      <p className="font-bold text-gray-900 text-lg">Historique complet</p>
+                      <p className="text-gray-600">Suivi détaillé de tous les achats et récompenses</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-lg">Création automatique</p>
+                      <p className="text-gray-600">La carte est créée automatiquement après un avis client</p>
                     </div>
                   </div>
                 </div>
