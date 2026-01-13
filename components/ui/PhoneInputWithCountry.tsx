@@ -94,7 +94,7 @@ interface PhoneInputWithCountryProps {
 export function PhoneInputWithCountry({
   value,
   onChange,
-  placeholder = 'Numéro de téléphone',
+  placeholder = '612345678',
   className = '',
 }: PhoneInputWithCountryProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -148,7 +148,15 @@ export function PhoneInputWithCountry({
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newPhone = e.target.value.replace(/[^\d]/g, ''); // Only digits
+    let newPhone = e.target.value.replace(/[^\d]/g, ''); // Only digits
+
+    // Auto-correct: remove leading 0 if present (common user mistake)
+    // The country dial code already replaces the leading 0
+    // e.g., for France: 0612345678 should become 612345678
+    if (newPhone.startsWith('0')) {
+      newPhone = newPhone.substring(1);
+    }
+
     onChange(selectedCountry.dialCode + newPhone);
   };
 
