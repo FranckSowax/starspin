@@ -3,33 +3,66 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIP } from '@/lib/utils/security';
 import { isValidUUID, isValidPhone } from '@/lib/utils/validation';
 
-// Whapi API endpoint for standard text messages
-const WHAPI_API_URL = 'https://gate.whapi.cloud/messages/text';
+// Whapi API endpoint for interactive messages with buttons
+const WHAPI_API_URL = 'https://gate.whapi.cloud/messages/interactive';
 
-// Congratulation message templates by language
-const CONGRATULATION_MESSAGES: Record<string, (prizeName: string, couponUrl: string) => string> = {
-  fr: (prizeName, couponUrl) =>
-    `🎉 FÉLICITATIONS ! 🎉\n\nVous avez gagné : *${prizeName}* !\n\n🎁 Cliquez sur le lien ci-dessous pour afficher votre coupon avec le QR code et le timer :\n\n${couponUrl}\n\n⏰ Attention : votre coupon expire dans 24h !`,
-  en: (prizeName, couponUrl) =>
-    `🎉 CONGRATULATIONS! 🎉\n\nYou won: *${prizeName}*!\n\n🎁 Click the link below to view your coupon with QR code and timer:\n\n${couponUrl}\n\n⏰ Warning: your coupon expires in 24h!`,
-  es: (prizeName, couponUrl) =>
-    `🎉 ¡FELICIDADES! 🎉\n\nHas ganado: *${prizeName}*!\n\n🎁 Haz clic en el enlace para ver tu cupón con código QR y temporizador:\n\n${couponUrl}\n\n⏰ ¡Atención: tu cupón expira en 24h!`,
-  pt: (prizeName, couponUrl) =>
-    `🎉 PARABÉNS! 🎉\n\nVocê ganhou: *${prizeName}*!\n\n🎁 Clique no link para ver seu cupom com QR code e timer:\n\n${couponUrl}\n\n⏰ Atenção: seu cupom expira em 24h!`,
-  de: (prizeName, couponUrl) =>
-    `🎉 HERZLICHEN GLÜCKWUNSCH! 🎉\n\nSie haben gewonnen: *${prizeName}*!\n\n🎁 Klicken Sie auf den Link, um Ihren Coupon mit QR-Code und Timer anzuzeigen:\n\n${couponUrl}\n\n⏰ Achtung: Ihr Coupon läuft in 24h ab!`,
-  it: (prizeName, couponUrl) =>
-    `🎉 CONGRATULAZIONI! 🎉\n\nHai vinto: *${prizeName}*!\n\n🎁 Clicca sul link per visualizzare il tuo coupon con QR code e timer:\n\n${couponUrl}\n\n⏰ Attenzione: il tuo coupon scade tra 24h!`,
-  ar: (prizeName, couponUrl) =>
-    `🎉 تهانينا! 🎉\n\nلقد فزت بـ: *${prizeName}*!\n\n🎁 انقر على الرابط لعرض قسيمتك مع رمز QR والمؤقت:\n\n${couponUrl}\n\n⏰ تنبيه: قسيمتك تنتهي خلال 24 ساعة!`,
-  zh: (prizeName, couponUrl) =>
-    `🎉 恭喜！🎉\n\n您赢得了：*${prizeName}*！\n\n🎁 点击下方链接查看您的优惠券、二维码和倒计时：\n\n${couponUrl}\n\n⏰ 注意：您的优惠券将在24小时后过期！`,
-  ja: (prizeName, couponUrl) =>
-    `🎉 おめでとうございます！🎉\n\n当選：*${prizeName}*！\n\n🎁 以下のリンクをクリックして、QRコードとタイマー付きのクーポンを確認してください：\n\n${couponUrl}\n\n⏰ ご注意：クーポンは24時間で期限切れになります！`,
-  ko: (prizeName, couponUrl) =>
-    `🎉 축하합니다! 🎉\n\n당첨: *${prizeName}*!\n\n🎁 아래 링크를 클릭하여 QR 코드와 타이머가 있는 쿠폰을 확인하세요:\n\n${couponUrl}\n\n⏰ 주의: 쿠폰은 24시간 후 만료됩니다!`,
-  th: (prizeName, couponUrl) =>
-    `🎉 ยินดีด้วย! 🎉\n\nคุณชนะ: *${prizeName}*!\n\n🎁 คลิกลิงก์ด้านล่างเพื่อดูคูปองพร้อม QR code และตัวนับเวลา:\n\n${couponUrl}\n\n⏰ คำเตือน: คูปองของคุณหมดอายุใน 24 ชั่วโมง!`,
+// Congratulation message templates by language (without URL in text)
+const CONGRATULATION_MESSAGES: Record<string, (prizeName: string) => { body: string; footer: string; buttonText: string }> = {
+  fr: (prizeName) => ({
+    body: `🎉 FÉLICITATIONS ! 🎉\n\nVous avez gagné : *${prizeName}* !\n\n🎁 Cliquez sur le bouton ci-dessous pour afficher votre coupon avec le QR code.`,
+    footer: '⏰ Votre coupon expire dans 24h !',
+    buttonText: 'Voir votre Prix',
+  }),
+  en: (prizeName) => ({
+    body: `🎉 CONGRATULATIONS! 🎉\n\nYou won: *${prizeName}*!\n\n🎁 Click the button below to view your coupon with QR code.`,
+    footer: '⏰ Your coupon expires in 24h!',
+    buttonText: 'View your Prize',
+  }),
+  es: (prizeName) => ({
+    body: `🎉 ¡FELICIDADES! 🎉\n\nHas ganado: *${prizeName}*!\n\n🎁 Haz clic en el botón para ver tu cupón con código QR.`,
+    footer: '⏰ ¡Tu cupón expira en 24h!',
+    buttonText: 'Ver tu Premio',
+  }),
+  pt: (prizeName) => ({
+    body: `🎉 PARABÉNS! 🎉\n\nVocê ganhou: *${prizeName}*!\n\n🎁 Clique no botão para ver seu cupom com QR code.`,
+    footer: '⏰ Seu cupom expira em 24h!',
+    buttonText: 'Ver seu Prêmio',
+  }),
+  de: (prizeName) => ({
+    body: `🎉 HERZLICHEN GLÜCKWUNSCH! 🎉\n\nSie haben gewonnen: *${prizeName}*!\n\n🎁 Klicken Sie auf den Button, um Ihren Coupon mit QR-Code anzuzeigen.`,
+    footer: '⏰ Ihr Coupon läuft in 24h ab!',
+    buttonText: 'Preis ansehen',
+  }),
+  it: (prizeName) => ({
+    body: `🎉 CONGRATULAZIONI! 🎉\n\nHai vinto: *${prizeName}*!\n\n🎁 Clicca sul pulsante per visualizzare il tuo coupon con QR code.`,
+    footer: '⏰ Il tuo coupon scade tra 24h!',
+    buttonText: 'Vedi il tuo Premio',
+  }),
+  ar: (prizeName) => ({
+    body: `🎉 تهانينا! 🎉\n\nلقد فزت بـ: *${prizeName}*!\n\n🎁 انقر على الزر لعرض قسيمتك مع رمز QR.`,
+    footer: '⏰ قسيمتك تنتهي خلال 24 ساعة!',
+    buttonText: 'عرض جائزتك',
+  }),
+  zh: (prizeName) => ({
+    body: `🎉 恭喜！🎉\n\n您赢得了：*${prizeName}*！\n\n🎁 点击下方按钮查看您的优惠券和二维码。`,
+    footer: '⏰ 您的优惠券将在24小时后过期！',
+    buttonText: '查看奖品',
+  }),
+  ja: (prizeName) => ({
+    body: `🎉 おめでとうございます！🎉\n\n当選：*${prizeName}*！\n\n🎁 ボタンをクリックして、QRコード付きのクーポンを確認してください。`,
+    footer: '⏰ クーポンは24時間で期限切れになります！',
+    buttonText: '賞品を見る',
+  }),
+  ko: (prizeName) => ({
+    body: `🎉 축하합니다! 🎉\n\n당첨: *${prizeName}*!\n\n🎁 버튼을 클릭하여 QR 코드가 있는 쿠폰을 확인하세요.`,
+    footer: '⏰ 쿠폰은 24시간 후 만료됩니다!',
+    buttonText: '상품 보기',
+  }),
+  th: (prizeName) => ({
+    body: `🎉 ยินดีด้วย! 🎉\n\nคุณชนะ: *${prizeName}*!\n\n🎁 คลิกปุ่มด้านล่างเพื่อดูคูปองพร้อม QR code`,
+    footer: '⏰ คูปองของคุณหมดอายุใน 24 ชั่วโมง!',
+    buttonText: 'ดูรางวัล',
+  }),
 };
 
 export async function POST(request: NextRequest) {
@@ -138,12 +171,12 @@ export async function POST(request: NextRequest) {
 
     // 9. Get congratulation message based on language
     const messageTemplate = CONGRATULATION_MESSAGES[language] || CONGRATULATION_MESSAGES['fr'];
-    const message = messageTemplate(prizeName, couponUrl);
+    const messageContent = messageTemplate(prizeName);
 
     // 10. Format phone number for Whapi (remove + prefix)
     const formattedPhone = phoneNumber.replace(/^\+/, '');
 
-    // 11. Call Whapi API with standard text message
+    // 11. Call Whapi API with interactive message (CTA button)
     const whapiResponse = await fetch(WHAPI_API_URL, {
       method: 'POST',
       headers: {
@@ -152,7 +185,20 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         to: formattedPhone,
-        body: message,
+        type: 'cta_url',
+        body: {
+          text: messageContent.body,
+        },
+        footer: {
+          text: messageContent.footer,
+        },
+        action: {
+          name: 'cta_url',
+          parameters: {
+            display_text: messageContent.buttonText,
+            url: couponUrl,
+          },
+        },
       }),
     });
 
