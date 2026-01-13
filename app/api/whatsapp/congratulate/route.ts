@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIP } from '@/lib/utils/security';
 import { isValidUUID, isValidPhone } from '@/lib/utils/validation';
 
-// Whapi API endpoint for interactive messages with buttons
+// Whapi API endpoint for interactive button messages
 const WHAPI_API_URL = 'https://gate.whapi.cloud/messages/interactive';
 
 // Congratulation message templates by language (without URL in text)
@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
     // 10. Format phone number for Whapi (remove + prefix)
     const formattedPhone = phoneNumber.replace(/^\+/, '');
 
-    // 11. Call Whapi API with interactive message (CTA button)
+    // 11. Call Whapi API with interactive button message
     const whapiResponse = await fetch(WHAPI_API_URL, {
       method: 'POST',
       headers: {
@@ -185,7 +185,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify({
         to: formattedPhone,
-        type: 'cta_url',
+        type: 'button',
         body: {
           text: messageContent.body,
         },
@@ -193,11 +193,13 @@ export async function POST(request: NextRequest) {
           text: messageContent.footer,
         },
         action: {
-          name: 'cta_url',
-          parameters: {
-            display_text: messageContent.buttonText,
-            url: couponUrl,
-          },
+          buttons: [
+            {
+              type: 'url',
+              title: messageContent.buttonText,
+              url: couponUrl,
+            },
+          ],
         },
       }),
     });
