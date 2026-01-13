@@ -46,7 +46,9 @@
     "iDone": "I'm done",
     "iDoneLaunchWheel": "I'm done - Spin the wheel",
     "buttonActiveIn": "Button will be active in {{seconds}} second(s)",
-    "clickToSpinAndWin": "Click to spin the wheel and win!"
+    "clickToSpinAndWin": "Click to spin the wheel and win!",
+    "whatsappHintTitle": "🎁 A surprise awaits you!",
+    "whatsappHintMessage": "While you leave your review, we're preparing your gift wheel. You'll receive a WhatsApp with your exclusive link to try your luck!"
   },
   "wheel": {
     "title": "Spin to Win!",

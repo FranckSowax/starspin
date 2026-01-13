@@ -5,7 +5,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/atoms/Button';
 import { supabase } from '@/lib/supabase/client';
-import { Star, ExternalLink, MessageCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Star, ExternalLink, MessageCircle, CheckCircle, AlertCircle, Loader2, Gift, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 import '@/lib/i18n/config';
 
@@ -436,7 +436,7 @@ export default function RedirectPage() {
             // WhatsApp Workflow
             <>
               {!hasClickedSocial ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <Button
                     onClick={handleOpenSocial}
                     className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg`}
@@ -444,6 +444,24 @@ export default function RedirectPage() {
                     <ExternalLink className="w-5 h-5" />
                     {strategyInfo.buttonText}
                   </Button>
+
+                  {/* WhatsApp Hint Banner */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mt-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <Gift className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-green-800 text-sm mb-1">
+                          {t('redirect.whatsappHintTitle')}
+                        </p>
+                        <p className="text-xs text-green-700 leading-relaxed">
+                          {t('redirect.whatsappHintMessage')}
+                        </p>
+                      </div>
+                      <Sparkles className="w-5 h-5 text-yellow-500 flex-shrink-0 animate-pulse" />
+                    </div>
+                  </div>
                 </div>
               ) : whatsappSending ? (
                 // Sending WhatsApp message

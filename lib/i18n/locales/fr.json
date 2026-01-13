@@ -46,7 +46,9 @@
     "iDone": "J'ai fait",
     "iDoneLaunchWheel": "J'ai fait - Lancer la roue",
     "buttonActiveIn": "Le bouton sera actif dans {{seconds}} seconde(s)",
-    "clickToSpinAndWin": "Cliquez pour tourner la roue et gagner !"
+    "clickToSpinAndWin": "Cliquez pour tourner la roue et gagner !",
+    "whatsappHintTitle": "🎁 Une surprise vous attend !",
+    "whatsappHintMessage": "Pendant que vous donnez votre avis, nous préparons votre roue des cadeaux. Vous recevrez un WhatsApp avec votre lien exclusif pour tenter de gagner !"
   },
   "wheel": {
     "title": "Tournez pour gagner!",
