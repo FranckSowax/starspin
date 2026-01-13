@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '@/lib/i18n/config';
 import { Star, Mail, Globe, Phone } from 'lucide-react';
 import { ALL_LANGUAGES } from '@/components/ui/LanguageSwitcher';
+import { PhoneInputWithCountry } from '@/components/ui/PhoneInputWithCountry';
 import { feedbackSchema, feedbackSchemaWhatsApp, sanitizeString, sanitizePhone, isValidUUID } from '@/lib/utils/validation';
 
 export default function RatingPage() {
@@ -355,28 +356,20 @@ export default function RatingPage() {
 
               {/* Contact Field - Email or Phone based on workflow mode */}
               {isWhatsAppMode ? (
-                // WhatsApp Mode - Phone Input
+                // WhatsApp Mode - Phone Input with Country Code
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                     <Phone className="w-4 h-4 text-green-600" />
                     {t('form.yourPhone')} <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value);
-                        setPhoneError('');
-                      }}
-                      placeholder={t('form.phonePlaceholder')}
-                      className={`w-full p-4 pl-11 border-2 ${
-                        phoneError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-green-500'
-                      } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
-                      required
-                    />
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  </div>
+                  <PhoneInputWithCountry
+                    value={phone}
+                    onChange={(value) => {
+                      setPhone(value);
+                      setPhoneError('');
+                    }}
+                    placeholder={t('form.phonePlaceholder')}
+                  />
                   {phoneError && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
                       <span className="w-1 h-1 bg-red-600 rounded-full"></span>
@@ -432,28 +425,20 @@ export default function RatingPage() {
 
               {/* Contact Field - Email or Phone based on workflow mode */}
               {isWhatsAppMode ? (
-                // WhatsApp Mode - Phone Input
+                // WhatsApp Mode - Phone Input with Country Code
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                     <Phone className="w-4 h-4 text-green-600" />
                     {t('form.yourPhone')} <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value);
-                        setPhoneError('');
-                      }}
-                      placeholder={t('form.phonePlaceholder')}
-                      className={`w-full p-4 pl-11 border-2 ${
-                        phoneError ? 'border-red-300 focus:ring-red-500' : 'border-gray-200 focus:ring-green-500'
-                      } rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all`}
-                      required
-                    />
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  </div>
+                  <PhoneInputWithCountry
+                    value={phone}
+                    onChange={(value) => {
+                      setPhone(value);
+                      setPhoneError('');
+                    }}
+                    placeholder={t('form.phonePlaceholder')}
+                  />
                   {phoneError && (
                     <p className="text-sm text-red-600 flex items-center gap-1">
                       <span className="w-1 h-1 bg-red-600 rounded-full"></span>
