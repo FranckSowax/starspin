@@ -1100,7 +1100,19 @@ export default function LandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-24 px-4 bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] relative overflow-hidden">
+      <section className="py-24 px-4 relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/BANNER-SPIN-HERO-.png"
+            alt="StarSpin Banner"
+            fill
+            className="object-cover"
+            priority
+          />
+          {/* Dark overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#2D6A4F]/80 to-[#1B4332]/90"></div>
+        </div>
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl"></div>

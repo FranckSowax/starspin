@@ -417,18 +417,20 @@ export default function RedirectPage() {
               {strategyInfo.title}
             </h2>
 
-            {/* Message with highlight */}
-            <p className={`text-sm ${strategyInfo.text_color} text-center leading-relaxed`}>
-              {strategyInfo.message.split('**').map((part, index) =>
-                index % 2 === 1 ? (
-                  <span key={index} className="font-bold text-teal-600 underline decoration-2 underline-offset-2">
-                    {part}
-                  </span>
-                ) : (
-                  <span key={index}>{part}</span>
-                )
-              )}
-            </p>
+            {/* Message with highlight - Only show if NOT WhatsApp mode (banner replaces it) */}
+            {!isWhatsAppMode && (
+              <p className={`text-sm ${strategyInfo.text_color} text-center leading-relaxed`}>
+                {strategyInfo.message.split('**').map((part, index) =>
+                  index % 2 === 1 ? (
+                    <span key={index} className="font-bold text-teal-600 underline decoration-2 underline-offset-2">
+                      {part}
+                    </span>
+                  ) : (
+                    <span key={index}>{part}</span>
+                  )
+                )}
+              </p>
+            )}
           </div>
 
           {/* Button Flow */}
@@ -437,16 +439,8 @@ export default function RedirectPage() {
             <>
               {!hasClickedSocial ? (
                 <div className="space-y-4">
-                  <Button
-                    onClick={handleOpenSocial}
-                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg`}
-                  >
-                    <ExternalLink className="w-5 h-5" />
-                    {strategyInfo.buttonText}
-                  </Button>
-
-                  {/* WhatsApp Hint Banner */}
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 mt-4">
+                  {/* WhatsApp Hint Banner - Above button */}
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                         <Gift className="w-5 h-5 text-green-600" />
@@ -462,6 +456,14 @@ export default function RedirectPage() {
                       <Sparkles className="w-5 h-5 text-yellow-500 flex-shrink-0 animate-pulse" />
                     </div>
                   </div>
+
+                  <Button
+                    onClick={handleOpenSocial}
+                    className={`w-full ${strategyInfo.button_bg} ${strategyInfo.button_hover} text-white py-4 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg`}
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    {strategyInfo.buttonText}
+                  </Button>
                 </div>
               ) : whatsappSending ? (
                 // Sending WhatsApp message
