@@ -26,6 +26,7 @@ import {
   Plus,
   X,
 } from 'lucide-react';
+import { PhoneInputWithCountry } from '@/components/ui/PhoneInputWithCountry';
 
 interface WhatsAppCustomer {
   user_token: string;
@@ -395,16 +396,12 @@ export default function SendCampaignPage() {
               <div className="space-y-3 mb-4">
                 {testNumbers.map((number, index) => (
                   <div key={index} className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input
-                        type="tel"
-                        placeholder={t('marketing.whatsappCampaign.testNumberPlaceholder')}
-                        value={number}
-                        onChange={(e) => updateTestNumber(index, e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-                      />
-                    </div>
+                    <PhoneInputWithCountry
+                      value={number}
+                      onChange={(value) => updateTestNumber(index, value)}
+                      placeholder={t('marketing.whatsappCampaign.testNumberPlaceholder')}
+                      className="flex-1"
+                    />
                     {testNumbers.length > 1 && (
                       <Button
                         variant="ghost"
