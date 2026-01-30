@@ -62,6 +62,11 @@
   animation: gradient 3s ease infinite;
 }
 
+.animate-gradient-text {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

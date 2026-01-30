@@ -165,7 +165,7 @@ export default function LandingPage() {
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-[#1B4332] leading-[1.1] tracking-tight">
                 {t('landing.hero.title')}
                 <br />
-                <span className="bg-gradient-to-r from-[#52B788] via-[#FFD700] to-[#52B788] bg-clip-text text-transparent bg-300% animate-gradient">
+                <span className="bg-gradient-to-r from-[#52B788] via-[#FFD700] to-[#52B788] bg-clip-text text-transparent animate-gradient-text">
                   {t('landing.hero.titleHighlight')}
                 </span>
               </h1>
@@ -263,7 +263,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gradient-to-tr from-[#FFD700]/5 to-transparent rounded-full blur-3xl" />
 
         <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="text-center mb-16 scroll-hidden" ref={(el) => sectionRefs.current[0] = el as HTMLElement}>
+          <div className="text-center mb-16 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[0] = el; }}>
             <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 px-4 py-2 mb-6">
               {t('landing.demo.tag')}
             </Badge>
@@ -275,7 +275,7 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="scroll-hidden" ref={(el) => sectionRefs.current[1] = el as HTMLElement}>
+          <div className="scroll-hidden" ref={(el) => { if (el) sectionRefs.current[1] = el; }}>
             <DemoVideoPlayer className="aspect-video rounded-3xl shadow-2xl shadow-[#2D6A4F]/10 border border-[#2D6A4F]/10" />
           </div>
         </div>
@@ -284,7 +284,7 @@ export default function LandingPage() {
       {/* Problem Section - Modern Cards */}
       <section className="py-32 px-4 bg-gradient-to-b from-white to-[#F8FAF8]">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-20 scroll-hidden" ref={(el) => sectionRefs.current[2] = el as HTMLElement}>
+          <div className="text-center mb-20 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[2] = el; }}>
             <Badge className="bg-red-50 text-red-600 border-0 px-4 py-2 mb-6">
               {t('landing.challenge.tag')}
             </Badge>
@@ -326,7 +326,7 @@ export default function LandingPage() {
               <Card
                 key={i}
                 className={`p-8 rounded-3xl border-0 scroll-hidden ${item.bg}`}
-                ref={(el) => sectionRefs.current[3 + i] = el as HTMLElement}
+                ref={(el) => { if (el) sectionRefs.current[3 + i] = el; }}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 <div className={`text-6xl mb-6 ${item.color === 'green' ? 'text-5xl' : ''}`}>{item.emoji}</div>
@@ -348,7 +348,7 @@ export default function LandingPage() {
       {/* Workflow Section - Modern Timeline */}
       <section className="py-32 px-4 bg-[#F8FAF8]">
         <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-20 scroll-hidden" ref={(el) => sectionRefs.current[6] = el as HTMLElement}>
+          <div className="text-center mb-20 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[6] = el; }}>
             <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 px-4 py-2 mb-6">
               {t('landing.workflow.tag')}
             </Badge>
@@ -361,7 +361,7 @@ export default function LandingPage() {
           </div>
 
           {/* Phone Carousel */}
-          <div className="mb-16 scroll-hidden" ref={(el) => sectionRefs.current[7] = el as HTMLElement}>
+          <div className="mb-16 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[7] = el; }}>
             <PhoneCarousel
               images={[
                 { src: step1, alt: 'Étape 1: Scan QR Code' },
@@ -383,7 +383,7 @@ export default function LandingPage() {
               <div
                 key={i}
                 className="relative group scroll-hidden"
-                ref={(el) => sectionRefs.current[8 + i] = el as HTMLElement}
+                ref={(el) => { if (el) sectionRefs.current[8 + i] = el; }}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 <div className="absolute -top-4 -left-4 text-8xl font-black text-[#2D6A4F]/5 group-hover:text-[#52B788]/10 transition-colors">
@@ -407,7 +407,7 @@ export default function LandingPage() {
         </div>
 
         <div className="container mx-auto max-w-7xl relative z-10">
-          <div className="text-center mb-20 scroll-hidden" ref={(el) => sectionRefs.current[12] = el as HTMLElement}>
+          <div className="text-center mb-20 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[12] = el; }}>
             <Badge className="bg-amber-50 text-amber-600 border-0 px-4 py-2 mb-6">
               {t('landing.loyalty.tag')}
             </Badge>
@@ -421,7 +421,7 @@ export default function LandingPage() {
 
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Images */}
-            <div className="grid grid-cols-2 gap-6 scroll-hidden" ref={(el) => sectionRefs.current[13] = el as HTMLElement}>
+            <div className="grid grid-cols-2 gap-6 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[13] = el; }}>
               <div className="space-y-6">
                 <div className="rounded-3xl overflow-hidden shadow-xl shadow-gray-200 hover:scale-105 transition-transform duration-500">
                   <Image
@@ -465,7 +465,7 @@ export default function LandingPage() {
             </div>
 
             {/* Features List */}
-            <div className="space-y-6 scroll-hidden" ref={(el) => sectionRefs.current[14] = el as HTMLElement}>
+            <div className="space-y-6 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[14] = el; }}>
               {[
                 {
                   icon: '⚡',
@@ -504,7 +504,7 @@ export default function LandingPage() {
       {/* Benefits Section - Modern Grid */}
       <section className="py-32 px-4 bg-gradient-to-b from-[#F8FAF8] to-white">
         <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-20 scroll-hidden" ref={(el) => sectionRefs.current[15] = el as HTMLElement}>
+          <div className="text-center mb-20 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[15] = el; }}>
             <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 px-4 py-2 mb-6">
               {t('landing.benefits.tag')}
             </Badge>
@@ -543,7 +543,7 @@ export default function LandingPage() {
               <Card
                 key={i}
                 className="h-full p-8 rounded-3xl bg-white border-2 border-transparent hover:border-[#52B788]/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#52B788]/20 scroll-hidden"
-                ref={(el) => sectionRefs.current[16 + i] = el as HTMLElement}
+                ref={(el) => { if (el) sectionRefs.current[16 + i] = el; }}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 <div className="text-5xl mb-6">{item.icon}</div>
@@ -563,7 +563,7 @@ export default function LandingPage() {
           </div>
 
           {/* Thailand Special */}
-          <div className="mt-16 scroll-hidden" ref={(el) => sectionRefs.current[20] = el as HTMLElement}>
+          <div className="mt-16 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[20] = el; }}>
             <Card className="bg-gradient-to-br from-[#2D6A4F] to-[#1B4332] border-0 rounded-3xl p-10 text-white">
               <div className="grid md:grid-cols-3 gap-8">
                 {[
@@ -586,7 +586,7 @@ export default function LandingPage() {
       {/* Testimonials Section - Modern Cards */}
       <section id="testimonials" className="py-32 px-4 bg-white">
         <div className="container mx-auto max-w-7xl">
-          <div className="text-center mb-20 scroll-hidden" ref={(el) => sectionRefs.current[21] = el as HTMLElement}>
+          <div className="text-center mb-20 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[21] = el; }}>
             <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 px-4 py-2 mb-6">
               {t('landing.testimonials.tag')}
             </Badge>
@@ -622,7 +622,7 @@ export default function LandingPage() {
               <Card
                 key={i}
                 className="p-8 rounded-3xl bg-gradient-to-b from-white to-[#F8FAF8] border-2 border-[#2D6A4F]/10 hover:border-[#52B788]/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[#52B788]/20 scroll-hidden"
-                ref={(el) => sectionRefs.current[22 + i] = el as HTMLElement}
+                ref={(el) => { if (el) sectionRefs.current[22 + i] = el; }}
                 style={{ transitionDelay: `${i * 100}ms` }}
               >
                 <div className="flex items-center gap-4 mb-6">
@@ -651,7 +651,7 @@ export default function LandingPage() {
       {/* Pricing Section - Modern Cards */}
       <section id="pricing" className="py-32 px-4 bg-gradient-to-b from-[#F8FAF8] to-white">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-20 scroll-hidden" ref={(el) => sectionRefs.current[25] = el as HTMLElement}>
+          <div className="text-center mb-20 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[25] = el; }}>
             <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 px-4 py-2 mb-6">
               {t('landing.pricing.tag')}
             </Badge>
@@ -665,7 +665,7 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8 items-center">
             {/* Discovery */}
-            <Card className="p-8 rounded-3xl bg-white border-2 border-[#2D6A4F]/10 hover:border-[#52B788]/50 transition-all duration-300 hover:-translate-y-2 scroll-hidden" ref={(el) => sectionRefs.current[26] = el as HTMLElement}>
+            <Card className="p-8 rounded-3xl bg-white border-2 border-[#2D6A4F]/10 hover:border-[#52B788]/50 transition-all duration-300 hover:-translate-y-2 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[26] = el; }}>
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-[#1B4332] mb-4">{t('landing.pricing.discovery')}</h3>
                 <div className="mb-2">
@@ -699,7 +699,7 @@ export default function LandingPage() {
             </Card>
 
             {/* Pro - Featured */}
-            <Card className="p-8 rounded-3xl bg-gradient-to-br from-[#2D6A4F] to-[#52B788] border-0 shadow-2xl shadow-[#52B788]/30 relative md:-translate-y-4 scroll-hidden" ref={(el) => sectionRefs.current[27] = el as HTMLElement}>
+            <Card className="p-8 rounded-3xl bg-gradient-to-br from-[#2D6A4F] to-[#52B788] border-0 shadow-2xl shadow-[#52B788]/30 relative md:-translate-y-4 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[27] = el; }}>
               <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                 <Badge className="bg-[#FFD700] text-[#1B4332] border-0 px-4 py-1.5 font-bold shadow-lg">
                   {t('landing.pricing.popular')}
@@ -744,7 +744,7 @@ export default function LandingPage() {
             </Card>
 
             {/* Multi Store */}
-            <Card className="p-8 rounded-3xl bg-white border-2 border-[#2D6A4F]/10 hover:border-[#52B788]/50 transition-all duration-300 hover:-translate-y-2 scroll-hidden" ref={(el) => sectionRefs.current[28] = el as HTMLElement}>
+            <Card className="p-8 rounded-3xl bg-white border-2 border-[#2D6A4F]/10 hover:border-[#52B788]/50 transition-all duration-300 hover:-translate-y-2 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[28] = el; }}>
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-[#1B4332] mb-4">{t('landing.pricing.multiStore')}</h3>
                 <div className="mb-2">
@@ -785,7 +785,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-12">
             {/* FAQ Accordion */}
             <div>
-              <div className="text-center md:text-left mb-12 scroll-hidden" ref={(el) => sectionRefs.current[29] = el as HTMLElement}>
+              <div className="text-center md:text-left mb-12 scroll-hidden" ref={(el) => { if (el) sectionRefs.current[29] = el; }}>
                 <Badge className="bg-[#2D6A4F]/10 text-[#2D6A4F] border-0 px-4 py-2 mb-6">
                   FAQ
                 </Badge>
@@ -830,7 +830,7 @@ export default function LandingPage() {
             </div>
 
             {/* Contact Form */}
-            <div className="scroll-hidden" ref={(el) => sectionRefs.current[33] = el as HTMLElement}>
+            <div className="scroll-hidden" ref={(el) => { if (el) sectionRefs.current[33] = el; }}>
               <Card className="p-8 rounded-3xl bg-gradient-to-br from-[#2D6A4F] to-[#52B788] border-0 text-white">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
