@@ -65,10 +65,12 @@ export default function LandingPage() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('scroll-visible');
+            // Stop observing once visible to prevent flickering
+            observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+      { threshold: 0.05, rootMargin: '0px 0px 0px 0px' }
     );
 
     sectionRefs.current.forEach((ref) => {
