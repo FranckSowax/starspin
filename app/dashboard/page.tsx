@@ -10,9 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { ChartAreaInteractive } from '@/components/dashboard/ChartAreaInteractive';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
-import { 
-  TrendingUp, 
-  Copy, 
+import {
+  TrendingUp,
+  Copy,
   ArrowUpRight,
   Star,
   Users,
@@ -20,7 +20,8 @@ import {
   RotateCw,
   MessageSquare,
   ScanLine,
-  BarChart3
+  BarChart3,
+  Award
 } from 'lucide-react';
 
 interface DashboardUser {
@@ -443,7 +444,7 @@ export default function DashboardPage() {
                 <p className="text-xs text-slate-500 mt-1">{t('dashboard.quickActions.reviewsDesc')}</p>
               </button>
 
-              <button 
+              <button
                 onClick={() => router.push('/dashboard/analytics')}
                 className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all text-left group"
               >
@@ -452,6 +453,17 @@ export default function DashboardPage() {
                 </div>
                 <h4 className="font-semibold text-slate-900">{t('dashboard.quickActions.analytics')}</h4>
                 <p className="text-xs text-slate-500 mt-1">{t('dashboard.quickActions.analyticsDesc')}</p>
+              </button>
+
+              <button
+                onClick={() => router.push('/dashboard/loyalty')}
+                className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all text-left group col-span-2"
+              >
+                <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center mb-3 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                  <Award className="w-5 h-5" />
+                </div>
+                <h4 className="font-semibold text-slate-900">{t('dashboard.nav.loyalty')}</h4>
+                <p className="text-xs text-slate-500 mt-1">{t('loyalty.settings.enabledDesc')}</p>
               </button>
             </div>
           </div>
