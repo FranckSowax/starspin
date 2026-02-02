@@ -17,13 +17,7 @@
 # - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 # - STRIPE_WEBHOOK_SECRET
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/nextjs/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
+# ⚠️ DO NOT add [[redirects]] rules here.
+# The @netlify/plugin-nextjs plugin automatically handles all routing
+# (API routes, SSR pages, static files). Manual redirects will BREAK
+# API routes like /api/loyalty/points, /api/loyalty/client, etc.
