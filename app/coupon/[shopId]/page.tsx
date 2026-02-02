@@ -209,7 +209,7 @@ function CouponContent() {
             </div>
           )}
 
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg transform rotate-1 hover:rotate-0 transition-transform duration-300">
+          <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
             <p className="text-sm text-gray-500 text-center mb-2 uppercase tracking-widest font-bold">{t('coupon.code')}</p>
             <p className="text-3xl font-mono font-bold text-center text-black mb-6 tracking-wider border-b-2 border-dashed border-gray-200 pb-4">
               {coupon.code}
