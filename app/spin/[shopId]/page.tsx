@@ -580,7 +580,7 @@ export default function SpinPage() {
 
             {/* Rotating wheel SVG */}
             <svg
-              className="w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] md:w-[400px] md:h-[400px]"
+              className="w-[85vw] h-[85vw] max-w-[400px] max-h-[400px]"
               viewBox="0 0 400 400"
               style={{
                 transform: `rotate(${rotation}deg)`,
@@ -633,9 +633,9 @@ export default function SpinPage() {
                         <>
                           <text
                             x={pos.x}
-                            y={pos.y - 8}
+                            y={pos.y - 9}
                             fill={segment.textColor}
-                            fontSize="11"
+                            fontSize="14"
                             fontWeight="bold"
                             textAnchor="middle"
                             filter="url(#textShadow)"
@@ -644,9 +644,9 @@ export default function SpinPage() {
                           </text>
                           <text
                             x={pos.x}
-                            y={pos.y + 8}
+                            y={pos.y + 10}
                             fill={segment.textColor}
-                            fontSize="11"
+                            fontSize="14"
                             fontWeight="bold"
                             textAnchor="middle"
                             filter="url(#textShadow)"
@@ -659,7 +659,7 @@ export default function SpinPage() {
                           x={pos.x}
                           y={pos.y}
                           fill={segment.textColor}
-                          fontSize="13"
+                          fontSize="16"
                           fontWeight="bold"
                           textAnchor="middle"
                           filter="url(#textShadow)"
@@ -686,7 +686,7 @@ export default function SpinPage() {
             <button
               onClick={spinWheel}
               disabled={isSpinning || spinsRemaining <= 0}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 rounded-full font-black text-base sm:text-lg disabled:cursor-not-allowed z-10"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-20 sm:h-20 rounded-full font-black text-lg sm:text-lg disabled:cursor-not-allowed z-10"
               style={{
                 background: isSpinning
                   ? 'linear-gradient(145deg, #374151, #1f2937)'
