@@ -58,7 +58,8 @@
     "retry": "¡Inténtalo de nuevo!",
     "unlucky": "Mala suerte...",
     "spinsRemaining": "Giros restantes",
-    "showCoupon": "Ver mi cupón"
+    "showCoupon": "Ver mi cupón",
+    "instruction": "Pulsa Spin para probar tu suerte. ¡Buena suerte!"
   },
   "coupon": {
     "title": "Tu recompensa",

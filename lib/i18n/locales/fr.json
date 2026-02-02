@@ -60,7 +60,8 @@
     "retry": "Réessayez !",
     "unlucky": "Dommage...",
     "spinsRemaining": "Tours restants",
-    "showCoupon": "Afficher mon coupon"
+    "showCoupon": "Afficher mon coupon",
+    "instruction": "Appuyez sur Spin pour tenter votre chance. Bonne chance !"
   },
   "coupon": {
     "title": "Votre récompense",

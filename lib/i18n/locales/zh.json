@@ -58,7 +58,8 @@
     "retry": "再试一次！",
     "unlucky": "运气不好...",
     "spinsRemaining": "剩余转动次数",
-    "showCoupon": "查看我的优惠券"
+    "showCoupon": "查看我的优惠券",
+    "instruction": "按下 Spin 试试运气，祝你好运！"
   },
   "coupon": {
     "title": "您的奖励",

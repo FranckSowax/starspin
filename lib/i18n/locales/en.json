@@ -60,7 +60,8 @@
     "retry": "Try again!",
     "unlucky": "No luck...",
     "spinsRemaining": "Spins remaining",
-    "showCoupon": "Show my coupon"
+    "showCoupon": "Show my coupon",
+    "instruction": "Press Spin to try your luck. Good luck!"
   },
   "coupon": {
     "title": "Your Reward",

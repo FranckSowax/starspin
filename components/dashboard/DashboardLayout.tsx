@@ -53,10 +53,10 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
 
   const navigation = [
     { name: t('dashboard.nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { name: t('dashboard.nav.qrCode'), href: '/dashboard/qr', icon: QrCode },
     { name: t('dashboard.nav.scanner'), href: '/dashboard/scan', icon: ScanLine },
     { name: t('dashboard.nav.prizes'), href: '/dashboard/prizes', icon: Gift },
     { name: t('dashboard.nav.feedback'), href: '/dashboard/feedback', icon: MessageSquare },
-    { name: t('dashboard.nav.qrCode'), href: '/dashboard/qr', icon: QrCode },
     { name: t('dashboard.nav.analytics'), href: '/dashboard/analytics', icon: BarChart3 },
     { name: t('dashboard.nav.strategy'), href: '/dashboard/strategy', icon: Target },
     { name: t('dashboard.nav.customers'), href: '/dashboard/customers', icon: Users },

@@ -58,7 +58,8 @@
     "retry": "حاول مرة أخرى!",
     "unlucky": "حظ سيء...",
     "spinsRemaining": "الدورات المتبقية",
-    "showCoupon": "عرض القسيمة"
+    "showCoupon": "عرض القسيمة",
+    "instruction": "اضغط على Spin لتجربة حظك. حظًا سعيدًا!"
   },
   "coupon": {
     "title": "مكافأتك",

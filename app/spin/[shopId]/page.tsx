@@ -544,6 +544,11 @@ export default function SpinPage() {
           </div>
         )}
 
+        {/* Instruction title */}
+        <p className="text-white text-center text-lg sm:text-xl font-semibold mb-4 px-4 drop-shadow-lg">
+          {t('wheel.instruction')}
+        </p>
+
         {/* Wheel container */}
         <div ref={wheelRef} className="relative">
           {/* Pointer */}
