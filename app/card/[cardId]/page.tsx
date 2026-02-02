@@ -56,6 +56,8 @@ export default function LoyaltyCardPage({ params }: PageProps) {
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [currentLang, setCurrentLang] = useState(i18n.language || 'fr');
   const qrRef = useRef<HTMLDivElement>(null);
+  const [redemptionModal, setRedemptionModal] = useState<{ code: string; rewardName: string; expiresAt: string } | null>(null);
+  const [redeemedRewards, setRedeemedRewards] = useState<any[]>([]);
 
   // Profile edit state
   const [editName, setEditName] = useState('');
@@ -114,6 +116,12 @@ export default function LoyaltyCardPage({ params }: PageProps) {
         if (transactionsRes.ok) {
           const transactionsData = await transactionsRes.json();
           setTransactions(transactionsData.transactions || []);
+        }
+
+        const redeemedRes = await fetch(`/api/loyalty/redeem?merchantId=${clientData.client.merchant_id}&clientId=${clientData.client.id}`);
+        if (redeemedRes.ok) {
+          const redeemedData = await redeemedRes.json();
+          setRedeemedRewards(redeemedData.redeemedRewards || []);
         }
       }
     } catch {
@@ -195,7 +203,11 @@ export default function LoyaltyCardPage({ params }: PageProps) {
 
       if (res.ok) {
         const data = await res.json();
-        alert(`${t('loyalty.redeem.success')}\n\n${t('loyalty.redeem.code')}: ${data.redemptionCode}\n\n${t('loyalty.redeem.showToStaff')}`);
+        setRedemptionModal({
+          code: data.redemptionCode,
+          rewardName: reward.name,
+          expiresAt: data.redeemedReward?.expires_at || ''
+        });
         fetchData();
       } else {
         const data = await res.json();
@@ -671,40 +683,60 @@ export default function LoyaltyCardPage({ params }: PageProps) {
                         <p className="text-slate-600">{t('loyalty.transactions.noTransactions')}</p>
                       </div>
                     ) : (
-                      transactions.slice(0, 20).map((tx) => (
-                        <div
-                          key={tx.id}
-                          className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              tx.points > 0 ? 'bg-green-100' : 'bg-red-100'
-                            }`}>
-                              {tx.points > 0 ? (
-                                <TrendingUp className="w-5 h-5 text-green-600" />
-                              ) : (
-                                <Gift className="w-5 h-5 text-red-600" />
+                      transactions.slice(0, 20).map((tx) => {
+                        const redeemed = tx.type === 'redeem' && tx.reference_id
+                          ? redeemedRewards.find((r: any) => r.id === tx.reference_id)
+                          : null;
+                        return (
+                          <div
+                            key={tx.id}
+                            className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                tx.points > 0 ? 'bg-green-100' : 'bg-red-100'
+                              }`}>
+                                {tx.points > 0 ? (
+                                  <TrendingUp className="w-5 h-5 text-green-600" />
+                                ) : (
+                                  <Gift className="w-5 h-5 text-red-600" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium text-slate-900">
+                                  {t(`loyalty.transactions.${tx.type}`)}
+                                </p>
+                                <p className="text-sm text-slate-500">
+                                  {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '-'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              {redeemed && redeemed.status === 'pending' && (
+                                <button
+                                  onClick={() => setRedemptionModal({
+                                    code: redeemed.redemption_code,
+                                    rewardName: redeemed.reward_name,
+                                    expiresAt: redeemed.expires_at || ''
+                                  })}
+                                  className="w-9 h-9 bg-amber-100 hover:bg-amber-200 rounded-lg flex items-center justify-center transition-colors"
+                                  title={t('loyalty.redeem.showQR')}
+                                >
+                                  <QrCode className="w-4 h-4 text-amber-700" />
+                                </button>
                               )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-slate-900">
-                                {t(`loyalty.transactions.${tx.type}`)}
-                              </p>
-                              <p className="text-sm text-slate-500">
-                                {tx.created_at ? new Date(tx.created_at).toLocaleDateString() : '-'}
-                              </p>
+                              <div className="text-right">
+                                <p className={`text-lg font-semibold ${tx.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {tx.points > 0 ? '+' : ''}{tx.points}
+                                </p>
+                                <p className="text-sm text-slate-500">
+                                  Balance: {tx.balance_after}
+                                </p>
+                              </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className={`text-lg font-semibold ${tx.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {tx.points > 0 ? '+' : ''}{tx.points}
-                            </p>
-                            <p className="text-sm text-slate-500">
-                              Balance: {tx.balance_after}
-                            </p>
-                          </div>
-                        </div>
-                      ))
+                        );
+                      })
                     )}
                   </div>
                 )}
@@ -868,6 +900,40 @@ export default function LoyaltyCardPage({ params }: PageProps) {
           <p className="text-sm text-slate-500">Powered by StarSpin</p>
         </div>
       </div>
+
+      {/* Redemption QR Code Modal */}
+      {redemptionModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setRedemptionModal(null)}>
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gift className="w-7 h-7 text-green-600" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-1">{t('loyalty.redeem.success')}</h3>
+              <p className="text-sm text-slate-600 mb-4">{redemptionModal.rewardName}</p>
+
+              <div className="bg-slate-50 rounded-xl p-4 mb-4">
+                <QRCode value={redemptionModal.code} size={200} className="mx-auto" />
+                <p className="text-lg font-mono font-bold text-slate-900 mt-3 tracking-wider">{redemptionModal.code}</p>
+              </div>
+
+              <p className="text-sm text-slate-600 mb-2">{t('loyalty.redeem.scanAtCheckout')}</p>
+              {redemptionModal.expiresAt && (
+                <p className="text-xs text-slate-400 mb-4">
+                  {t('loyalty.redeem.expires')}: {new Date(redemptionModal.expiresAt).toLocaleDateString()}
+                </p>
+              )}
+
+              <Button
+                onClick={() => setRedemptionModal(null)}
+                className="w-full bg-amber-500 hover:bg-amber-600"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

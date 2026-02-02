@@ -423,6 +423,8 @@
       "success": "Reward redeemed!",
       "code": "Redemption code",
       "showToStaff": "Show this code at checkout",
+      "showQR": "Show QR code",
+      "scanAtCheckout": "Present this QR code at checkout",
       "expires": "Expires on",
       "insufficientPoints": "Insufficient points",
       "status": {

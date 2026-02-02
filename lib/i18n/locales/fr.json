@@ -423,6 +423,8 @@
       "success": "Récompense échangée !",
       "code": "Code de rédemption",
       "showToStaff": "Présentez ce code en caisse",
+      "showQR": "Afficher le QR code",
+      "scanAtCheckout": "Présentez ce QR code en caisse",
       "expires": "Expire le",
       "insufficientPoints": "Points insuffisants",
       "status": {
