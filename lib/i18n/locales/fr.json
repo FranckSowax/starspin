@@ -130,6 +130,7 @@
     "nav": {
       "mainMenu": "Menu Principal",
       "dashboard": "Tableau de bord",
+      "profile": "Profil",
       "scanner": "Scanner",
       "prizes": "Prix & Lots",
       "feedback": "Avis Clients",
