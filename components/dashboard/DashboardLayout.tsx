@@ -26,8 +26,6 @@ import {
   ChevronRight,
   Store,
   Award,
-  Megaphone,
-  Send,
   UserCircle
 } from 'lucide-react';
 
@@ -67,9 +65,6 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
     { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
   ];
 
-  const marketingNavigation = [
-    { name: t('dashboard.nav.whatsappCampaign'), href: '/dashboard/marketing/whatsapp-campaign', icon: Send },
-  ];
 
   if (!mounted) {
     return null; // Prevent hydration mismatch
@@ -165,39 +160,6 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
               );
             })}
 
-            {/* Marketing Section Separator */}
-            <div className="my-6 px-4">
-              <div className="border-t border-slate-700/50"></div>
-            </div>
-
-            {/* Marketing Section */}
-            <div className="flex items-center gap-2 px-4 mb-4">
-              <Megaphone className="w-4 h-4 text-purple-500" />
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t('dashboard.nav.marketing')}</p>
-            </div>
-            {marketingNavigation.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
-                    group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                    ${isActive
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-900/20 border border-purple-500/20'
-                      : 'text-white hover:bg-slate-800/50'
-                    }
-                  `}
-                >
-                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-                  {item.name}
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white/50" />}
-                </Link>
-              );
-            })}
           </nav>
 
           {/* Sign Out */}
