@@ -16,12 +16,19 @@ export interface PrizeWithQuantity {
   quantity: number;
 }
 
+interface SegmentColorConfig {
+  color: string;
+  textColor: string;
+  borderColor: string;
+}
+
 interface WheelPreviewProps {
   prizeQuantities: PrizeWithQuantity[];
   unluckyQuantity: number;
   retryQuantity: number;
   size?: number;
   maxSegments?: number;
+  segmentColors?: SegmentColorConfig[];
 }
 
 // Color palette for prize segments
@@ -99,12 +106,13 @@ function distributeSegments(segments: WheelSegment[]): WheelSegment[] {
   return result;
 }
 
-export function WheelPreview({ 
-  prizeQuantities, 
-  unluckyQuantity, 
-  retryQuantity, 
+export function WheelPreview({
+  prizeQuantities,
+  unluckyQuantity,
+  retryQuantity,
   size = 300,
-  maxSegments = 8
+  maxSegments = 8,
+  segmentColors
 }: WheelPreviewProps) {
   
   // Build segments array based on quantities
@@ -115,11 +123,12 @@ export function WheelPreview({
     // Add prize segments based on quantity
     prizeQuantities.forEach(({ prize, quantity }) => {
       for (let i = 0; i < quantity; i++) {
+        const customColor = segmentColors?.[colorIndex % (segmentColors?.length || 1)];
         allSegments.push({
           id: `${prize.id}-${i}`,
           name: prize.name.length > 10 ? prize.name.substring(0, 10) + '...' : prize.name,
-          color: PRIZE_COLORS[colorIndex % PRIZE_COLORS.length],
-          textColor: '#FFFFFF',
+          color: customColor?.color || PRIZE_COLORS[colorIndex % PRIZE_COLORS.length],
+          textColor: customColor?.textColor || '#FFFFFF',
           type: 'prize',
         });
       }

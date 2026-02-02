@@ -8,8 +8,20 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
-import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock, Palette } from 'lucide-react';
 import { WheelPreview, PrizeWithQuantity } from '@/components/dashboard/WheelPreview';
+
+// Default segment colors
+const DEFAULT_SEGMENT_COLORS = [
+  { color: '#FF6B6B', textColor: '#FFFFFF', borderColor: '#FF5252' },
+  { color: '#4ECDC4', textColor: '#FFFFFF', borderColor: '#26A69A' },
+  { color: '#45B7D1', textColor: '#FFFFFF', borderColor: '#2196F3' },
+  { color: '#96CEB4', textColor: '#FFFFFF', borderColor: '#4CAF50' },
+  { color: '#FFEAA7', textColor: '#2D3436', borderColor: '#FDCB6E' },
+  { color: '#DDA0DD', textColor: '#FFFFFF', borderColor: '#BA55D3' },
+  { color: '#FFD93D', textColor: '#2D3436', borderColor: '#FFC107' },
+  { color: '#6C5CE7', textColor: '#FFFFFF', borderColor: '#5B4BC4' },
+];
 
 // Special segment types that are always present on the wheel
 const SPECIAL_SEGMENTS = {
@@ -40,6 +52,7 @@ export default function PrizesPage() {
   const [imagePreview, setImagePreview] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const [migrationNeeded, setMigrationNeeded] = useState(false);
+  const [segmentColors, setSegmentColors] = useState(DEFAULT_SEGMENT_COLORS);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -69,6 +82,9 @@ export default function PrizesPage() {
       }
       if (merchantData?.prize_quantities) {
         setPrizeQuantities(merchantData.prize_quantities);
+      }
+      if (merchantData?.segment_colors && Array.isArray(merchantData.segment_colors) && merchantData.segment_colors.length > 0) {
+        setSegmentColors(merchantData.segment_colors);
       }
       
       fetchPrizes(user.id);
@@ -251,6 +267,7 @@ export default function PrizesPage() {
           unlucky_quantity: unluckyQuantity,
           retry_quantity: retryQuantity,
           prize_quantities: prizeQuantities,
+          segment_colors: segmentColors,
         })
         .eq('id', user.id);
       
@@ -272,7 +289,7 @@ export default function PrizesPage() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [unluckyQuantity, retryQuantity, prizeQuantities, user]);
+  }, [unluckyQuantity, retryQuantity, prizeQuantities, segmentColors, user]);
 
   const getChanceDescription = (prob: number) => {
     if (prob >= 50) return { text: 'Très fréquent', color: 'text-green-600', bg: 'bg-green-50' };
@@ -633,18 +650,19 @@ export default function PrizesPage() {
         <Card className="p-6 bg-gradient-to-br from-slate-50 to-gray-100 border-2 border-gray-200">
           <div className="flex flex-col lg:flex-row items-center gap-8">
             <div className="flex-shrink-0">
-              <WheelPreview 
+              <WheelPreview
                 prizeQuantities={prizeQuantitiesArray}
                 unluckyQuantity={unluckyQuantity}
                 retryQuantity={retryQuantity}
                 size={320}
                 maxSegments={MAX_SEGMENTS}
+                segmentColors={segmentColors}
               />
             </div>
             <div className="flex-1 text-center lg:text-left">
               <h3 className="text-2xl font-bold text-gray-900 mb-3">🎡 Aperçu de la Roue</h3>
               <p className="text-gray-600 mb-4">
-                Voici un aperçu de votre roue avec tous les segments configurés. 
+                Voici un aperçu de votre roue avec tous les segments configurés.
                 Chaque segment représente un prix ou un segment spécial.
               </p>
               <div className="grid grid-cols-2 gap-3 text-sm">
@@ -668,6 +686,48 @@ export default function PrizesPage() {
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Segment Color Configuration */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Palette className="w-5 h-5 text-teal-600" />
+              <h4 className="font-bold text-gray-900">Couleurs des segments</h4>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {segmentColors.map((config, index) => (
+                <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 flex items-center gap-2">
+                  <span className="text-xs text-gray-500 w-6 flex-shrink-0">S{index + 1}</span>
+                  <div className="flex gap-1">
+                    <label className="cursor-pointer" title="Couleur du segment">
+                      <input
+                        type="color"
+                        value={config.color}
+                        onChange={(e) => {
+                          const newColors = [...segmentColors];
+                          newColors[index] = { ...config, color: e.target.value, borderColor: e.target.value };
+                          setSegmentColors(newColors);
+                        }}
+                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                      />
+                    </label>
+                    <label className="cursor-pointer" title="Couleur du texte">
+                      <input
+                        type="color"
+                        value={config.textColor}
+                        onChange={(e) => {
+                          const newColors = [...segmentColors];
+                          newColors[index] = { ...config, textColor: e.target.value };
+                          setSegmentColors(newColors);
+                        }}
+                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                      />
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Premier carré = fond du segment, second = couleur du texte</p>
           </div>
         </Card>
 

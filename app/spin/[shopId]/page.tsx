@@ -1,11 +1,122 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase/client';
 import { Prize } from '@/lib/types/database';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
+
+// Types
+type SegmentType = 'prize' | 'unlucky' | 'retry';
+
+interface WheelSegment {
+  type: SegmentType;
+  prize?: Prize;
+  label: string;
+  color: string;
+  textColor: string;
+  borderColor: string;
+}
+
+interface SegmentColor {
+  color: string;
+  textColor: string;
+  borderColor: string;
+}
+
+// Default 8-segment color palette
+const DEFAULT_SEGMENT_COLORS: SegmentColor[] = [
+  { color: '#FF6B6B', textColor: '#FFFFFF', borderColor: '#FF5252' },
+  { color: '#4ECDC4', textColor: '#FFFFFF', borderColor: '#26A69A' },
+  { color: '#45B7D1', textColor: '#FFFFFF', borderColor: '#2196F3' },
+  { color: '#96CEB4', textColor: '#FFFFFF', borderColor: '#4CAF50' },
+  { color: '#FFEAA7', textColor: '#2D3436', borderColor: '#FDCB6E' },
+  { color: '#DDA0DD', textColor: '#FFFFFF', borderColor: '#BA55D3' },
+  { color: '#FFD93D', textColor: '#2D3436', borderColor: '#FFC107' },
+  { color: '#6C5CE7', textColor: '#FFFFFF', borderColor: '#5B4BC4' },
+];
+
+// Fixed colors for special segments
+const UNLUCKY_COLOR: SegmentColor = { color: '#DC2626', textColor: '#FFFFFF', borderColor: '#B91C1C' };
+const RETRY_COLOR: SegmentColor = { color: '#F59E0B', textColor: '#1F2937', borderColor: '#D97706' };
+
+// Split text into max 2 lines for segment labels
+const splitTextForSegment = (text: string): string[] => {
+  if (text.length <= 8) return [text];
+  const midPoint = Math.ceil(text.length / 2);
+  let cutIndex = text.indexOf(' ', midPoint - 3);
+  if (cutIndex === -1 || cutIndex > midPoint + 4) {
+    cutIndex = text.lastIndexOf(' ', midPoint);
+  }
+  if (cutIndex === -1 || cutIndex < 3) {
+    return [text.slice(0, midPoint), text.slice(midPoint)];
+  }
+  return [text.slice(0, cutIndex), text.slice(cutIndex + 1)];
+};
+
+// Confetti hook
+const useConfetti = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const particlesRef = useRef<Array<{
+    x: number; y: number; vx: number; vy: number;
+    color: string; size: number; rotation: number; rotationSpeed: number;
+  }>>([]);
+  const animationRef = useRef<number | null>(null);
+  const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#FFD93D', '#6C5CE7'];
+
+  const createParticles = useCallback((x: number, y: number, count: number = 150) => {
+    const particles = [];
+    for (let i = 0; i < count; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const velocity = 2 + Math.random() * 6;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * velocity,
+        vy: Math.sin(angle) * velocity - 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 4 + Math.random() * 8,
+        rotation: Math.random() * Math.PI * 2,
+        rotationSpeed: (Math.random() - 0.5) * 0.3,
+      });
+    }
+    particlesRef.current = particles;
+  }, []);
+
+  const animate = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particlesRef.current = particlesRef.current.filter(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.rotation += p.rotationSpeed;
+      if (p.y > canvas.height + 50) return false;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      ctx.restore();
+      return true;
+    });
+    if (particlesRef.current.length > 0) {
+      animationRef.current = requestAnimationFrame(animate);
+    }
+  }, []);
+
+  const trigger = useCallback((x: number, y: number) => {
+    createParticles(x, y, 150);
+    if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+    animate();
+  }, [createParticles, animate]);
+
+  useEffect(() => () => {
+    if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+  }, []);
+
+  return { canvasRef, trigger };
+};
 
 export default function SpinPage() {
   const params = useParams();
@@ -14,7 +125,6 @@ export default function SpinPage() {
   const { t, i18n } = useTranslation();
   const shopId = params.shopId as string;
 
-  // Get phone number and language from URL params (passed from redirect page)
   const phoneFromUrl = searchParams.get('phone');
   const langFromUrl = searchParams.get('lang');
   const currentLang = langFromUrl || i18n.language || 'en';
@@ -22,10 +132,11 @@ export default function SpinPage() {
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [merchant, setMerchant] = useState<any>(null);
   const [hasSpun, setHasSpun] = useState(false);
-  const [spinsRemaining, setSpinsRemaining] = useState(1); // Start with 1 spin, can increase with RETRY
+  const [spinsRemaining, setSpinsRemaining] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<string>('');
   const [resultType, setResultType] = useState<'win' | 'retry' | 'lost' | null>(null);
   const [couponCode, setCouponCode] = useState<string>('');
@@ -33,20 +144,13 @@ export default function SpinPage() {
   const [saveError, setSaveError] = useState(false);
   const [unluckyProbability, setUnluckyProbability] = useState(20);
   const [retryProbability, setRetryProbability] = useState(10);
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const currentRotationRef = useRef(0);
+  const [segmentColors, setSegmentColors] = useState<SegmentColor[]>(DEFAULT_SEGMENT_COLORS);
 
-  // Segment types
-  type SegmentType = 'prize' | 'unlucky' | 'retry';
-  interface WheelSegment {
-    type: SegmentType;
-    prize?: Prize;
-    label: string;
-  }
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const { canvasRef, trigger } = useConfetti();
 
   useEffect(() => {
     setIsClient(true);
-    // Apply language from URL if provided
     if (langFromUrl && i18n.language !== langFromUrl) {
       i18n.changeLanguage(langFromUrl);
     }
@@ -55,7 +159,7 @@ export default function SpinPage() {
   useEffect(() => {
     const checkSpinEligibility = async () => {
       const userToken = localStorage.getItem('user_token');
-      
+
       if (userToken) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -81,12 +185,15 @@ export default function SpinPage() {
 
       if (merchantData) {
         setMerchant(merchantData);
-        // Load special segment probabilities
         if (merchantData.unlucky_probability !== undefined) {
           setUnluckyProbability(merchantData.unlucky_probability);
         }
         if (merchantData.retry_probability !== undefined) {
           setRetryProbability(merchantData.retry_probability);
+        }
+        // Load custom segment colors
+        if (merchantData.segment_colors && Array.isArray(merchantData.segment_colors) && merchantData.segment_colors.length > 0) {
+          setSegmentColors(merchantData.segment_colors);
         }
       }
 
@@ -105,35 +212,35 @@ export default function SpinPage() {
     checkSpinEligibility();
   }, [shopId]);
 
-  // Generate wheel segments with 6-8 segments total
-  // Rules:
-  // 1. Always include #UNLUCKY# and #REESSAYER# segments
-  // 2. If merchant has <3 prizes, duplicate them to fill
-  // 3. Total segments should be between 6-8
+  // Generate wheel segments (same logic as before)
   const generateWheelSegments = (): WheelSegment[] => {
     const segments: WheelSegment[] = [];
-    
-    // Always add UNLUCKY and RETRY segments
-    segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
-    segments.push({ type: 'retry', label: '#REESSAYER#' });
-    
+
+    segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
+    segments.push({ type: 'retry', label: '#REESSAYER#', ...RETRY_COLOR });
+
     if (prizes.length === 0) {
-      // No prizes - fill with more unlucky/retry
-      segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
-      segments.push({ type: 'retry', label: '#REESSAYER#' });
-      segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
-      segments.push({ type: 'retry', label: '#REESSAYER#' });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
+      segments.push({ type: 'retry', label: '#REESSAYER#', ...RETRY_COLOR });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
+      segments.push({ type: 'retry', label: '#REESSAYER#', ...RETRY_COLOR });
       return segments;
     }
-    
-    // Add prize segments
-    let prizeSegments: WheelSegment[] = prizes.map(prize => ({
-      type: 'prize' as const,
-      prize,
-      label: prize.name
-    }));
-    
-    // If less than 3 prizes, duplicate them
+
+    let colorIdx = 0;
+    let prizeSegments: WheelSegment[] = prizes.map(prize => {
+      const c = segmentColors[colorIdx % segmentColors.length];
+      colorIdx++;
+      return {
+        type: 'prize' as const,
+        prize,
+        label: prize.name,
+        color: c.color,
+        textColor: c.textColor,
+        borderColor: c.borderColor,
+      };
+    });
+
     if (prizes.length < 3) {
       const duplicated = [...prizeSegments];
       while (duplicated.length < 4) {
@@ -141,150 +248,112 @@ export default function SpinPage() {
       }
       prizeSegments = duplicated;
     }
-    
-    // Add prize segments
+
     segments.push(...prizeSegments);
-    
-    // Ensure we have between 6-8 segments
-    // If we have more than 8, trim prizes (keep special segments)
+
     if (segments.length > 8) {
       const specialSegments = segments.filter(s => s.type !== 'prize');
       const prizeSegs = segments.filter(s => s.type === 'prize').slice(0, 8 - specialSegments.length);
       return [...specialSegments, ...prizeSegs];
     }
-    
-    // If we have less than 6, add more unlucky segments
+
     while (segments.length < 6) {
-      segments.push({ type: 'unlucky', label: '#UNLUCKY#' });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
     }
-    
-    // Shuffle segments to distribute them evenly (but keep some structure)
-    // Interleave: prize, special, prize, special...
+
+    // Interleave segments
     const prizeSegs = segments.filter(s => s.type === 'prize');
     const specialSegs = segments.filter(s => s.type !== 'prize');
     const interleaved: WheelSegment[] = [];
-    
+
     const maxLen = Math.max(prizeSegs.length, specialSegs.length);
     for (let i = 0; i < maxLen; i++) {
       if (i < prizeSegs.length) interleaved.push(prizeSegs[i]);
       if (i < specialSegs.length) interleaved.push(specialSegs[i]);
     }
-    
+
     return interleaved;
   };
 
   const allSegments = generateWheelSegments();
   const totalSegments = allSegments.length;
   const segmentAngle = totalSegments > 0 ? 360 / totalSegments : 0;
-  
+
   const selectWinningSegment = () => {
-    // Calculate total probability
     const totalPrizeProbability = prizes.reduce((sum, prize) => sum + (prize.probability || 0), 0);
     const totalProbability = totalPrizeProbability + unluckyProbability + retryProbability;
-    
-    // Random number between 0 and total probability
     const random = Math.random() * totalProbability;
-    
-    // Check if landed on a prize
+
     let currentProb = 0;
     for (let i = 0; i < allSegments.length; i++) {
       const segment = allSegments[i];
-      
       if (segment.type === 'prize' && segment.prize) {
         currentProb += (segment.prize.probability || 0);
         if (random <= currentProb) return i;
       } else if (segment.type === 'unlucky') {
-        // Distribute unlucky probability among unlucky segments
         const unluckyCount = allSegments.filter(s => s.type === 'unlucky').length;
         currentProb += unluckyProbability / unluckyCount;
         if (random <= currentProb) return i;
       } else if (segment.type === 'retry') {
-        // Distribute retry probability among retry segments
         const retryCount = allSegments.filter(s => s.type === 'retry').length;
         currentProb += retryProbability / retryCount;
         if (random <= currentProb) return i;
       }
     }
-    
-    // Fallback to first segment
     return 0;
   };
 
   const spinWheel = async () => {
     if (isSpinning || spinsRemaining <= 0) return;
-    
+
     setIsSpinning(true);
-    setSpinsRemaining(prev => prev - 1); // Consume one spin
+    setSpinsRemaining(prev => prev - 1);
     setResult('');
     setResultType(null);
     setCouponCode('');
 
     const winningSegmentIndex = selectWinningSegment();
     const winningSegment = allSegments[winningSegmentIndex];
-    
-    // Determine result type based on segment
+
     let type: 'win' | 'retry' | 'lost' = 'lost';
     let selectedPrize: Prize | undefined = undefined;
-    
+
     if (winningSegment.type === 'prize' && winningSegment.prize) {
       type = 'win';
       selectedPrize = winningSegment.prize;
     } else if (winningSegment.type === 'retry') {
       type = 'retry';
-    } else {
-      type = 'lost';
     }
 
-    // Calculate segment center for alignment
-    // Segments are rendered with -90 offset (starting from top)
-    const segmentVisualCenter = (winningSegmentIndex * segmentAngle) + (segmentAngle / 2) - 90;
-    
-    // Add random offset within the segment
+    // Calculate target rotation
+    const segmentCenterAngle = winningSegmentIndex * segmentAngle + segmentAngle / 2 - 90;
     const randomOffset = (Math.random() - 0.5) * segmentAngle * 0.6;
-
-    // Target rotation
-    // Align segment center to -90 (Top)
-    // We use a clean geometric calculation: Target = Top(-90) - Center - Random
-    // Note: extraSpins must be a multiple of 360 to preserve this alignment.
-    const currentRot = currentRotationRef.current;
-    const targetAngle = -90 - segmentVisualCenter - randomOffset;
-    
-    // Normalize to find the delta needed
-    const currentNormalized = currentRot % 360;
+    const targetAngle = -segmentCenterAngle - 90 + randomOffset;
+    const currentNormalized = rotation % 360;
     const distToTarget = ((targetAngle - currentNormalized) % 360 + 360) % 360;
-    
-    // Add 5-7 full spins for variety
-    const minSpins = 5;
-    const extraSpins = 360 * minSpins + Math.floor(Math.random() * 3) * 360; // 5 to 7 full spins
-    const totalRotation = currentRot + extraSpins + distToTarget;
+    const extraSpins = 5 + Math.floor(Math.random() * 3);
+    const totalRotation = rotation + extraSpins * 360 + distToTarget;
 
-    if (wheelRef.current) {
-      wheelRef.current.style.transform = `rotate(${totalRotation}deg)`;
-      currentRotationRef.current = totalRotation;
-    }
+    setRotation(totalRotation);
 
     setTimeout(async () => {
       await handleSpinComplete(selectedPrize, type);
       setIsSpinning(false);
-    }, 5000);
+    }, 5200);
   };
 
   const handleSpinComplete = async (prize: Prize | undefined, type: 'win' | 'retry' | 'lost') => {
     setResultType(type);
-    
+
     if (type === 'win' && prize) {
       setIsSaving(true);
       setSaveError(false);
       setResult(prize.name);
-      
-      // Confetti effect
-      if (typeof window !== 'undefined' && (window as any).confetti) {
-        (window as any).confetti({
-          particleCount: 150,
-          spread: 100,
-          origin: { y: 0.6 },
-          colors: ['#ffd700', '#2d8a3e', '#ffb700', '#ff9500']
-        });
+
+      // Confetti
+      if (wheelRef.current) {
+        const rect = wheelRef.current.getBoundingClientRect();
+        trigger(rect.left + rect.width / 2, rect.top + rect.height / 2);
       }
 
       try {
@@ -317,10 +386,8 @@ export default function SpinPage() {
           });
 
           if (couponError) throw couponError;
-
           setCouponCode(generatedCode);
 
-          // Send spin notification to merchant
           fetch('/api/notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -331,9 +398,8 @@ export default function SpinPage() {
               message: `Un client a gagné "${prize.name}" !`,
               data: { prizeName: prize.name, couponCode: generatedCode },
             }),
-          }).catch(() => {}); // Fire and forget
+          }).catch(() => {});
 
-          // Send WhatsApp congratulation message if phone number is available (WhatsApp workflow)
           if (phoneFromUrl && merchant?.workflow_mode === 'whatsapp') {
             fetch('/api/whatsapp/congratulate', {
               method: 'POST',
@@ -345,7 +411,7 @@ export default function SpinPage() {
                 couponCode: generatedCode,
                 language: currentLang,
               }),
-            }).catch(() => {}); // Fire and forget
+            }).catch(() => {});
           }
         }
       } catch {
@@ -355,18 +421,52 @@ export default function SpinPage() {
       }
     } else if (type === 'retry') {
       setResult(t('wheel.retry'));
-      // Grant an extra spin for RETRY
       setSpinsRemaining(prev => prev + 1);
     } else {
       setResult(t('wheel.unlucky'));
-      // UNLUCKY is eliminatory - mark as spun to prevent further spins
       setHasSpun(true);
     }
   };
 
+  // SVG helpers
+  const createSegmentPath = (index: number, outerRadius: number, innerRadius: number) => {
+    const startAngle = (index * segmentAngle - 90) * Math.PI / 180;
+    const endAngle = ((index + 1) * segmentAngle - 90) * Math.PI / 180;
+    const cx = 200, cy = 200;
+    const x1 = cx + outerRadius * Math.cos(startAngle);
+    const y1 = cy + outerRadius * Math.sin(startAngle);
+    const x2 = cx + outerRadius * Math.cos(endAngle);
+    const y2 = cy + outerRadius * Math.sin(endAngle);
+    const x3 = cx + innerRadius * Math.cos(endAngle);
+    const y3 = cy + innerRadius * Math.sin(endAngle);
+    const x4 = cx + innerRadius * Math.cos(startAngle);
+    const y4 = cy + innerRadius * Math.sin(startAngle);
+    const largeArc = segmentAngle > 180 ? 1 : 0;
+    return `M ${x4} ${y4} L ${x1} ${y1} A ${outerRadius} ${outerRadius} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+  };
+
+  const getTextPosition = (index: number) => {
+    const midAngle = ((index * segmentAngle) + segmentAngle / 2 - 90) * Math.PI / 180;
+    const radius = 115;
+    return {
+      x: 200 + radius * Math.cos(midAngle),
+      y: 200 + radius * Math.sin(midAngle),
+      rotation: index * segmentAngle + segmentAngle / 2 - 90,
+    };
+  };
+
+  const ledLights = Array.from({ length: 16 }, (_, i) => {
+    const angle = (i * (360 / 16) - 90) * Math.PI / 180;
+    return {
+      x: 200 + 195 * Math.cos(angle),
+      y: 200 + 195 * Math.sin(angle),
+      isOn: i % 2 === 0,
+    };
+  });
+
   if (!isClient || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-600 to-teal-700">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8">
           <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
@@ -379,14 +479,14 @@ export default function SpinPage() {
       <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
         {merchant?.background_url ? (
           <>
-            <div 
+            <div
               className="absolute inset-0 bg-cover bg-center"
               style={{ backgroundImage: `url(${merchant.background_url})` }}
             />
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-teal-600 to-teal-700"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"></div>
         )}
         <div className="relative z-10 bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
@@ -399,310 +499,267 @@ export default function SpinPage() {
   }
 
   return (
-    <>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Russo+One&display=swap');
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
+      {/* Confetti canvas */}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 pointer-events-none z-50"
+        width={typeof window !== 'undefined' ? window.innerWidth : 1920}
+        height={typeof window !== 'undefined' ? window.innerHeight : 1080}
+      />
 
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(100vh);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
+      {/* Background */}
+      {merchant?.background_url ? (
+        <>
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${merchant.background_url})` }}
+          />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900"></div>
+      )}
 
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-
-        .game-container {
-          animation: slideUp 1s ease-out;
-        }
-
-        .wheel {
-          transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-        }
-
-        .segment {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
-          overflow: hidden;
-        }
-
-        .segment-content {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: flex-start;
-          justify-content: center;
-          padding-top: 8%;
-        }
-
-        .segment-content.green {
-          background: linear-gradient(180deg, #2d8a3e 0%, #1e6b2f 100%);
-        }
-
-        .segment-content.black {
-          background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
-        }
-
-        .segment-content.yellow {
-          background: linear-gradient(180deg, #ffd700 0%, #e6a800 100%);
-        }
-
-        .segment-text {
-          color: #ffd700;
-          font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif;
-          font-size: clamp(0.55rem, 2.2vw, 0.9rem);
-          font-weight: 900;
-          text-shadow: 1px 1px 3px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.9);
-          white-space: nowrap;
-          text-transform: uppercase;
-          letter-spacing: 1px;
-          -webkit-text-stroke: 0.3px rgba(0, 0, 0, 0.5);
-        }
-
-        .segment-text.yellow-text {
-          color: #1a1a1a;
-          text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-          -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.3);
-        }
-
-        .dot {
-          position: absolute;
-          width: 3%;
-          height: 3%;
-          background: radial-gradient(circle, #ffd700 0%, #ffb700 50%, #ff9500 100%);
-          border-radius: 50%;
-          top: 0;
-          left: 50%;
-          transform-origin: 0 calc(50vw * 0.47);
-          box-shadow: 0 2px 8px rgba(255, 215, 0, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.5);
-        }
-      `}</style>
-
-      <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-        {/* Background */}
-        {merchant?.background_url ? (
-          <>
-            <div 
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${merchant.background_url})` }}
-            />
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-[#1a1a2e]"></div>
-        )}
-
-        {/* Game Container */}
-        <div className="game-container relative z-10 text-center w-full max-w-[500px]">
-          
-          {/* Wheel Wrapper */}
-          <div className="relative w-full aspect-square max-w-[450px] mx-auto">
-            {/* Pointer */}
-            <div className="absolute top-[-15%] left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5))' }}>
-              {merchant?.logo_url ? (
-                <>
-                  <div
-                    className="w-24 h-24 rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#ffd700] mb-[-15px] relative z-10"
-                    style={{ backgroundColor: merchant.logo_background_color || '#FFFFFF' }}
-                  >
-                    <img
-                      src={merchant.logo_url}
-                      alt="Merchant Logo"
-                      className="w-full h-full object-contain rounded-full"
-                    />
-                  </div>
-                  <div className="w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-t-[40px] border-t-[#ffd700] relative z-0"></div>
-                </>
-              ) : (
-                <>
-                  <div className="w-[18px] h-[18px] bg-[#1a1a1a] rounded-full mb-[-8px] relative z-10" style={{ boxShadow: '0 2px 5px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.2)' }}></div>
-                  <div className="w-[36px] h-[22px] rounded-t-[18px] mb-[-1px]" style={{ background: 'linear-gradient(180deg, #ffb84d 0%, #ffa500 100%)', boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3)' }}></div>
-                  <div className="w-0 h-0 border-l-[22px] border-l-transparent border-r-[22px] border-r-transparent border-t-[45px] border-t-[#ffa500]" style={{ filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}></div>
-                </>
-              )}
-            </div>
-
-            {/* Wheel Container */}
-            <div className="w-full h-full rounded-full relative p-[3%]" style={{ background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.8), inset 0 2px 15px rgba(255, 255, 255, 0.15)' }}>
-              {/* Decorative Dots */}
-              <div className="absolute inset-[3%] rounded-full">
-                {allSegments.map((_, i) => (
-                  <div
-                    key={i}
-                    className="dot"
-                    style={{ transform: `rotate(${i * segmentAngle + segmentAngle / 2}deg) translateX(-50%)` }}
-                  />
-                ))}
-              </div>
-
-              {/* Wheel */}
-              <div
-                ref={wheelRef}
-                className="wheel w-full h-full rounded-full relative overflow-hidden"
-                style={{ boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.5)' }}
-              >
-                {allSegments.map((segment, index) => {
-                  // New color logic: alternate yellow/black for ALL segments
-                  // Start with yellow (index 0 = yellow, index 1 = black, etc.)
-                  // UNLUCKY segments are always black
-                  let segmentColor = index % 2 === 0 ? 'yellow' : 'black';
-
-                  // Override: UNLUCKY is always black
-                  if (segment.type === 'unlucky') {
-                    segmentColor = 'black';
-                  }
-                  
-                  // Use segment label directly
-                  const segmentText = segment.label;
-                  
-                  // Calculate clip-path for pie slice
-                  // Each segment is a triangle from center to edge
-                  const startAngle = index * segmentAngle - 90; // -90 to start from top
-                  const endAngle = startAngle + segmentAngle;
-                  const midAngle = startAngle + segmentAngle / 2;
-                  
-                  // Convert angles to radians for calculation
-                  const startRad = (startAngle * Math.PI) / 180;
-                  const endRad = (endAngle * Math.PI) / 180;
-                  const midRad = (midAngle * Math.PI) / 180;
-                  
-                  // Calculate points for clip-path polygon (center + arc approximation)
-                  const r = 50; // radius percentage
-                  const cx = 50; // center x
-                  const cy = 50; // center y
-                  
-                  // For small angles, we can use a simple triangle
-                  // For larger angles, add intermediate points
-                  const points = [`${cx}% ${cy}%`]; // center point
-                  
-                  // Add points along the arc
-                  const numArcPoints = Math.max(2, Math.ceil(segmentAngle / 30));
-                  for (let i = 0; i <= numArcPoints; i++) {
-                    const angle = startRad + (endRad - startRad) * (i / numArcPoints);
-                    const x = cx + r * Math.cos(angle);
-                    const y = cy + r * Math.sin(angle);
-                    points.push(`${x}% ${y}%`);
-                  }
-                  
-                  const clipPath = `polygon(${points.join(', ')})`;
-                  
-                  // Text position: start from near center, extend toward edge
-                  // Text should be readable from center outward (vertical orientation)
-                  const textDistance = 22; // % from center where text starts (moved further from SPIN button)
-                  const textX = cx + textDistance * Math.cos(midRad);
-                  const textY = cy + textDistance * Math.sin(midRad);
-
-                  return (
-                    <div
-                      key={`${segment.type}-${index}`}
-                      className="segment"
-                      style={{ 
-                        clipPath: clipPath
-                      }}
-                    >
-                      <div 
-                        className={`segment-content ${segmentColor}`}
-                      >
-                        <div
-                          className={`segment-text ${segmentColor === 'yellow' ? 'yellow-text' : ''}`}
-                          style={{
-                            position: 'absolute',
-                            top: `${textY}%`,
-                            left: `${textX}%`,
-                            transform: `rotate(${midAngle}deg)`,
-                            transformOrigin: 'left center'
-                          }}
-                        >
-                          {segmentText}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Center SPIN Button */}
-              <div
-                onClick={spinWheel}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[28%] h-[28%] rounded-full flex items-center justify-center cursor-pointer z-10 border-[3px] border-[#1a1a1a] transition-transform hover:scale-105 active:scale-95"
-                style={{
-                  background: 'radial-gradient(circle at 30% 30%, #3a3a3a, #2a2a2a 40%, #1a1a1a)',
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.8), inset 0 3px 15px rgba(255, 255, 255, 0.15), inset 0 -3px 10px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                <div className="absolute inset-[-6px] rounded-full -z-10" style={{ background: 'linear-gradient(145deg, #2a2a2a, #1a1a1a)' }}></div>
-                <div className="text-2xl md:text-4xl font-black text-[#ffd700]" style={{ textShadow: '2px 2px 6px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 215, 0, 0.5)', letterSpacing: '0.1em' }}>
-                  SPIN
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Result */}
-          {result && (
-            <div className="mt-8" style={{ animation: 'fadeIn 0.5s ease' }}>
-              <div className="inline-block bg-black/90 px-8 py-6 rounded-2xl backdrop-blur-lg border-2 border-[#ffd700]" style={{ boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3)' }}>
-                {resultType === 'win' ? (
-                  <>
-                    <div className="text-xl text-[#ffd700] mb-3">🎊 FÉLICITATIONS ! 🎊</div>
-                    <div className="text-2xl text-white font-bold mb-4">{result}</div>
-                    <button
-                      disabled={isSaving || !couponCode}
-                      onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}&lang=${currentLang}`)}
-                      className={`w-full py-3 px-6 font-bold rounded-xl transition-colors text-lg ${
-                        isSaving || !couponCode 
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed' 
-                          : 'bg-[#ffd700] text-black hover:bg-[#ffb700]'
-                      }`}
-                      style={!(isSaving || !couponCode) ? { boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' } : {}}
-                    >
-                      {isSaving ? 'Génération du coupon...' : 'Récupérer mon prix →'}
-                    </button>
-                    {saveError && (
-                      <p className="text-red-500 mt-2 text-sm font-bold">Erreur de connexion. Veuillez contacter le support.</p>
-                    )}
-                  </>
-                ) : resultType === 'retry' ? (
-                  <>
-                    <div className="text-xl text-[#ffd700] mb-3">😬 PAS DE CHANCE... 😬</div>
-                    <div className="text-2xl text-white font-bold mb-4">Réessayez !</div>
-                    <button
-                      onClick={() => setResult('')}
-                      className="w-full py-3 px-6 bg-[#ffd700] text-black font-bold rounded-xl hover:bg-[#ffb700] transition-colors text-lg"
-                      style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)' }}
-                    >
-                      Tourner encore ↻
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-xl text-red-500 mb-3">😢 PERDU... 😢</div>
-                    <div className="text-xl text-white font-bold mb-4">Meilleure chance la prochaine fois !</div>
-                    <button
-                      onClick={() => router.push('/')}
-                      className="w-full py-3 px-6 bg-gray-600 text-white font-bold rounded-xl hover:bg-gray-500 transition-colors text-lg"
-                    >
-                      Retour
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+      {/* Background effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
       </div>
 
-    </>
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-[500px]">
+
+        {/* Logo */}
+        {merchant?.logo_url && (
+          <div className="mb-4">
+            <div
+              className="w-20 h-20 rounded-full p-2 shadow-xl flex items-center justify-center border-4 border-[#fbbf24]"
+              style={{ backgroundColor: merchant.logo_background_color || '#FFFFFF' }}
+            >
+              <img
+                src={merchant.logo_url}
+                alt={merchant.business_name || ''}
+                className="w-full h-full object-contain rounded-full"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Wheel container */}
+        <div ref={wheelRef} className="relative">
+          {/* Pointer */}
+          <div className="absolute left-1/2 -translate-x-1/2 z-30 -top-3">
+            <svg width="50" height="60" viewBox="0 0 50 60" className="drop-shadow-2xl">
+              <defs>
+                <linearGradient id="pointerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="50%" stopColor="#f59e0b" />
+                  <stop offset="100%" stopColor="#d97706" />
+                </linearGradient>
+              </defs>
+              <path d="M25 60 L5 5 Q25 0 45 5 Z" fill="url(#pointerGrad)" stroke="#92400e" strokeWidth="2" />
+              <circle cx="25" cy="12" r="6" fill="#fef3c7" stroke="#92400e" strokeWidth="2" />
+            </svg>
+          </div>
+
+          {/* Wheel */}
+          <div className="relative">
+            {/* LED ring */}
+            <svg className="absolute -inset-[10px] w-[calc(100%+20px)] h-[calc(100%+20px)]" viewBox="0 0 420 420">
+              {ledLights.map((led, i) => (
+                <circle
+                  key={i}
+                  cx={led.x + 10}
+                  cy={led.y + 10}
+                  r="5"
+                  fill={led.isOn ? '#fbbf24' : '#451a03'}
+                  className={led.isOn ? 'animate-pulse' : ''}
+                  style={{ animationDelay: `${i * 0.1}s` }}
+                />
+              ))}
+            </svg>
+
+            {/* Rotating wheel SVG */}
+            <svg
+              className="w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] md:w-[400px] md:h-[400px]"
+              viewBox="0 0 400 400"
+              style={{
+                transform: `rotate(${rotation}deg)`,
+                transition: isSpinning ? 'transform 5.2s cubic-bezier(0.1, 0.6, 0.15, 1)' : 'none',
+                filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))',
+              }}
+            >
+              <defs>
+                <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#fff" stopOpacity="0.3" />
+                  <stop offset="100%" stopColor="#000" stopOpacity="0.3" />
+                </radialGradient>
+                <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#fbbf24" />
+                  <stop offset="50%" stopColor="#f59e0b" />
+                  <stop offset="100%" stopColor="#d97706" />
+                </linearGradient>
+                <filter id="textShadow">
+                  <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="rgba(0,0,0,0.8)" />
+                </filter>
+              </defs>
+
+              {/* Outer gold rim */}
+              <circle cx="200" cy="200" r="190" fill="none" stroke="url(#goldRim)" strokeWidth="8" />
+              <circle cx="200" cy="200" r="182" fill="#0f172a" />
+
+              {/* Segments */}
+              {allSegments.map((segment, index) => {
+                const pos = getTextPosition(index);
+                const lines = splitTextForSegment(segment.label);
+                const hasTwoLines = lines.length > 1;
+
+                return (
+                  <g key={`${segment.type}-${index}`}>
+                    <path
+                      d={createSegmentPath(index, 178, 65)}
+                      fill={segment.color}
+                      stroke={segment.borderColor}
+                      strokeWidth="2"
+                    />
+                    <path
+                      d={createSegmentPath(index, 178, 65)}
+                      fill="url(#centerGlow)"
+                      opacity="0.3"
+                    />
+
+                    {/* Text */}
+                    <g transform={`rotate(${pos.rotation + 90}, ${pos.x}, ${pos.y})`}>
+                      {hasTwoLines ? (
+                        <>
+                          <text
+                            x={pos.x}
+                            y={pos.y - 8}
+                            fill={segment.textColor}
+                            fontSize="11"
+                            fontWeight="bold"
+                            textAnchor="middle"
+                            filter="url(#textShadow)"
+                          >
+                            {lines[0].toUpperCase()}
+                          </text>
+                          <text
+                            x={pos.x}
+                            y={pos.y + 8}
+                            fill={segment.textColor}
+                            fontSize="11"
+                            fontWeight="bold"
+                            textAnchor="middle"
+                            filter="url(#textShadow)"
+                          >
+                            {lines[1].toUpperCase()}
+                          </text>
+                        </>
+                      ) : (
+                        <text
+                          x={pos.x}
+                          y={pos.y}
+                          fill={segment.textColor}
+                          fontSize="13"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                          filter="url(#textShadow)"
+                        >
+                          {lines[0].toUpperCase()}
+                        </text>
+                      )}
+                    </g>
+                  </g>
+                );
+              })}
+
+              {/* Center decorations */}
+              <circle cx="200" cy="200" r="62" fill="url(#goldRim)" />
+              <circle cx="200" cy="200" r="56" fill="#0f172a" />
+              {[0, 45, 90, 135, 180, 225, 270, 315].map(angle => (
+                <line key={angle} x1="200" y1="148" x2="200" y2="158" stroke="#fbbf24" strokeWidth="2" transform={`rotate(${angle}, 200, 200)`} />
+              ))}
+              <circle cx="200" cy="200" r="20" fill="url(#goldRim)" />
+              <circle cx="200" cy="200" r="14" fill="#0f172a" />
+            </svg>
+
+            {/* SPIN button overlay */}
+            <button
+              onClick={spinWheel}
+              disabled={isSpinning || spinsRemaining <= 0}
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 rounded-full font-black text-base sm:text-lg disabled:cursor-not-allowed z-10"
+              style={{
+                background: isSpinning
+                  ? 'linear-gradient(145deg, #374151, #1f2937)'
+                  : 'linear-gradient(145deg, #fbbf24, #f59e0b)',
+                color: isSpinning ? '#6b7280' : '#78350f',
+                boxShadow: isSpinning
+                  ? 'inset 0 2px 8px rgba(0,0,0,0.5)'
+                  : '0 8px 25px rgba(251, 191, 36, 0.4)',
+                border: '3px solid #b45309',
+              }}
+            >
+              {isSpinning ? '...' : 'SPIN'}
+            </button>
+          </div>
+        </div>
+
+        {/* Result display */}
+        {result && (
+          <div className="mt-6 p-5 rounded-2xl text-center max-w-sm w-full" style={{
+            background: resultType === 'win'
+              ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(22, 163, 74, 0.95))'
+              : resultType === 'retry'
+              ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.95), rgba(217, 119, 6, 0.95))'
+              : 'linear-gradient(135deg, rgba(80, 20, 20, 0.95), rgba(60, 20, 20, 0.95))',
+            border: `2px solid ${resultType === 'win' ? '#22c55e' : resultType === 'retry' ? '#fbbf24' : '#ef4444'}`,
+          }}>
+            {resultType === 'win' && (
+              <>
+                <p className="text-2xl font-black text-white mb-2">🎊 {result}</p>
+                <button
+                  disabled={isSaving || !couponCode}
+                  onClick={() => router.push(`/coupon/${shopId}?code=${couponCode}&lang=${currentLang}`)}
+                  className={`w-full py-3 px-6 font-bold rounded-xl transition-colors text-lg ${
+                    isSaving || !couponCode
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  {isSaving ? 'Génération...' : 'Récupérer mon prix →'}
+                </button>
+                {saveError && (
+                  <p className="text-red-200 mt-2 text-sm font-bold">Erreur. Veuillez réessayer.</p>
+                )}
+              </>
+            )}
+            {resultType === 'retry' && (
+              <>
+                <p className="text-xl font-black text-white mb-2">🔄 Tour gratuit !</p>
+                <button
+                  onClick={() => setResult('')}
+                  className="w-full py-3 px-6 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition-colors"
+                >
+                  Tourner encore ↻
+                </button>
+              </>
+            )}
+            {resultType === 'lost' && (
+              <>
+                <p className="text-2xl font-black text-red-300 mb-2">😢 PERDU</p>
+                <p className="text-white text-sm mb-3">Meilleure chance la prochaine fois !</p>
+                <button
+                  onClick={() => router.push('/')}
+                  className="w-full py-3 px-6 bg-white/20 text-white font-bold rounded-xl hover:bg-white/30 transition-colors"
+                >
+                  Retour
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
