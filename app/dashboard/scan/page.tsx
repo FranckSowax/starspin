@@ -20,7 +20,7 @@ export default function ScanPage() {
   const [merchant, setMerchant] = useState<any>(null);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [couponDetails, setCouponDetails] = useState<any>(null);
-  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'verifying' | 'valid' | 'invalid' | 'redeemed' | 'loyalty'>('idle');
+  const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'verifying' | 'valid' | 'invalid' | 'redeemed' | 'loyalty' | 'redemption' | 'redemption_used'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sessionHistory, setSessionHistory] = useState<any[]>([]);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
@@ -31,6 +31,10 @@ export default function ScanPage() {
   const [pointsToAdd, setPointsToAdd] = useState<number>(0);
   const [addingPoints, setAddingPoints] = useState(false);
   const [pointsAdded, setPointsAdded] = useState(false);
+
+  // Redemption states
+  const [redemptionDetails, setRedemptionDetails] = useState<any>(null);
+  const [validatingRedemption, setValidatingRedemption] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -95,10 +99,15 @@ export default function ScanPage() {
     setPurchaseAmount('');
     setPointsToAdd(0);
     setPointsAdded(false);
+    setRedemptionDetails(null);
+    setValidatingRedemption(false);
   };
 
   // Check if data is a UUID (loyalty card QR code)
   const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
+  // Check if data is a redemption code (RWD-XXXXXX)
+  const isRedemptionCode = (str: string) => /^RWD-[A-Z0-9]{5,8}$/i.test(str.trim());
 
   const onScanSuccess = async (decodedText: string) => {
     if (scannerRef.current) {
@@ -108,8 +117,10 @@ export default function ScanPage() {
 
     setScanResult(decodedText);
 
-    // Detect scan type: UUID = loyalty card, otherwise = coupon
-    if (isUUID(decodedText) && merchant?.loyalty_enabled) {
+    // Detect scan type: UUID = loyalty card, RWD- = redemption, otherwise = coupon
+    if (isRedemptionCode(decodedText.trim())) {
+      verifyRedemption(decodedText.trim());
+    } else if (isUUID(decodedText) && merchant?.loyalty_enabled) {
       verifyLoyaltyCard(decodedText);
     } else {
       verifyCoupon(decodedText);
@@ -205,6 +216,96 @@ export default function ScanPage() {
       setErrorMessage('Erreur lors de l\'ajout des points');
     } finally {
       setAddingPoints(false);
+    }
+  };
+
+  // Verify a redemption code (RWD-XXXXXX)
+  const verifyRedemption = async (code: string) => {
+    setScanStatus('verifying');
+
+    try {
+      const res = await fetch(`/api/loyalty/redeem?code=${encodeURIComponent(code)}`);
+
+      if (!res.ok) {
+        setScanStatus('invalid');
+        setErrorMessage('Code de rédemption introuvable.');
+        return;
+      }
+
+      const data = await res.json();
+
+      if (!data.found || !data.redeemedReward) {
+        setScanStatus('invalid');
+        setErrorMessage('Code de rédemption introuvable.');
+        return;
+      }
+
+      const reward = data.redeemedReward;
+
+      // Check if it belongs to this merchant
+      if (reward.merchant_id !== merchant.id) {
+        setScanStatus('invalid');
+        setErrorMessage('Ce code appartient à un autre commerce.');
+        return;
+      }
+
+      setRedemptionDetails(reward);
+
+      if (reward.status === 'used') {
+        setScanStatus('invalid');
+        setErrorMessage(`Ce code a déjà été utilisé le ${new Date(reward.used_at).toLocaleDateString()}.`);
+      } else if (reward.status === 'expired' || (reward.expires_at && new Date(reward.expires_at) < new Date())) {
+        setScanStatus('invalid');
+        setErrorMessage('Ce code de rédemption a expiré.');
+      } else if (reward.status === 'cancelled') {
+        setScanStatus('invalid');
+        setErrorMessage('Ce code de rédemption a été annulé.');
+      } else {
+        setScanStatus('redemption');
+      }
+    } catch {
+      setScanStatus('invalid');
+      setErrorMessage('Erreur lors de la vérification du code.');
+    }
+  };
+
+  // Mark a redemption as used
+  const markRedemptionUsed = async () => {
+    if (!redemptionDetails) return;
+
+    setValidatingRedemption(true);
+    try {
+      const res = await fetch('/api/loyalty/redeem', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          redemptionCode: redemptionDetails.redemption_code,
+          merchantId: merchant.id,
+          action: 'use'
+        })
+      });
+
+      if (res.ok) {
+        setScanStatus('redemption_used');
+
+        setSessionHistory(prev => [{
+          type: 'redemption',
+          rewardName: redemptionDetails.reward_name,
+          rewardValue: redemptionDetails.reward_value,
+          code: redemptionDetails.redemption_code,
+          clientName: redemptionDetails.loyalty_clients?.name || 'Client',
+          clientPhone: redemptionDetails.loyalty_clients?.phone || '',
+          pointsSpent: redemptionDetails.points_spent,
+          timestamp: new Date().toISOString()
+        }, ...prev]);
+      } else {
+        const data = await res.json();
+        setErrorMessage(data.error || 'Erreur lors de la validation.');
+      }
+    } catch {
+      setErrorMessage('Erreur lors de la validation du code.');
+    } finally {
+      setValidatingRedemption(false);
     }
   };
 
@@ -376,7 +477,7 @@ export default function ScanPage() {
             </div>
           )}
 
-          {(scanStatus === 'invalid' || errorMessage) && (scanStatus !== 'valid') && (scanStatus !== 'redeemed') && (scanStatus !== 'scanning') && (scanStatus !== 'verifying') && (scanStatus !== 'idle') && (scanStatus !== 'loyalty') && (
+          {(scanStatus === 'invalid' || errorMessage) && (scanStatus !== 'valid') && (scanStatus !== 'redeemed') && (scanStatus !== 'scanning') && (scanStatus !== 'verifying') && (scanStatus !== 'idle') && (scanStatus !== 'loyalty') && (scanStatus !== 'redemption') && (scanStatus !== 'redemption_used') && (
             <div className="text-center py-8">
               <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <XCircle className="w-10 h-10" />
@@ -502,6 +603,102 @@ export default function ScanPage() {
               )}
             </div>
           )}
+
+          {/* Redemption Code Mode */}
+          {scanStatus === 'redemption' && redemptionDetails && (
+            <div className="py-6">
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Gift className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl font-bold text-purple-700 mb-1">Rédemption de récompense</h2>
+                <p className="text-gray-500 text-sm">Code scanné : <span className="font-mono font-bold">{redemptionDetails.redemption_code}</span></p>
+              </div>
+
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6 space-y-3">
+                <div className="flex justify-between items-start">
+                  <span className="text-sm text-gray-500">Récompense</span>
+                  <span className="font-semibold text-gray-900 text-right">{redemptionDetails.reward_name}</span>
+                </div>
+                {redemptionDetails.reward_value && (
+                  <div className="flex justify-between items-start">
+                    <span className="text-sm text-gray-500">Valeur</span>
+                    <span className="font-medium text-gray-900">{redemptionDetails.reward_value}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Points dépensés</span>
+                  <span className="font-medium text-amber-600">{redemptionDetails.points_spent} pts</span>
+                </div>
+                <div className="border-t border-gray-200 pt-3 flex justify-between">
+                  <span className="text-sm text-gray-500">Client</span>
+                  <div className="text-right">
+                    <p className="font-medium text-gray-900">{redemptionDetails.loyalty_clients?.name || 'Client'}</p>
+                    {redemptionDetails.loyalty_clients?.phone && (
+                      <p className="text-sm text-gray-500">{redemptionDetails.loyalty_clients.phone}</p>
+                    )}
+                    {redemptionDetails.loyalty_clients?.email && (
+                      <p className="text-sm text-gray-500">{redemptionDetails.loyalty_clients.email}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Échangé le</span>
+                  <span className="text-sm text-gray-700">{new Date(redemptionDetails.created_at).toLocaleDateString()}</span>
+                </div>
+                {redemptionDetails.expires_at && (
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-500">Expire le</span>
+                    <span className={`text-sm font-medium ${new Date(redemptionDetails.expires_at) < new Date() ? 'text-red-600' : 'text-green-600'}`}>
+                      {new Date(redemptionDetails.expires_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-500">Statut</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">En attente</span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1">
+                  Annuler
+                </Button>
+                <Button
+                  onClick={markRedemptionUsed}
+                  disabled={validatingRedemption}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  size="lg"
+                >
+                  {validatingRedemption ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Valider la remise
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Redemption Used Success */}
+          {scanStatus === 'redemption_used' && (
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+                <CheckCircle2 className="w-10 h-10" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Récompense remise !</h2>
+              <p className="text-gray-600 mb-2">
+                <span className="font-semibold">{redemptionDetails?.reward_name}</span> a été remise à {redemptionDetails?.loyalty_clients?.name || 'client'}.
+              </p>
+              <p className="text-sm text-gray-400 mb-8">Code : <span className="font-mono">{redemptionDetails?.redemption_code}</span></p>
+              <Button onClick={startScanning} size="lg" className="bg-teal-600 hover:bg-teal-700">
+                Scanner un autre client
+              </Button>
+            </div>
+          )}
         </Card>
 
         {/* Session History */}
@@ -525,6 +722,26 @@ export default function ScanPage() {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-medium text-amber-600">+{item.pointsAdded} pts</p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </>
+                  ) : item.type === 'redemption' ? (
+                    // Redemption entry
+                    <>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                          <Gift className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{item.rewardName}</p>
+                          <p className="text-sm text-gray-500">{item.clientName}{item.clientPhone ? ` · ${item.clientPhone}` : ''}</p>
+                          <p className="text-xs text-gray-400 font-mono">{item.code} · {item.pointsSpent} pts</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-purple-600">Remis</p>
                         <p className="text-xs text-gray-400">
                           {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
