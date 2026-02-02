@@ -25,7 +25,7 @@ interface SegmentColor {
   borderColor: string;
 }
 
-// Default 8-segment color palette
+// Default 8-segment color palette (S1-S6 = prizes, S7 = UNLUCKY, S8 = RETRY)
 const DEFAULT_SEGMENT_COLORS: SegmentColor[] = [
   { color: '#FF6B6B', textColor: '#FFFFFF', borderColor: '#FF5252' },
   { color: '#4ECDC4', textColor: '#FFFFFF', borderColor: '#26A69A' },
@@ -33,13 +33,9 @@ const DEFAULT_SEGMENT_COLORS: SegmentColor[] = [
   { color: '#96CEB4', textColor: '#FFFFFF', borderColor: '#4CAF50' },
   { color: '#FFEAA7', textColor: '#2D3436', borderColor: '#FDCB6E' },
   { color: '#DDA0DD', textColor: '#FFFFFF', borderColor: '#BA55D3' },
-  { color: '#FFD93D', textColor: '#2D3436', borderColor: '#FFC107' },
-  { color: '#6C5CE7', textColor: '#FFFFFF', borderColor: '#5B4BC4' },
+  { color: '#DC2626', textColor: '#FFFFFF', borderColor: '#B91C1C' },  // UNLUCKY
+  { color: '#F59E0B', textColor: '#1F2937', borderColor: '#D97706' },  // RETRY
 ];
-
-// Fixed colors for special segments
-const UNLUCKY_COLOR: SegmentColor = { color: '#DC2626', textColor: '#FFFFFF', borderColor: '#B91C1C' };
-const RETRY_COLOR: SegmentColor = { color: '#F59E0B', textColor: '#1F2937', borderColor: '#D97706' };
 
 // Split text into max 2 lines for segment labels
 const splitTextForSegment = (text: string): string[] => {
@@ -215,21 +211,23 @@ export default function SpinPage() {
   // Generate wheel segments (same logic as before)
   const generateWheelSegments = (): WheelSegment[] => {
     const segments: WheelSegment[] = [];
+    const unluckyColor = segmentColors[6] || DEFAULT_SEGMENT_COLORS[6];
+    const retryColor = segmentColors[7] || DEFAULT_SEGMENT_COLORS[7];
 
-    segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
-    segments.push({ type: 'retry', label: '#REESSAYER#', ...RETRY_COLOR });
+    segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...unluckyColor });
+    segments.push({ type: 'retry', label: '#REESSAYER#', ...retryColor });
 
     if (prizes.length === 0) {
-      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
-      segments.push({ type: 'retry', label: '#REESSAYER#', ...RETRY_COLOR });
-      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
-      segments.push({ type: 'retry', label: '#REESSAYER#', ...RETRY_COLOR });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...unluckyColor });
+      segments.push({ type: 'retry', label: '#REESSAYER#', ...retryColor });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...unluckyColor });
+      segments.push({ type: 'retry', label: '#REESSAYER#', ...retryColor });
       return segments;
     }
 
     let colorIdx = 0;
     let prizeSegments: WheelSegment[] = prizes.map(prize => {
-      const c = segmentColors[colorIdx % segmentColors.length];
+      const c = segmentColors[colorIdx % 6] || DEFAULT_SEGMENT_COLORS[colorIdx % 6];
       colorIdx++;
       return {
         type: 'prize' as const,
@@ -258,7 +256,7 @@ export default function SpinPage() {
     }
 
     while (segments.length < 6) {
-      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...UNLUCKY_COLOR });
+      segments.push({ type: 'unlucky', label: '#UNLUCKY#', ...unluckyColor });
     }
 
     // Interleave segments

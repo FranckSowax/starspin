@@ -135,24 +135,26 @@ export function WheelPreview({
       if (quantity > 0) colorIndex++;
     });
     
-    // Add UNLUCKY segments based on quantity
+    // Add UNLUCKY segments based on quantity (use S7 color = index 6)
+    const unluckyColor = segmentColors?.[6];
     for (let i = 0; i < unluckyQuantity; i++) {
       allSegments.push({
         id: `unlucky-${i}`,
         name: '#UNLUCKY#',
-        color: '#DC2626', // Red
-        textColor: '#FFFFFF',
+        color: unluckyColor?.color || '#DC2626',
+        textColor: unluckyColor?.textColor || '#FFFFFF',
         type: 'unlucky',
       });
     }
-    
-    // Add RETRY segments based on quantity
+
+    // Add RETRY segments based on quantity (use S8 color = index 7)
+    const retryColor = segmentColors?.[7];
     for (let i = 0; i < retryQuantity; i++) {
       allSegments.push({
         id: `retry-${i}`,
         name: '#RÉESSAYER#',
-        color: '#F59E0B', // Yellow/Amber
-        textColor: '#1F2937',
+        color: retryColor?.color || '#F59E0B',
+        textColor: retryColor?.textColor || '#1F2937',
         type: 'retry',
       });
     }

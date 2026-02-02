@@ -11,7 +11,7 @@ import { Prize } from '@/lib/types/database';
 import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock, Palette } from 'lucide-react';
 import { WheelPreview, PrizeWithQuantity } from '@/components/dashboard/WheelPreview';
 
-// Default segment colors
+// Default segment colors (S1-S6 = prizes, S7 = #UNLUCKY#, S8 = #RÉESSAYER#)
 const DEFAULT_SEGMENT_COLORS = [
   { color: '#FF6B6B', textColor: '#FFFFFF', borderColor: '#FF5252' },
   { color: '#4ECDC4', textColor: '#FFFFFF', borderColor: '#26A69A' },
@@ -19,9 +19,12 @@ const DEFAULT_SEGMENT_COLORS = [
   { color: '#96CEB4', textColor: '#FFFFFF', borderColor: '#4CAF50' },
   { color: '#FFEAA7', textColor: '#2D3436', borderColor: '#FDCB6E' },
   { color: '#DDA0DD', textColor: '#FFFFFF', borderColor: '#BA55D3' },
-  { color: '#FFD93D', textColor: '#2D3436', borderColor: '#FFC107' },
-  { color: '#6C5CE7', textColor: '#FFFFFF', borderColor: '#5B4BC4' },
+  { color: '#DC2626', textColor: '#FFFFFF', borderColor: '#B91C1C' },  // #UNLUCKY#
+  { color: '#F59E0B', textColor: '#1F2937', borderColor: '#D97706' },  // #RÉESSAYER#
 ];
+
+// Labels for each segment slot
+const SEGMENT_LABELS = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', '#UNLUCKY#', '#RÉESSAYER#'];
 
 // Special segment types that are always present on the wheel
 const SPECIAL_SEGMENTS = {
@@ -695,39 +698,47 @@ export default function PrizesPage() {
               <h4 className="font-bold text-gray-900">Couleurs des segments</h4>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {segmentColors.map((config, index) => (
-                <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 flex items-center gap-2">
-                  <span className="text-xs text-gray-500 w-6 flex-shrink-0">S{index + 1}</span>
-                  <div className="flex gap-1">
-                    <label className="cursor-pointer" title="Couleur du segment">
-                      <input
-                        type="color"
-                        value={config.color}
-                        onChange={(e) => {
-                          const newColors = [...segmentColors];
-                          newColors[index] = { ...config, color: e.target.value, borderColor: e.target.value };
-                          setSegmentColors(newColors);
-                        }}
-                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                      />
-                    </label>
-                    <label className="cursor-pointer" title="Couleur du texte">
-                      <input
-                        type="color"
-                        value={config.textColor}
-                        onChange={(e) => {
-                          const newColors = [...segmentColors];
-                          newColors[index] = { ...config, textColor: e.target.value };
-                          setSegmentColors(newColors);
-                        }}
-                        className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                      />
-                    </label>
+              {segmentColors.map((config, index) => {
+                const label = SEGMENT_LABELS[index] || `S${index + 1}`;
+                const isSpecial = index >= 6;
+                return (
+                  <div key={index} className={`rounded-lg p-3 border flex items-center gap-2 ${
+                    isSpecial ? 'bg-gray-50 border-gray-300' : 'bg-white border-gray-200'
+                  }`}>
+                    <span className={`text-xs w-auto flex-shrink-0 font-medium ${
+                      index === 6 ? 'text-red-600' : index === 7 ? 'text-yellow-600' : 'text-gray-500'
+                    }`}>{label}</span>
+                    <div className="flex gap-1 ml-auto">
+                      <label className="cursor-pointer" title="Couleur du segment">
+                        <input
+                          type="color"
+                          value={config.color}
+                          onChange={(e) => {
+                            const newColors = [...segmentColors];
+                            newColors[index] = { ...config, color: e.target.value, borderColor: e.target.value };
+                            setSegmentColors(newColors);
+                          }}
+                          className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                        />
+                      </label>
+                      <label className="cursor-pointer" title="Couleur du texte">
+                        <input
+                          type="color"
+                          value={config.textColor}
+                          onChange={(e) => {
+                            const newColors = [...segmentColors];
+                            newColors[index] = { ...config, textColor: e.target.value };
+                            setSegmentColors(newColors);
+                          }}
+                          className="w-8 h-8 rounded cursor-pointer border-0 p-0"
+                        />
+                      </label>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-            <p className="text-xs text-gray-500 mt-2">Premier carré = fond du segment, second = couleur du texte</p>
+            <p className="text-xs text-gray-500 mt-2">Premier carré = fond du segment, second = couleur du texte. S7 et S8 = segments spéciaux.</p>
           </div>
         </Card>
 
