@@ -484,14 +484,15 @@ export default function DashboardPage() {
 
               <div className="bg-black/30 rounded-lg p-4 mb-6 border border-white/10">
                 <code className="text-sm font-mono text-emerald-400 break-all">
-                  {process.env.NEXT_PUBLIC_APP_URL}/rate/{user.id}
+                  {(process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : ''))}/rate/{user.id}
                 </code>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Button 
+                <Button
                   onClick={() => {
-                    navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`);
+                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+                    navigator.clipboard.writeText(`${baseUrl}/rate/${user.id}`);
                     alert(t('dashboard.reviewLink.copied'));
                   }}
                   className="bg-white text-slate-900 hover:bg-slate-100 border-0"
