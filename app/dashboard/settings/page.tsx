@@ -7,47 +7,18 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
-  Check, X, Loader2, Globe, Bell, Shield, Link2, Calendar,
+  Check, X, Loader2, Globe, Bell, Shield, Link2,
   Settings, ExternalLink
 } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 
-type TabId = 'general' | 'links' | 'planning';
-
-interface DaySchedule {
-  open: boolean;
-  from: string;
-  to: string;
-}
-
-type WeeklySchedule = Record<string, DaySchedule>;
-
-const DEFAULT_SCHEDULE: WeeklySchedule = {
-  monday: { open: true, from: '09:00', to: '18:00' },
-  tuesday: { open: true, from: '09:00', to: '18:00' },
-  wednesday: { open: true, from: '09:00', to: '18:00' },
-  thursday: { open: true, from: '09:00', to: '18:00' },
-  friday: { open: true, from: '09:00', to: '18:00' },
-  saturday: { open: true, from: '10:00', to: '17:00' },
-  sunday: { open: false, from: '10:00', to: '17:00' },
-};
-
-const DAY_LABELS: Record<string, { fr: string; en: string }> = {
-  monday: { fr: 'Lundi', en: 'Monday' },
-  tuesday: { fr: 'Mardi', en: 'Tuesday' },
-  wednesday: { fr: 'Mercredi', en: 'Wednesday' },
-  thursday: { fr: 'Jeudi', en: 'Thursday' },
-  friday: { fr: 'Vendredi', en: 'Friday' },
-  saturday: { fr: 'Samedi', en: 'Saturday' },
-  sunday: { fr: 'Dimanche', en: 'Sunday' },
-};
+type TabId = 'general' | 'links';
 
 const TABS: { id: TabId; icon: React.ReactNode; labelFr: string; labelEn: string }[] = [
   { id: 'general', icon: <Settings className="w-4 h-4" />, labelFr: 'General', labelEn: 'General' },
   { id: 'links', icon: <Link2 className="w-4 h-4" />, labelFr: 'Liens', labelEn: 'Links' },
-  { id: 'planning', icon: <Calendar className="w-4 h-4" />, labelFr: 'Planification', labelEn: 'Planning' },
 ];
 
 export default function SettingsPage() {
@@ -72,9 +43,6 @@ export default function SettingsPage() {
   const [tiktokUrl, setTiktokUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
   const [tripadvisorUrl, setTripadvisorUrl] = useState('');
-
-  // Planning settings
-  const [weeklySchedule, setWeeklySchedule] = useState<WeeklySchedule>(DEFAULT_SCHEDULE);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -105,15 +73,6 @@ export default function SettingsPage() {
       setInstagramUrl(merchantData?.instagram_url || '');
       setTripadvisorUrl(merchantData?.tripadvisor_url || '');
 
-      // Schedule
-      if (merchantData?.weekly_schedule) {
-        try {
-          const schedule = JSON.parse(merchantData.weekly_schedule);
-          setWeeklySchedule({ ...DEFAULT_SCHEDULE, ...schedule });
-        } catch {
-          setWeeklySchedule(DEFAULT_SCHEDULE);
-        }
-      }
     };
 
     checkAuth();
@@ -138,8 +97,6 @@ export default function SettingsPage() {
         updateData.tiktok_url = tiktokUrl || null;
         updateData.instagram_url = instagramUrl || null;
         updateData.tripadvisor_url = tripadvisorUrl || null;
-      } else if (activeTab === 'planning') {
-        updateData.weekly_schedule = JSON.stringify(weeklySchedule);
       }
 
       const { error } = await supabase
@@ -161,13 +118,6 @@ export default function SettingsPage() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const updateScheduleDay = (day: string, field: keyof DaySchedule, value: any) => {
-    setWeeklySchedule(prev => ({
-      ...prev,
-      [day]: { ...prev[day], [field]: value },
-    }));
   };
 
   if (!user || !merchant) {
@@ -550,80 +500,6 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* ===== PLANNING TAB ===== */}
-          {activeTab === 'planning' && (
-            <div className="space-y-5">
-              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
-                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                    <Calendar className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-900">
-                      {isFr ? "Horaires d'ouverture" : 'Opening Hours'}
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      {isFr
-                        ? 'Configurez vos horaires pour chaque jour de la semaine'
-                        : 'Configure your hours for each day of the week'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {Object.entries(weeklySchedule).map(([day, schedule]) => (
-                    <div
-                      key={day}
-                      className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-200 ${
-                        schedule.open ? 'bg-white' : 'bg-gray-50'
-                      }`}
-                    >
-                      {/* Toggle */}
-                      <label className="relative cursor-pointer shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={schedule.open}
-                          onChange={(e) => updateScheduleDay(day, 'open', e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-9 h-5 bg-gray-200 rounded-full peer peer-checked:bg-teal-600 transition-colors" />
-                        <div className="absolute left-[2px] top-[2px] w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform" />
-                      </label>
-
-                      {/* Day name */}
-                      <span className={`text-sm font-medium w-24 ${schedule.open ? 'text-gray-900' : 'text-gray-400'}`}>
-                        {isFr ? DAY_LABELS[day].fr : DAY_LABELS[day].en}
-                      </span>
-
-                      {/* Time inputs */}
-                      {schedule.open ? (
-                        <div className="flex items-center gap-2 flex-1">
-                          <input
-                            type="time"
-                            value={schedule.from}
-                            onChange={(e) => updateScheduleDay(day, 'from', e.target.value)}
-                            className="px-2 py-1.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
-                          />
-                          <span className="text-gray-400 text-xs">{isFr ? 'a' : 'to'}</span>
-                          <input
-                            type="time"
-                            value={schedule.to}
-                            onChange={(e) => updateScheduleDay(day, 'to', e.target.value)}
-                            className="px-2 py-1.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-200"
-                          />
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400 italic">
-                          {isFr ? 'Ferme' : 'Closed'}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
-          )}
         </div>
 
         {/* Save Button */}
