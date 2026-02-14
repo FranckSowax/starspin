@@ -26,18 +26,17 @@ interface CustomerDetailsModalProps {
   onClose: () => void;
 }
 
-// Modal de détails client
 function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) {
   if (!customer) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white p-6">
+        <div className="relative bg-gradient-to-r from-teal-600 to-emerald-600 text-white p-6">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold shadow-lg ${
+              <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold shadow-lg ${
                 customer.email || customer.phone
                   ? 'bg-white text-teal-600'
                   : 'bg-teal-500 text-white'
@@ -45,7 +44,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
                 {customer.email ? customer.email[0].toUpperCase() : customer.phone ? '📱' : '?'}
               </div>
               <div>
-                <h2 className="text-xl font-bold">
+                <h2 className="text-lg font-bold">
                   {customer.email || customer.phone || 'Client Anonyme'}
                 </h2>
                 <p className="text-teal-100 text-sm font-mono">
@@ -55,91 +54,91 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 p-6 bg-slate-50 border-b border-slate-200">
+        <div className="grid grid-cols-3 gap-4 p-5 bg-gray-50 border-b border-gray-200">
           <div className="text-center">
-            <p className="text-2xl font-bold text-slate-900">{customer.total_reviews}</p>
-            <p className="text-sm text-slate-500">Avis Total</p>
+            <p className="text-2xl font-bold text-gray-900">{customer.total_reviews}</p>
+            <p className="text-xs text-gray-500">Avis Total</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
-              <p className="text-2xl font-bold text-slate-900">{customer.avg_rating.toFixed(1)}</p>
-              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+              <p className="text-2xl font-bold text-gray-900">{customer.avg_rating.toFixed(1)}</p>
+              <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             </div>
-            <p className="text-sm text-slate-500">Note Moyenne</p>
+            <p className="text-xs text-gray-500">Note Moyenne</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-slate-900">
-              {customer.total_reviews > 1 ? 'Habitué' : 'Nouveau'}
+            <p className="text-2xl font-bold text-gray-900">
+              {customer.total_reviews > 1 ? 'Habitu\u00e9' : 'Nouveau'}
             </p>
-            <p className="text-sm text-slate-500">Statut</p>
+            <p className="text-xs text-gray-500">Statut</p>
           </div>
         </div>
 
         {/* Contact Info */}
-        <div className="p-6 border-b border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Coordonnées</h3>
+        <div className="p-5 border-b border-gray-200">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Coordonn\u00e9es</h3>
           <div className="space-y-2">
             {customer.email && (
-              <div className="flex items-center gap-3 text-slate-700">
-                <Mail className="w-5 h-5 text-slate-400" />
+              <div className="flex items-center gap-3 text-sm text-gray-700">
+                <Mail className="w-4 h-4 text-gray-400" />
                 <span>{customer.email}</span>
               </div>
             )}
             {customer.phone && (
-              <div className="flex items-center gap-3 text-slate-700">
-                <Phone className="w-5 h-5 text-green-500" />
+              <div className="flex items-center gap-3 text-sm text-gray-700">
+                <Phone className="w-4 h-4 text-green-500" />
                 <span>{customer.phone}</span>
                 <a
                   href={`https://wa.me/${customer.phone.replace(/^\+/, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-2 text-green-600 hover:text-green-700 flex items-center gap-1 text-sm"
+                  className="ml-2 text-green-600 hover:text-green-700 flex items-center gap-1 text-xs"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <MessageCircle className="w-3.5 h-3.5" />
                   WhatsApp
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
             )}
             {!customer.email && !customer.phone && (
-              <p className="text-slate-400 italic">Aucune coordonnée disponible</p>
+              <p className="text-sm text-gray-400 italic">Aucune coordonn\u00e9e disponible</p>
             )}
           </div>
         </div>
 
         {/* Feedbacks List */}
-        <div className="p-6 max-h-[300px] overflow-y-auto">
-          <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+        <div className="p-5 max-h-[280px] overflow-y-auto">
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
             Historique des Avis ({customer.feedbacks.length})
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {customer.feedbacks.map((feedback, index) => (
               <div
                 key={feedback.id || index}
-                className="p-4 bg-slate-50 rounded-xl border border-slate-100"
+                className="p-3.5 bg-gray-50 rounded-lg border border-gray-100"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
+                <div className="flex justify-between items-start mb-1.5">
+                  <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`w-4 h-4 ${
+                        className={`w-3.5 h-3.5 ${
                           star <= feedback.rating
                             ? 'text-amber-400 fill-amber-400'
-                            : 'text-slate-200'
+                            : 'text-gray-200'
                         }`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-gray-400">
                     {new Date(feedback.created_at).toLocaleDateString('fr-FR', {
                       day: 'numeric',
                       month: 'short',
@@ -149,11 +148,10 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
                     })}
                   </span>
                 </div>
-                {feedback.comment && (
-                  <p className="text-sm text-slate-600">{feedback.comment}</p>
-                )}
-                {!feedback.comment && (
-                  <p className="text-sm text-slate-400 italic">Pas de commentaire</p>
+                {feedback.comment ? (
+                  <p className="text-sm text-gray-600">{feedback.comment}</p>
+                ) : (
+                  <p className="text-sm text-gray-400 italic">Pas de commentaire</p>
                 )}
               </div>
             ))}
@@ -161,8 +159,8 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
-          <Button onClick={onClose} variant="outline">
+        <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+          <Button onClick={onClose} variant="outline" className="text-sm">
             Fermer
           </Button>
         </div>
@@ -214,7 +212,6 @@ export default function CustomersPage() {
       const whatsappCustomersMap = new Map<string, Customer>();
 
       feedbackData?.forEach((feedback) => {
-        const hasEmail = feedback.customer_email;
         const hasPhone = feedback.customer_phone;
         const map = hasPhone ? whatsappCustomersMap : webCustomersMap;
         const key = feedback.user_token;
@@ -283,166 +280,140 @@ export default function CustomersPage() {
 
   if (loading || !user || !merchant) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-slate-600">Chargement de vos clients...</p>
+      <DashboardLayout merchant={merchant}>
+        <div className="flex items-center justify-center h-96">
+          <Loader2Spinner />
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout merchant={merchant}>
-      <div className="space-y-8">
+      <div className="space-y-6">
+        {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Clients</h1>
-            <p className="text-slate-500 mt-1">Gérez votre base de données clients et leurs interactions</p>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                <Users className="w-5 h-5" />
+              </div>
+              Clients
+            </h1>
+            <p className="text-gray-500 mt-1 ml-[52px]">G\u00e9rez votre base de donn\u00e9es clients et leurs interactions</p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" className="gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Exporter CSV
-            </Button>
-          </div>
+          <Button variant="outline" className="gap-2 border-gray-200 text-gray-600 hover:bg-gray-50">
+            <TrendingUp className="w-4 h-4" />
+            Exporter CSV
+          </Button>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="p-6 border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-teal-50 rounded-xl text-teal-600">
-                <Users className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Clients Totaux</p>
-                <h3 className="text-2xl font-bold text-slate-900">{totalCustomers}</h3>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600">
-                <Mail className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Emails Collectés</p>
-                <h3 className="text-2xl font-bold text-slate-900">{totalEmails}</h3>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-6 border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-green-50 rounded-xl text-green-600">
-                <Phone className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">WhatsApp Collectés</p>
-                <h3 className="text-2xl font-bold text-slate-900">{totalPhones}</h3>
+        {/* Stats Grid - compact 4-col */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'Clients Totaux', value: totalCustomers, icon: Users, color: 'teal' },
+            { label: 'Emails Collect\u00e9s', value: totalEmails, icon: Mail, color: 'emerald' },
+            { label: 'WhatsApp Collect\u00e9s', value: totalPhones, icon: Phone, color: 'teal' },
+            {
+              label: 'Avis Moyen/Client',
+              value: totalCustomers > 0
+                ? (([...webCustomers, ...whatsappCustomers].reduce((sum, c) => sum + c.total_reviews, 0)) / totalCustomers).toFixed(1)
+                : '0',
+              icon: Star,
+              color: 'emerald'
+            },
+          ].map((stat, i) => (
+            <div key={i} className="group relative p-4 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
+              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.color === 'teal' ? 'bg-teal-50 text-teal-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                  <stat.icon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500 truncate">{stat.label}</p>
+                  <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+                </div>
               </div>
             </div>
-          </Card>
-
-          <Card className="p-6 border-slate-100 shadow-sm">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-3 bg-blue-50 rounded-xl text-blue-600">
-                <Star className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Avis Moyen/Client</p>
-                <h3 className="text-2xl font-bold text-slate-900">
-                  {totalCustomers > 0
-                    ? (([...webCustomers, ...whatsappCustomers].reduce((sum, c) => sum + c.total_reviews, 0)) / totalCustomers).toFixed(1)
-                    : '0'
-                  }
-                </h3>
-              </div>
-            </div>
-          </Card>
+          ))}
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-slate-200">
+        <div className="flex gap-1 border-b border-gray-200">
           <button
             onClick={() => { setActiveTab('web'); setSearchQuery(''); }}
-            className={`flex items-center gap-2 px-6 py-3 font-medium text-sm transition-all border-b-2 -mb-px ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
               activeTab === 'web'
-                ? 'text-teal-600 border-teal-600 bg-teal-50/50'
-                : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-50'
+                ? 'text-teal-600 border-teal-600'
+                : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             <Mail className="w-4 h-4" />
             Workflow Web
-            <Badge variant="secondary" className="ml-1">{webCustomers.length}</Badge>
+            <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">{webCustomers.length}</span>
           </button>
           <button
             onClick={() => { setActiveTab('whatsapp'); setSearchQuery(''); }}
-            className={`flex items-center gap-2 px-6 py-3 font-medium text-sm transition-all border-b-2 -mb-px ${
+            className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
               activeTab === 'whatsapp'
-                ? 'text-green-600 border-green-600 bg-green-50/50'
-                : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-50'
+                ? 'text-green-600 border-green-600'
+                : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             <MessageCircle className="w-4 h-4" />
             Workflow WhatsApp
-            <Badge variant="secondary" className="ml-1">{whatsappCustomers.length}</Badge>
+            <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">{whatsappCustomers.length}</span>
           </button>
         </div>
 
-        {/* Search and Filter Bar */}
-        <Card className="p-4 border-slate-100 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+        {/* Customer Table Card */}
+        <div className="group relative border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
+          <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+
+          {/* Search in card header */}
+          <div className="p-4 border-b border-gray-100">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder={activeTab === 'web' ? 'Rechercher par email...' : 'Rechercher par numéro WhatsApp...'}
+                placeholder={activeTab === 'web' ? 'Rechercher par email...' : 'Rechercher par num\u00e9ro WhatsApp...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-teal-50/30 transition-all duration-200"
               />
             </div>
-            <Button variant="outline" className="gap-2 text-slate-600">
-              <Filter className="w-4 h-4" />
-              Filtres
-            </Button>
           </div>
-        </Card>
 
-        {/* Customer List Table */}
-        <Card className="border-slate-100 shadow-sm overflow-hidden">
+          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Client</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-gray-50/80">
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {activeTab === 'web' ? 'Email' : 'WhatsApp'}
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Note Moyenne</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Avis</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Dernière Visite</th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Avis</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Derni\u00e8re Visite</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-gray-100">
                 {filteredCustomers.length > 0 ? (
                   filteredCustomers.map((customer) => (
-                    <tr key={customer.user_token} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-sm ${
+                    <tr key={customer.user_token} className="hover:bg-teal-50/30 transition-colors">
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold ${
                             activeTab === 'web'
                               ? customer.email
-                                ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white'
-                                : 'bg-slate-100 text-slate-500'
+                                ? 'bg-teal-50 text-teal-600'
+                                : 'bg-gray-100 text-gray-400'
                               : customer.phone
-                                ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white'
-                                : 'bg-slate-100 text-slate-500'
+                                ? 'bg-emerald-50 text-emerald-600'
+                                : 'bg-gray-100 text-gray-400'
                           }`}>
                             {activeTab === 'web'
                               ? (customer.email ? customer.email[0].toUpperCase() : '?')
@@ -450,100 +421,99 @@ export default function CustomersPage() {
                             }
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">
+                            <p className="text-sm font-medium text-gray-900">
                               {activeTab === 'web'
                                 ? (customer.email || 'Client Anonyme')
                                 : (customer.phone || 'Client Anonyme')
                               }
                             </p>
-                            <p className="text-xs text-slate-500 font-mono">
-                              ID: {customer.user_token.substring(0, 8)}...
+                            <p className="text-xs text-gray-400 font-mono">
+                              {customer.user_token.substring(0, 8)}...
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-5 py-3 whitespace-nowrap">
                         {activeTab === 'web' ? (
                           customer.email ? (
-                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                              <Mail className="w-4 h-4 text-slate-400" />
+                            <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                              <Mail className="w-3.5 h-3.5 text-gray-400" />
                               {customer.email}
                             </div>
                           ) : (
-                            <span className="text-slate-400 text-sm">-</span>
+                            <span className="text-gray-400 text-sm">-</span>
                           )
                         ) : (
                           customer.phone ? (
-                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                              <Phone className="w-4 h-4 text-green-500" />
+                            <div className="flex items-center gap-1.5 text-sm text-gray-600">
+                              <Phone className="w-3.5 h-3.5 text-green-500" />
                               {customer.phone}
                             </div>
                           ) : (
-                            <span className="text-slate-400 text-sm">-</span>
+                            <span className="text-gray-400 text-sm">-</span>
                           )
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-5 py-3 whitespace-nowrap">
                         {customer.total_reviews > 1 ? (
-                          <Badge className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-purple-100">
-                            Habitué
-                          </Badge>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-teal-50 text-teal-700">
+                            Habitu\u00e9
+                          </span>
                         ) : (
-                          <Badge className="bg-slate-100 text-slate-600 hover:bg-slate-200 border-slate-200">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                             Nouveau
-                          </Badge>
+                          </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-5 py-3 whitespace-nowrap">
                         <div className="flex items-center gap-1">
-                          <span className="font-semibold text-slate-900">{customer.avg_rating.toFixed(1)}</span>
-                          <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                          <span className="text-sm font-semibold text-gray-900">{customer.avg_rating.toFixed(1)}</span>
+                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-slate-600">{customer.total_reviews} avis</span>
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-600">{customer.total_reviews}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2 text-sm text-slate-500">
-                          <Calendar className="w-4 h-4" />
+                      <td className="px-5 py-3 whitespace-nowrap">
+                        <span className="text-sm text-gray-500">
                           {new Date(customer.last_review).toLocaleDateString('fr-FR', {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric'
                           })}
-                        </div>
+                        </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right">
+                      <td className="px-5 py-3 whitespace-nowrap text-right">
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+                          className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 text-xs"
                           onClick={() => setSelectedCustomer(customer)}
                         >
-                          Détails
+                          D\u00e9tails
                         </Button>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                    <td colSpan={7} className="px-5 py-12 text-center text-gray-500">
                       <div className="flex flex-col items-center justify-center">
                         {activeTab === 'web' ? (
-                          <Mail className="w-12 h-12 text-slate-300 mb-3" />
+                          <Mail className="w-10 h-10 text-gray-300 mb-3" />
                         ) : (
-                          <MessageCircle className="w-12 h-12 text-slate-300 mb-3" />
+                          <MessageCircle className="w-10 h-10 text-gray-300 mb-3" />
                         )}
-                        <p className="text-lg font-medium text-slate-900">
+                        <p className="text-base font-medium text-gray-900">
                           {searchQuery
-                            ? 'Aucun client trouvé pour cette recherche'
-                            : `Aucun client ${activeTab === 'web' ? 'Web' : 'WhatsApp'} trouvé`
+                            ? 'Aucun client trouv\u00e9 pour cette recherche'
+                            : `Aucun client ${activeTab === 'web' ? 'Web' : 'WhatsApp'} trouv\u00e9`
                           }
                         </p>
-                        <p className="text-sm">
+                        <p className="text-sm text-gray-400 mt-1">
                           {searchQuery
                             ? 'Essayez une autre recherche'
-                            : `Les clients du workflow ${activeTab === 'web' ? 'Web (email)' : 'WhatsApp'} apparaîtront ici.`
+                            : `Les clients du workflow ${activeTab === 'web' ? 'Web (email)' : 'WhatsApp'} appara\u00eetront ici.`
                           }
                         </p>
                       </div>
@@ -553,7 +523,7 @@ export default function CustomersPage() {
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Customer Details Modal */}
@@ -564,5 +534,14 @@ export default function CustomersPage() {
         />
       )}
     </DashboardLayout>
+  );
+}
+
+function Loader2Spinner() {
+  return (
+    <div className="text-center">
+      <div className="w-10 h-10 border-3 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+      <p className="text-sm text-gray-500">Chargement de vos clients...</p>
+    </div>
   );
 }

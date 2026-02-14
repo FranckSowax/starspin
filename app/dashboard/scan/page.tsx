@@ -7,7 +7,7 @@ import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { CheckCircle2, XCircle, AlertCircle, RefreshCw, Award, Star, Coins } from 'lucide-react';
+import { CheckCircle2, XCircle, RefreshCw, Award, Star, Coins, Ticket, ChevronDown, ChevronUp, ScanLine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import type { LoyaltyClient } from '@/lib/types/database';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,7 @@ export default function ScanPage() {
   const [scanStatus, setScanStatus] = useState<'idle' | 'scanning' | 'verifying' | 'valid' | 'invalid' | 'redeemed' | 'loyalty' | 'redemption' | 'redemption_used'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sessionHistory, setSessionHistory] = useState<any[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   // Loyalty card states
@@ -39,7 +40,7 @@ export default function ScanPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         router.push('/auth/login');
         return;
@@ -70,8 +71,8 @@ export default function ScanPage() {
       // Initialize scanner
       const scanner = new Html5QrcodeScanner(
         "reader",
-        { 
-          fps: 10, 
+        {
+          fps: 10,
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
           showTorchButtonIfSupported: true
@@ -148,7 +149,7 @@ export default function ScanPage() {
 
       if (!data.client) {
         setScanStatus('invalid');
-        setErrorMessage('Carte fidélité introuvable pour ce commerce.');
+        setErrorMessage('Carte fidelite introuvable pour ce commerce.');
         return;
       }
 
@@ -228,7 +229,7 @@ export default function ScanPage() {
 
       if (!res.ok) {
         setScanStatus('invalid');
-        setErrorMessage('Code de rédemption introuvable.');
+        setErrorMessage('Code de redemption introuvable.');
         return;
       }
 
@@ -236,7 +237,7 @@ export default function ScanPage() {
 
       if (!data.found || !data.redeemedReward) {
         setScanStatus('invalid');
-        setErrorMessage('Code de rédemption introuvable.');
+        setErrorMessage('Code de redemption introuvable.');
         return;
       }
 
@@ -245,7 +246,7 @@ export default function ScanPage() {
       // Check if it belongs to this merchant
       if (reward.merchant_id !== merchant.id) {
         setScanStatus('invalid');
-        setErrorMessage('Ce code appartient à un autre commerce.');
+        setErrorMessage('Ce code appartient a un autre commerce.');
         return;
       }
 
@@ -253,19 +254,19 @@ export default function ScanPage() {
 
       if (reward.status === 'used') {
         setScanStatus('invalid');
-        setErrorMessage(`Ce code a déjà été utilisé le ${new Date(reward.used_at).toLocaleDateString()}.`);
+        setErrorMessage(`Ce code a deja ete utilise le ${new Date(reward.used_at).toLocaleDateString()}.`);
       } else if (reward.status === 'expired' || (reward.expires_at && new Date(reward.expires_at) < new Date())) {
         setScanStatus('invalid');
-        setErrorMessage('Ce code de rédemption a expiré.');
+        setErrorMessage('Ce code de redemption a expire.');
       } else if (reward.status === 'cancelled') {
         setScanStatus('invalid');
-        setErrorMessage('Ce code de rédemption a été annulé.');
+        setErrorMessage('Ce code de redemption a ete annule.');
       } else {
         setScanStatus('redemption');
       }
     } catch {
       setScanStatus('invalid');
-      setErrorMessage('Erreur lors de la vérification du code.');
+      setErrorMessage('Erreur lors de la verification du code.');
     }
   };
 
@@ -311,9 +312,8 @@ export default function ScanPage() {
 
   const verifyCoupon = async (data: string) => {
     setScanStatus('verifying');
-    
+
     // Extract code from URL or raw text
-    // Handles direct code (e.g., "ABC-1234") or URL (e.g., "https://.../coupon/...?code=ABC-1234")
     let codeToVerify = data;
     try {
       if (data.includes('code=')) {
@@ -335,7 +335,7 @@ export default function ScanPage() {
 
       if (error || !coupon) {
         setScanStatus('invalid');
-        setErrorMessage(t('scan.invalidCode') || 'Code invalide ou appartenant à un autre commerçant.');
+        setErrorMessage(t('scan.invalidCode') || 'Code invalide ou appartenant a un autre commercant.');
         return;
       }
 
@@ -343,17 +343,17 @@ export default function ScanPage() {
 
       if (coupon.used) {
         setScanStatus('invalid');
-        setErrorMessage(`${t('scan.alreadyUsed') || 'Ce coupon a déjà été utilisé le'} ${new Date(coupon.used_at).toLocaleDateString()}`);
+        setErrorMessage(`${t('scan.alreadyUsed') || 'Ce coupon a deja ete utilise le'} ${new Date(coupon.used_at).toLocaleDateString()}`);
       } else if (new Date(coupon.expires_at) < new Date()) {
         setScanStatus('invalid');
-        setErrorMessage(t('scan.expired') || 'Ce coupon a expiré.');
+        setErrorMessage(t('scan.expired') || 'Ce coupon a expire.');
       } else {
         setScanStatus('valid');
       }
 
     } catch {
       setScanStatus('invalid');
-      setErrorMessage(t('common.error') || 'Une erreur est survenue lors de la vérification.');
+      setErrorMessage(t('common.error') || 'Une erreur est survenue lors de la verification.');
     }
   };
 
@@ -363,9 +363,9 @@ export default function ScanPage() {
     try {
       const { error } = await supabase
         .from('coupons')
-        .update({ 
-          used: true, 
-          used_at: new Date().toISOString() 
+        .update({
+          used: true,
+          used_at: new Date().toISOString()
         })
         .eq('id', couponDetails.id);
 
@@ -390,14 +390,14 @@ export default function ScanPage() {
         body: JSON.stringify({
           merchantId: merchant.id,
           type: 'coupon_used',
-          title: '✅ Coupon utilisé',
-          message: `Le coupon "${couponDetails.code}" pour "${couponDetails.prize_name}" a été validé.`,
+          title: 'Coupon utilise',
+          message: `Le coupon "${couponDetails.code}" pour "${couponDetails.prize_name}" a ete valide.`,
           data: { couponCode: couponDetails.code, prizeName: couponDetails.prize_name },
         }),
       }).catch(() => {}); // Fire and forget
 
     } catch {
-      setErrorMessage('Impossible de valider le coupon. Veuillez réessayer.');
+      setErrorMessage('Impossible de valider le coupon. Veuillez reessayer.');
     }
   };
 
@@ -405,8 +405,8 @@ export default function ScanPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading...</p>
+          <div className="w-12 h-12 border-3 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-sm text-gray-500">Loading...</p>
         </div>
       </div>
     );
@@ -414,363 +414,393 @@ export default function ScanPage() {
 
   return (
     <DashboardLayout merchant={merchant}>
-      <div className="space-y-6 max-w-2xl mx-auto">
+      <div className="max-w-xl mx-auto space-y-4">
+        {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Scanner de Coupon</h1>
-          <p className="text-gray-600">Scannez le QR code du client pour vérifier et valider son gain.</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('scan.title') || 'Scanner'}</h1>
+          <p className="text-sm text-gray-500 mt-1">{t('scan.subtitle') || 'Scannez le QR code du client pour verifier et valider.'}</p>
         </div>
 
-        <Card className="p-6">
-          {scanStatus === 'idle' && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-teal-100 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Prêt à scanner</h3>
-              <p className="text-gray-500 mb-8">Assurez-vous d'avoir autorisé l'accès à la caméra.</p>
-              <Button onClick={startScanning} size="lg" className="bg-teal-600 hover:bg-teal-700">
-                Lancer le scan
-              </Button>
-            </div>
-          )}
+        {/* Scanner Card */}
+        <div className="group relative border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
+          <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+          <div className="p-5">
 
-          {scanStatus === 'scanning' && (
-            <div className="w-full">
-              <div id="reader" className="w-full overflow-hidden rounded-lg"></div>
-              <Button onClick={() => setScanStatus('idle')} variant="outline" className="w-full mt-4">
-                Annuler
-              </Button>
-            </div>
-          )}
-
-          {scanStatus === 'verifying' && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-lg font-medium">Vérification du code...</p>
-            </div>
-          )}
-
-          {scanStatus === 'valid' && couponDetails && (
-            <div className="text-center py-8">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-                <CheckCircle2 className="w-10 h-10" />
-              </div>
-              <h2 className="text-2xl font-bold text-green-700 mb-2">Coupon Valide !</h2>
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 max-w-sm mx-auto">
-                <p className="text-sm text-gray-500 uppercase tracking-wide font-semibold mb-1">Prix à remettre</p>
-                <p className="text-3xl font-bold text-gray-900 mb-4">{couponDetails.prize_name}</p>
-                <div className="border-t border-gray-200 pt-4">
-                  <p className="text-sm text-gray-600">Code: <span className="font-mono font-bold">{couponDetails.code}</span></p>
-                  <p className="text-xs text-gray-400 mt-1">Expire le: {new Date(couponDetails.expires_at).toLocaleDateString()}</p>
+            {/* Idle State */}
+            {scanStatus === 'idle' && (
+              <div className="text-center py-8">
+                <div className="w-14 h-14 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-4">
+                  <ScanLine className="w-7 h-7" />
                 </div>
-              </div>
-              <div className="flex gap-4 justify-center">
-                <Button onClick={() => setScanStatus('idle')} variant="outline">
-                  Annuler
-                </Button>
-                <Button onClick={redeemCoupon} size="lg" className="bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/30">
-                  Valider la remise du prix
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('scan.ready') || 'Pret a scanner'}</h3>
+                <p className="text-xs text-gray-500 mb-5">Coupon, carte fidelite ou code de redemption</p>
+                <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-2">
+                  <ScanLine className="w-4 h-4" />
+                  {t('scan.start') || 'Lancer le scan'}
                 </Button>
               </div>
-            </div>
-          )}
+            )}
 
-          {(scanStatus === 'invalid' || errorMessage) && (scanStatus !== 'valid') && (scanStatus !== 'redeemed') && (scanStatus !== 'scanning') && (scanStatus !== 'verifying') && (scanStatus !== 'idle') && (scanStatus !== 'loyalty') && (scanStatus !== 'redemption') && (scanStatus !== 'redemption_used') && (
-            <div className="text-center py-8">
-              <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <XCircle className="w-10 h-10" />
+            {/* Scanning State */}
+            {scanStatus === 'scanning' && (
+              <div>
+                <div id="reader" className="w-full overflow-hidden rounded-lg border border-gray-200"></div>
+                <Button onClick={() => setScanStatus('idle')} variant="outline" className="w-full mt-3" size="sm">
+                  {t('dashboard.common.cancel') || 'Annuler'}
+                </Button>
               </div>
-              <h2 className="text-2xl font-bold text-red-700 mb-2">Coupon Invalide</h2>
-              <p className="text-gray-600 mb-8 max-w-xs mx-auto">{errorMessage}</p>
-              <Button onClick={startScanning} className="bg-gray-900 hover:bg-gray-800">
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Scanner un autre code
-              </Button>
-            </div>
-          )}
+            )}
 
-          {scanStatus === 'redeemed' && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Gift className="w-10 h-10" />
+            {/* Verifying State */}
+            {scanStatus === 'verifying' && (
+              <div className="text-center py-8">
+                <div className="w-10 h-10 border-3 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-sm font-medium text-gray-700">Verification du code...</p>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Prix Validé !</h2>
-              <p className="text-gray-600 mb-8">Le coupon a été marqué comme utilisé avec succès.</p>
-              <Button onClick={startScanning} size="lg" className="bg-teal-600 hover:bg-teal-700">
-                Scanner un autre client
-              </Button>
-            </div>
-          )}
+            )}
 
-          {/* Loyalty Card Mode */}
-          {scanStatus === 'loyalty' && loyaltyClient && (
-            <div className="py-6">
-              {!pointsAdded ? (
-                <>
-                  <div className="text-center mb-6">
-                    <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Award className="w-10 h-10" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-amber-700 mb-2">{t('loyalty.scan.loyaltyCardDetected')}</h2>
+            {/* Valid Coupon */}
+            {scanStatus === 'valid' && couponDetails && (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-7 h-7" />
+                </div>
+                <h2 className="text-lg font-bold text-green-700 mb-1">Coupon Valide</h2>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-5 max-w-xs mx-auto">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-0.5">Prix a remettre</p>
+                  <p className="text-xl font-bold text-gray-900 mb-2">{couponDetails.prize_name}</p>
+                  <div className="border-t border-gray-200 pt-2 space-y-1">
+                    <p className="text-xs text-gray-600">Code: <span className="font-mono font-bold">{couponDetails.code}</span></p>
+                    <p className="text-xs text-gray-400">Expire le: {new Date(couponDetails.expires_at).toLocaleDateString()}</p>
                   </div>
-
-                  <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6 rounded-xl text-white mb-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p className="text-amber-100 text-sm">{t('loyalty.scan.clientName')}</p>
-                        <p className="text-xl font-bold">{loyaltyClient.name || 'Client'}</p>
-                        <p className="font-mono text-sm text-amber-200">{loyaltyClient.card_id}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-amber-100 text-sm">{t('loyalty.scan.currentPoints')}</p>
-                        <div className="flex items-center gap-1 justify-end">
-                          <Star className="w-5 h-5" />
-                          <span className="text-2xl font-bold">{loyaltyClient.points}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        {t('loyalty.scan.enterAmount')} ({merchant?.loyalty_currency || 'THB'})
-                      </label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={purchaseAmount}
-                        onChange={handleAmountChange}
-                        placeholder="0"
-                        className="text-2xl text-center font-bold h-16"
-                      />
-                    </div>
-
-                    {pointsToAdd > 0 && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
-                        <p className="text-sm text-amber-700 mb-1">{t('loyalty.scan.pointsToAdd')}</p>
-                        <div className="flex items-center justify-center gap-2">
-                          <Coins className="w-6 h-6 text-amber-500" />
-                          <span className="text-3xl font-bold text-amber-600">+{pointsToAdd}</span>
-                        </div>
-                        <p className="text-xs text-amber-600 mt-2">
-                          {merchant?.purchase_amount_threshold || 1000} {merchant?.loyalty_currency || 'THB'} = {merchant?.points_per_purchase || 10} points
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex gap-3">
-                      <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1">
-                        {t('dashboard.common.cancel')}
-                      </Button>
-                      <Button
-                        onClick={handleAddPoints}
-                        disabled={addingPoints || pointsToAdd <= 0}
-                        className="flex-1 bg-amber-500 hover:bg-amber-600"
-                      >
-                        {addingPoints ? (
-                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <Coins className="w-4 h-4 mr-2" />
-                            {t('loyalty.scan.addPointsBtn')}
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-                    <CheckCircle2 className="w-10 h-10" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-green-700 mb-2">{t('loyalty.scan.pointsAdded')}</h2>
-                  <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-6 max-w-sm mx-auto">
-                    <p className="text-sm text-gray-500 mb-2">{t('loyalty.scan.newBalance')}</p>
-                    <div className="flex items-center justify-center gap-2">
-                      <Star className="w-8 h-8 text-amber-500" />
-                      <span className="text-4xl font-bold text-gray-900">{loyaltyClient.points}</span>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2">{loyaltyClient.name || 'Client'}</p>
-                  </div>
-                  <Button onClick={startScanning} size="lg" className="bg-teal-600 hover:bg-teal-700">
-                    Scanner un autre client
+                </div>
+                <div className="flex gap-3 justify-center">
+                  <Button onClick={() => setScanStatus('idle')} variant="outline" size="sm">
+                    Annuler
+                  </Button>
+                  <Button onClick={redeemCoupon} className="bg-green-600 hover:bg-green-700 gap-1.5" size="sm">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Valider la remise
                   </Button>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Redemption Code Mode */}
-          {scanStatus === 'redemption' && redemptionDetails && (
-            <div className="py-6">
-              <div className="text-center mb-6">
-                <div className="w-20 h-20 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Gift className="w-10 h-10" />
-                </div>
-                <h2 className="text-2xl font-bold text-purple-700 mb-1">Rédemption de récompense</h2>
-                <p className="text-gray-500 text-sm">Code scanné : <span className="font-mono font-bold">{redemptionDetails.redemption_code}</span></p>
               </div>
+            )}
 
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 mb-6 space-y-3">
-                <div className="flex justify-between items-start">
-                  <span className="text-sm text-gray-500">Récompense</span>
-                  <span className="font-semibold text-gray-900 text-right">{redemptionDetails.reward_name}</span>
+            {/* Invalid */}
+            {(scanStatus === 'invalid' || errorMessage) && (scanStatus !== 'valid') && (scanStatus !== 'redeemed') && (scanStatus !== 'scanning') && (scanStatus !== 'verifying') && (scanStatus !== 'idle') && (scanStatus !== 'loyalty') && (scanStatus !== 'redemption') && (scanStatus !== 'redemption_used') && (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <XCircle className="w-7 h-7" />
                 </div>
-                {redemptionDetails.reward_value && (
-                  <div className="flex justify-between items-start">
-                    <span className="text-sm text-gray-500">Valeur</span>
-                    <span className="font-medium text-gray-900">{redemptionDetails.reward_value}</span>
+                <h2 className="text-lg font-bold text-red-700 mb-1">Invalide</h2>
+                <p className="text-sm text-gray-600 mb-5 max-w-xs mx-auto">{errorMessage}</p>
+                <Button onClick={startScanning} variant="outline" className="gap-1.5" size="sm">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Scanner un autre code
+                </Button>
+              </div>
+            )}
+
+            {/* Redeemed Coupon Success */}
+            {scanStatus === 'redeemed' && (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Gift className="w-7 h-7" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-1">Prix Valide</h2>
+                <p className="text-sm text-gray-500 mb-5">Le coupon a ete marque comme utilise.</p>
+                <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-1.5" size="sm">
+                  <ScanLine className="w-3.5 h-3.5" />
+                  Scanner un autre client
+                </Button>
+              </div>
+            )}
+
+            {/* Loyalty Card Mode */}
+            {scanStatus === 'loyalty' && loyaltyClient && (
+              <div className="py-4">
+                {!pointsAdded ? (
+                  <>
+                    <div className="text-center mb-4">
+                      <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <Award className="w-7 h-7" />
+                      </div>
+                      <h2 className="text-lg font-bold text-amber-700">{t('loyalty.scan.loyaltyCardDetected')}</h2>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-4 rounded-xl text-white mb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="text-amber-100 text-xs">{t('loyalty.scan.clientName')}</p>
+                          <p className="text-base font-bold">{loyaltyClient.name || 'Client'}</p>
+                          <p className="font-mono text-xs text-amber-200">{loyaltyClient.card_id}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-amber-100 text-xs">{t('loyalty.scan.currentPoints')}</p>
+                          <div className="flex items-center gap-1 justify-end">
+                            <Star className="w-4 h-4" />
+                            <span className="text-xl font-bold">{loyaltyClient.points}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1.5">
+                          {t('loyalty.scan.enterAmount')} ({merchant?.loyalty_currency || 'THB'})
+                        </label>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={purchaseAmount}
+                          onChange={handleAmountChange}
+                          placeholder="0"
+                          className="text-xl text-center font-bold h-12"
+                        />
+                      </div>
+
+                      {pointsToAdd > 0 && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                          <p className="text-xs text-amber-700 mb-0.5">{t('loyalty.scan.pointsToAdd')}</p>
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Coins className="w-5 h-5 text-amber-500" />
+                            <span className="text-2xl font-bold text-amber-600">+{pointsToAdd}</span>
+                          </div>
+                          <p className="text-[10px] text-amber-600 mt-1">
+                            {merchant?.purchase_amount_threshold || 1000} {merchant?.loyalty_currency || 'THB'} = {merchant?.points_per_purchase || 10} points
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1" size="sm">
+                          {t('dashboard.common.cancel')}
+                        </Button>
+                        <Button
+                          onClick={handleAddPoints}
+                          disabled={addingPoints || pointsToAdd <= 0}
+                          className="flex-1 bg-amber-500 hover:bg-amber-600 gap-1.5"
+                          size="sm"
+                        >
+                          {addingPoints ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <Coins className="w-3.5 h-3.5" />
+                              {t('loyalty.scan.addPointsBtn')}
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <div className="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-7 h-7" />
+                    </div>
+                    <h2 className="text-lg font-bold text-green-700 mb-1">{t('loyalty.scan.pointsAdded')}</h2>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-5 max-w-xs mx-auto">
+                      <p className="text-xs text-gray-500 mb-1">{t('loyalty.scan.newBalance')}</p>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <Star className="w-6 h-6 text-amber-500" />
+                        <span className="text-3xl font-bold text-gray-900">{loyaltyClient.points}</span>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">{loyaltyClient.name || 'Client'}</p>
+                    </div>
+                    <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-1.5" size="sm">
+                      <ScanLine className="w-3.5 h-3.5" />
+                      Scanner un autre client
+                    </Button>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Points dépensés</span>
-                  <span className="font-medium text-amber-600">{redemptionDetails.points_spent} pts</span>
-                </div>
-                <div className="border-t border-gray-200 pt-3 flex justify-between">
-                  <span className="text-sm text-gray-500">Client</span>
-                  <div className="text-right">
-                    <p className="font-medium text-gray-900">{redemptionDetails.loyalty_clients?.name || 'Client'}</p>
-                    {redemptionDetails.loyalty_clients?.phone && (
-                      <p className="text-sm text-gray-500">{redemptionDetails.loyalty_clients.phone}</p>
-                    )}
-                    {redemptionDetails.loyalty_clients?.email && (
-                      <p className="text-sm text-gray-500">{redemptionDetails.loyalty_clients.email}</p>
-                    )}
+              </div>
+            )}
+
+            {/* Redemption Code Mode */}
+            {scanStatus === 'redemption' && redemptionDetails && (
+              <div className="py-4">
+                <div className="text-center mb-4">
+                  <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Gift className="w-7 h-7" />
                   </div>
+                  <h2 className="text-lg font-bold text-purple-700 mb-0.5">Redemption de recompense</h2>
+                  <p className="text-xs text-gray-500">Code : <span className="font-mono font-bold">{redemptionDetails.redemption_code}</span></p>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Échangé le</span>
-                  <span className="text-sm text-gray-700">{new Date(redemptionDetails.created_at).toLocaleDateString()}</span>
-                </div>
-                {redemptionDetails.expires_at && (
+
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-sm text-gray-500">Expire le</span>
-                    <span className={`text-sm font-medium ${new Date(redemptionDetails.expires_at) < new Date() ? 'text-red-600' : 'text-green-600'}`}>
-                      {new Date(redemptionDetails.expires_at).toLocaleDateString()}
-                    </span>
+                    <span className="text-gray-500">Recompense</span>
+                    <span className="font-semibold text-gray-900 text-right">{redemptionDetails.reward_name}</span>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-500">Statut</span>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">En attente</span>
+                  {redemptionDetails.reward_value && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Valeur</span>
+                      <span className="font-medium text-gray-900">{redemptionDetails.reward_value}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Points depenses</span>
+                    <span className="font-medium text-amber-600">{redemptionDetails.points_spent} pts</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-2 flex justify-between">
+                    <span className="text-gray-500">Client</span>
+                    <div className="text-right">
+                      <p className="font-medium text-gray-900">{redemptionDetails.loyalty_clients?.name || 'Client'}</p>
+                      {redemptionDetails.loyalty_clients?.phone && (
+                        <p className="text-xs text-gray-500">{redemptionDetails.loyalty_clients.phone}</p>
+                      )}
+                      {redemptionDetails.loyalty_clients?.email && (
+                        <p className="text-xs text-gray-500">{redemptionDetails.loyalty_clients.email}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Echange le</span>
+                    <span className="text-gray-700">{new Date(redemptionDetails.created_at).toLocaleDateString()}</span>
+                  </div>
+                  {redemptionDetails.expires_at && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Expire le</span>
+                      <span className={`font-medium ${new Date(redemptionDetails.expires_at) < new Date() ? 'text-red-600' : 'text-green-600'}`}>
+                        {new Date(redemptionDetails.expires_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Statut</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">En attente</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1" size="sm">
+                    Annuler
+                  </Button>
+                  <Button
+                    onClick={markRedemptionUsed}
+                    disabled={validatingRedemption}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700 gap-1.5"
+                    size="sm"
+                  >
+                    {validatingRedemption ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Valider la remise
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
+            )}
 
-              <div className="flex gap-3">
-                <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1">
-                  Annuler
-                </Button>
-                <Button
-                  onClick={markRedemptionUsed}
-                  disabled={validatingRedemption}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
-                  size="lg"
-                >
-                  {validatingRedemption ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Valider la remise
-                    </>
-                  )}
+            {/* Redemption Used Success */}
+            {scanStatus === 'redemption_used' && (
+              <div className="text-center py-6">
+                <div className="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="w-7 h-7" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 mb-1">Recompense remise</h2>
+                <p className="text-sm text-gray-600 mb-1">
+                  <span className="font-semibold">{redemptionDetails?.reward_name}</span> remise a {redemptionDetails?.loyalty_clients?.name || 'client'}.
+                </p>
+                <p className="text-xs text-gray-400 mb-5 font-mono">{redemptionDetails?.redemption_code}</p>
+                <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-1.5" size="sm">
+                  <ScanLine className="w-3.5 h-3.5" />
+                  Scanner un autre client
                 </Button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
 
-          {/* Redemption Used Success */}
-          {scanStatus === 'redemption_used' && (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
-                <CheckCircle2 className="w-10 h-10" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Récompense remise !</h2>
-              <p className="text-gray-600 mb-2">
-                <span className="font-semibold">{redemptionDetails?.reward_name}</span> a été remise à {redemptionDetails?.loyalty_clients?.name || 'client'}.
-              </p>
-              <p className="text-sm text-gray-400 mb-8">Code : <span className="font-mono">{redemptionDetails?.redemption_code}</span></p>
-              <Button onClick={startScanning} size="lg" className="bg-teal-600 hover:bg-teal-700">
-                Scanner un autre client
-              </Button>
-            </div>
-          )}
-        </Card>
-
-        {/* Session History */}
+        {/* Session History - Collapsible */}
         {sessionHistory.length > 0 && (
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Historique de la session</h3>
-            <div className="space-y-4">
-              {sessionHistory.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-                  {item.type === 'loyalty' ? (
-                    // Loyalty points entry
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
-                          <Award className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{item.clientName}</p>
-                          <p className="text-sm text-gray-500 font-mono">{item.cardId}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-amber-600">+{item.pointsAdded} pts</p>
-                        <p className="text-xs text-gray-400">
-                          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </>
-                  ) : item.type === 'redemption' ? (
-                    // Redemption entry
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
-                          <Gift className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{item.rewardName}</p>
-                          <p className="text-sm text-gray-500">{item.clientName}{item.clientPhone ? ` · ${item.clientPhone}` : ''}</p>
-                          <p className="text-xs text-gray-400 font-mono">{item.code} · {item.pointsSpent} pts</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-purple-600">Remis</p>
-                        <p className="text-xs text-gray-400">
-                          {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </>
-                  ) : (
-                    // Coupon entry
-                    <>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
-                          <Gift className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{item.prize_name}</p>
-                          <p className="text-sm text-gray-500 font-mono">{item.code}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-green-600">Validé</p>
-                        <p className="text-xs text-gray-400">
-                          {new Date(item.used_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </>
-                  )}
+          <div className="group relative border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
+            <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+            <button
+              onClick={() => setHistoryOpen(!historyOpen)}
+              className="w-full flex items-center justify-between p-4 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                  <Ticket className="w-5 h-5" />
                 </div>
-              ))}
-            </div>
-          </Card>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900">Historique de la session</p>
+                  <p className="text-xs text-gray-500">{sessionHistory.length} element{sessionHistory.length > 1 ? 's' : ''}</p>
+                </div>
+              </div>
+              {historyOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+            </button>
+
+            {historyOpen && (
+              <div className="px-4 pb-4 space-y-2">
+                {sessionHistory.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-lg text-sm">
+                    {item.type === 'loyalty' ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
+                            <Award className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-900">{item.clientName}</p>
+                            <p className="text-[10px] text-gray-500 font-mono">{item.cardId}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-medium text-amber-600">+{item.pointsAdded} pts</p>
+                          <p className="text-[10px] text-gray-400">
+                            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </>
+                    ) : item.type === 'redemption' ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center">
+                            <Gift className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-900">{item.rewardName}</p>
+                            <p className="text-[10px] text-gray-500">{item.clientName}{item.clientPhone ? ` - ${item.clientPhone}` : ''}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-medium text-purple-600">Remis</p>
+                          <p className="text-[10px] text-gray-400">
+                            {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                            <Gift className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-gray-900">{item.prize_name}</p>
+                            <p className="text-[10px] text-gray-500 font-mono">{item.code}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-medium text-green-600">Valide</p>
+                          <p className="text-[10px] text-gray-400">
+                            {new Date(item.used_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </DashboardLayout>
@@ -780,14 +810,14 @@ export default function ScanPage() {
 // Icon component helper
 function Gift({ className }: { className?: string }) {
   return (
-    <svg 
-      className={className} 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
       strokeLinejoin="round"
     >
       <rect x="3" y="8" width="18" height="4" rx="1" />

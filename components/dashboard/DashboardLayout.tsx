@@ -35,7 +35,7 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
-  const { t, ready } = useTranslation(undefined, { useSuspense: false });
+  const { t, i18n, ready } = useTranslation(undefined, { useSuspense: false });
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -50,20 +50,47 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
     router.push('/');
   };
 
-  const navigation = [
-    { name: t('dashboard.nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
-    { name: t('dashboard.nav.profile'), href: '/dashboard/profile', icon: UserCircle },
-    { name: t('dashboard.nav.qrCode'), href: '/dashboard/qr', icon: QrCode },
-    { name: t('dashboard.nav.scanner'), href: '/dashboard/scan', icon: ScanLine },
-    { name: t('dashboard.nav.strategy'), href: '/dashboard/strategy', icon: Target },
-    { name: t('dashboard.nav.prizes'), href: '/dashboard/prizes', icon: Gift },
-    { name: t('dashboard.nav.loyalty'), href: '/dashboard/loyalty', icon: Award },
-    { name: t('dashboard.nav.feedback'), href: '/dashboard/feedback', icon: MessageSquare },
-    { name: t('dashboard.nav.analytics'), href: '/dashboard/analytics', icon: BarChart3 },
-    { name: t('dashboard.nav.customers'), href: '/dashboard/customers', icon: Users },
-    { name: t('dashboard.nav.billing'), href: '/dashboard/billing', icon: CreditCard },
-    { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
+  const navigationGroups = [
+    {
+      label: null,
+      items: [
+        { name: t('dashboard.nav.dashboard'), href: '/dashboard', icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: i18n.language === 'fr' ? 'Operations' : 'Operations',
+      items: [
+        { name: t('dashboard.nav.scanner'), href: '/dashboard/scan', icon: ScanLine },
+        { name: t('dashboard.nav.qrCode'), href: '/dashboard/qr', icon: QrCode },
+      ],
+    },
+    {
+      label: i18n.language === 'fr' ? 'Engagement' : 'Engagement',
+      items: [
+        { name: t('dashboard.nav.prizes'), href: '/dashboard/prizes', icon: Gift },
+        { name: t('dashboard.nav.loyalty'), href: '/dashboard/loyalty', icon: Award },
+        { name: t('dashboard.nav.feedback'), href: '/dashboard/feedback', icon: MessageSquare },
+        { name: t('dashboard.nav.strategy'), href: '/dashboard/strategy', icon: Target },
+      ],
+    },
+    {
+      label: i18n.language === 'fr' ? 'Analyse' : 'Analytics',
+      items: [
+        { name: t('dashboard.nav.analytics'), href: '/dashboard/analytics', icon: BarChart3 },
+        { name: t('dashboard.nav.customers'), href: '/dashboard/customers', icon: Users },
+      ],
+    },
+    {
+      label: i18n.language === 'fr' ? 'Compte' : 'Account',
+      items: [
+        { name: t('dashboard.nav.profile'), href: '/dashboard/profile', icon: UserCircle },
+        { name: t('dashboard.nav.billing'), href: '/dashboard/billing', icon: CreditCard },
+        { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
+      ],
+    },
   ];
+
+  const navigation = navigationGroups.flatMap(g => g.items);
 
 
   if (!mounted) {
@@ -134,32 +161,38 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
           )}
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800">
-            <p className="px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">{t('dashboard.nav.mainMenu')}</p>
-            {navigation.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`
-                    group flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200
-                    ${isActive
-                      ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20'
-                      : 'text-white hover:bg-slate-800/50'
-                    }
-                  `}
-                >
-                  <Icon className={`w-5 h-5 transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
-                  {item.name}
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white/50" />}
-                </Link>
-              );
-            })}
-
+          <nav className="flex-1 px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800">
+            {navigationGroups.map((group, gi) => (
+              <div key={gi} className={gi > 0 ? 'mt-5' : ''}>
+                {group.label && (
+                  <p className="px-4 text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-2">{group.label}</p>
+                )}
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`
+                          group flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+                          ${isActive
+                            ? 'bg-gradient-to-r from-teal-600 to-teal-700 text-white shadow-lg shadow-teal-900/20 border border-teal-500/20'
+                            : 'text-white hover:bg-slate-800/50'
+                          }
+                        `}
+                      >
+                        <Icon className={`w-[18px] h-[18px] transition-colors ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-white'}`} />
+                        {item.name}
+                        {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white/50" />}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
 
           {/* Sign Out */}

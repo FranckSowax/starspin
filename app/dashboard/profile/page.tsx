@@ -6,23 +6,34 @@ import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Upload, Image as ImageIcon, Check, X, Loader2, Save, UserCircle } from 'lucide-react';
+import {
+  Upload, Image as ImageIcon, Check, X, Loader2, Save,
+  UserCircle, Palette, Building2, Mail, Phone, MapPin
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 
+type TabId = 'info' | 'appearance';
+
+const TABS: { id: TabId; icon: React.ReactNode; labelFr: string; labelEn: string }[] = [
+  { id: 'info', icon: <UserCircle className="w-4 h-4" />, labelFr: 'Informations', labelEn: 'Information' },
+  { id: 'appearance', icon: <Palette className="w-4 h-4" />, labelFr: 'Apparence', labelEn: 'Appearance' },
+];
+
 export default function ProfilePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
+  const isFr = i18n.language === 'fr';
+
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [backgroundFile, setBackgroundFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
   const [backgroundPreview, setBackgroundPreview] = useState<string>('');
-  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'warning', text: string, sql?: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>('info');
 
   // Contact info state
   const [businessName, setBusinessName] = useState('');
@@ -31,9 +42,9 @@ export default function ProfilePage() {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
-  const [googleReviewLink, setGoogleReviewLink] = useState('');
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
+
+  // Appearance state
+  const [logoBackgroundColor, setLogoBackgroundColor] = useState('#FFFFFF');
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -60,9 +71,7 @@ export default function ProfilePage() {
         setAddress(merchantData.address || '');
         setCity(merchantData.city || '');
         setCountry(merchantData.country || '');
-        setGoogleReviewLink(merchantData.google_review_link || '');
-        setInstagramUrl(merchantData.instagram_url || '');
-        setTiktokUrl(merchantData.tiktok_url || '');
+        setLogoBackgroundColor(merchantData.logo_background_color || '#FFFFFF');
         if (merchantData.logo_url) setLogoPreview(merchantData.logo_url);
         if (merchantData.background_url) setBackgroundPreview(merchantData.background_url);
       }
@@ -95,7 +104,9 @@ export default function ProfilePage() {
         if (Math.abs(aspectRatio - target) > 0.15) {
           setMessage({
             type: 'error',
-            text: `Image ratio is ${(aspectRatio * 16 / 9).toFixed(2)}:16. Recommended: 9:16 (vertical format)`
+            text: isFr
+              ? `Le ratio de l'image est ${(aspectRatio * 16 / 9).toFixed(2)}:16. Recommande : 9:16 (format vertical)`
+              : `Image ratio is ${(aspectRatio * 16 / 9).toFixed(2)}:16. Recommended: 9:16 (vertical format)`
           });
         } else {
           setMessage(null);
@@ -141,26 +152,27 @@ export default function ProfilePage() {
     setMessage(null);
 
     try {
-      const updates: any = {
-        business_name: businessName,
-        email,
-        phone,
-        address,
-        city,
-        country,
-        google_review_link: googleReviewLink,
-        instagram_url: instagramUrl,
-        tiktok_url: tiktokUrl,
-      };
+      const updates: any = {};
 
-      if (logoFile) {
-        const logoUrl = await uploadImage(logoFile, 'logos');
-        updates.logo_url = logoUrl;
-      }
+      if (activeTab === 'info') {
+        updates.business_name = businessName;
+        updates.email = email;
+        updates.phone = phone;
+        updates.address = address;
+        updates.city = city;
+        updates.country = country;
+      } else if (activeTab === 'appearance') {
+        updates.logo_background_color = logoBackgroundColor || '#FFFFFF';
 
-      if (backgroundFile) {
-        const backgroundUrl = await uploadImage(backgroundFile, 'backgrounds');
-        updates.background_url = backgroundUrl;
+        if (logoFile) {
+          const logoUrl = await uploadImage(logoFile, 'logos');
+          updates.logo_url = logoUrl;
+        }
+
+        if (backgroundFile) {
+          const backgroundUrl = await uploadImage(backgroundFile, 'backgrounds');
+          updates.background_url = backgroundUrl;
+        }
       }
 
       const { error } = await supabase
@@ -170,7 +182,10 @@ export default function ProfilePage() {
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setMessage({
+        type: 'success',
+        text: isFr ? 'Profil mis a jour avec succes !' : 'Profile updated successfully!'
+      });
       setLogoFile(null);
       setBackgroundFile(null);
 
@@ -187,7 +202,7 @@ export default function ProfilePage() {
       if (error.message && (error.message.includes('row-level security') || error.message.includes('StorageApiError'))) {
         setMessage({
           type: 'warning',
-          text: 'Database configuration required: Storage policies are missing.',
+          text: isFr ? 'Configuration de la base de donnees requise : les politiques de stockage sont manquantes.' : 'Database configuration required: Storage policies are missing.',
           sql: `
 -- Run this in your Supabase SQL Editor:
 INSERT INTO storage.buckets (id, name, public) VALUES ('merchant-assets', 'merchant-assets', true) ON CONFLICT (id) DO NOTHING;
@@ -202,7 +217,7 @@ DROP POLICY IF EXISTS "Auth Update" ON storage.objects;
 CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'merchant-assets' AND auth.role() = 'authenticated' );`
         });
       } else {
-        setMessage({ type: 'error', text: error.message || 'Failed to save profile' });
+        setMessage({ type: 'error', text: error.message || (isFr ? 'Erreur lors de la sauvegarde' : 'Failed to save profile') });
       }
     } finally {
       setSaving(false);
@@ -213,293 +228,371 @@ CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'm
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading...</p>
+          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-lg text-gray-600">{isFr ? 'Chargement...' : 'Loading...'}</p>
         </div>
       </div>
     );
   }
 
+  const inputClass = 'w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-teal-50/30 transition-all duration-200';
+
   return (
     <DashboardLayout merchant={merchant}>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-4xl">
+        {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Profil</h1>
-          <p className="text-gray-600">Manage your business information and appearance</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">
+            {isFr ? 'Profil' : 'Profile'}
+          </h1>
+          <p className="text-gray-500 text-sm">
+            {isFr ? 'Gerez les informations et l\'apparence de votre commerce' : 'Manage your business information and appearance'}
+          </p>
         </div>
 
+        {/* Success/Error/Warning message */}
         {message && (
-          <Card className={`p-4 ${
-            message.type === 'success' ? 'bg-teal-50 border-teal-200' :
-            message.type === 'warning' ? 'bg-amber-50 border-amber-200' :
-            'bg-red-50 border-red-200'
-          }`}>
-            <div className="flex items-start gap-2">
-              {message.type === 'success' ? (
-                <Check className="w-5 h-5 text-teal-600 mt-0.5" />
-              ) : message.type === 'warning' ? (
-                <div className="w-5 h-5 text-amber-600 mt-0.5">⚠️</div>
-              ) : (
-                <X className="w-5 h-5 text-red-600 mt-0.5" />
+          <div
+            className={`flex items-start gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${
+              message.type === 'success'
+                ? 'bg-teal-50 border border-teal-200 text-teal-700'
+                : message.type === 'warning'
+                ? 'bg-amber-50 border border-amber-200 text-amber-800'
+                : 'bg-red-50 border border-red-200 text-red-700'
+            }`}
+          >
+            {message.type === 'success' ? (
+              <Check className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+            ) : message.type === 'warning' ? (
+              <span className="shrink-0 mt-0.5">&#9888;</span>
+            ) : (
+              <X className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1">
+              {message.text}
+              {message.sql && (
+                <pre className="mt-2 p-3 bg-white/50 rounded border text-xs font-mono overflow-x-auto">
+                  {message.sql}
+                </pre>
               )}
-              <div className="flex-1">
-                <p className={`font-medium ${
-                  message.type === 'success' ? 'text-teal-700' :
-                  message.type === 'warning' ? 'text-amber-800' :
-                  'text-red-700'
-                }`}>
-                  {message.text}
-                </p>
-                {message.sql && (
-                  <pre className="mt-2 p-3 bg-white/50 rounded border text-xs font-mono overflow-x-auto">
-                    {message.sql}
-                  </pre>
-                )}
-              </div>
             </div>
-          </Card>
+          </div>
         )}
 
-        {/* Contact Information */}
-        <Card className="p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-teal-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Contact Information</h3>
-          </div>
+        {/* Tabs Navigation */}
+        <nav className="flex gap-1 border-b-2 border-gray-100 overflow-x-auto" role="tablist">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setMessage(null);
+              }}
+              className={`
+                relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all duration-300 rounded-t-lg whitespace-nowrap
+                ${activeTab === tab.id
+                  ? 'text-teal-600'
+                  : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50/50'
+                }
+              `}
+            >
+              {tab.icon}
+              <span>{isFr ? tab.labelFr : tab.labelEn}</span>
+              {/* Active underline */}
+              <span
+                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500 to-emerald-500 transition-transform duration-300 origin-left ${
+                  activeTab === tab.id ? 'scale-x-100' : 'scale-x-0'
+                }`}
+              />
+            </button>
+          ))}
+        </nav>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
-              <input
-                type="text"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
-              <input
-                type="text"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Social Links */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Links</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Google Review Link</label>
-              <input
-                type="url"
-                value={googleReviewLink}
-                onChange={(e) => setGoogleReviewLink(e.target.value)}
-                placeholder="https://g.page/..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Instagram URL</label>
-              <input
-                type="url"
-                value={instagramUrl}
-                onChange={(e) => setInstagramUrl(e.target.value)}
-                placeholder="https://instagram.com/..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">TikTok URL</label>
-              <input
-                type="url"
-                value={tiktokUrl}
-                onChange={(e) => setTiktokUrl(e.target.value)}
-                placeholder="https://tiktok.com/@..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        </Card>
-
-        {/* Image Uploads */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Logo Upload */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Business Logo</h3>
-                <p className="text-sm text-gray-600">Displayed at the top of your rating page</p>
-              </div>
-              <Badge variant="outline">Square</Badge>
-            </div>
-
-            <div className="space-y-4">
-              {logoPreview && (
-                <div className="relative w-full h-48 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                  <img src={logoPreview} alt="Logo preview" className="max-h-full max-w-full object-contain" />
-                </div>
-              )}
-
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-500 transition-colors">
-                <input
-                  type="file"
-                  id="logo-upload"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  className="hidden"
-                />
-                <label htmlFor="logo-upload" className="cursor-pointer">
-                  <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-600 mb-1">
-                    <span className="text-teal-600 font-semibold">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
-                </label>
-              </div>
-            </div>
-          </Card>
-
-          {/* Background Upload */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">Background Image</h3>
-                <p className="text-sm text-gray-600">Background for your rating page</p>
-              </div>
-              <Badge variant="outline">9:16 Ratio</Badge>
-            </div>
-
-            <div className="space-y-4">
-              {backgroundPreview && (
-                <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
-                  <img src={backgroundPreview} alt="Background preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <p className="text-white text-sm">With overlay (40% opacity)</p>
+        {/* Tab Content */}
+        <div className="animate-[fadeIn_0.3s_ease-out]" key={activeTab}>
+          {/* ===== INFORMATIONS TAB ===== */}
+          {activeTab === 'info' && (
+            <div className="space-y-5">
+              {/* Business Info Card */}
+              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <Building2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {isFr ? 'Informations du commerce' : 'Business Information'}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {isFr ? 'Nom et coordonnees de votre etablissement' : 'Name and contact details of your business'}
+                    </p>
                   </div>
                 </div>
-              )}
 
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-500 transition-colors">
-                <input
-                  type="file"
-                  id="background-upload"
-                  accept="image/*"
-                  onChange={handleBackgroundChange}
-                  className="hidden"
-                />
-                <label htmlFor="background-upload" className="cursor-pointer">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-sm text-gray-600 mb-1">
-                    <span className="text-teal-600 font-semibold">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-500">PNG, JPG (9:16 format) up to 10MB</p>
-                </label>
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isFr ? 'Nom du commerce' : 'Business Name'}
+                    </label>
+                    <input
+                      type="text"
+                      value={businessName}
+                      onChange={(e) => setBusinessName(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isFr ? 'Telephone' : 'Phone'}
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </Card>
+
+              {/* Address Card */}
+              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <MapPin className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {isFr ? 'Adresse' : 'Address'}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {isFr ? 'Localisation de votre etablissement' : 'Location of your business'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isFr ? 'Adresse' : 'Address'}
+                    </label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isFr ? 'Ville' : 'City'}
+                    </label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {isFr ? 'Pays' : 'Country'}
+                    </label>
+                    <input
+                      type="text"
+                      value={country}
+                      onChange={(e) => setCountry(e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </Card>
             </div>
-          </Card>
+          )}
+
+          {/* ===== APPEARANCE TAB ===== */}
+          {activeTab === 'appearance' && (
+            <div className="space-y-5">
+              {/* Logo Upload Card */}
+              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <ImageIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {isFr ? 'Logo du commerce' : 'Business Logo'}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {isFr ? 'Affiche en haut de votre page' : 'Displayed at the top of your page'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-5">
+                  {/* Preview */}
+                  {logoPreview && (
+                    <div className="w-32 h-32 shrink-0 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
+                      <img src={logoPreview} alt="Logo preview" className="max-h-full max-w-full object-contain" />
+                    </div>
+                  )}
+                  {/* Upload zone */}
+                  <div className="flex-1">
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-teal-500 transition-colors cursor-pointer">
+                      <input
+                        type="file"
+                        id="logo-upload"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                      <label htmlFor="logo-upload" className="cursor-pointer">
+                        <ImageIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">
+                          <span className="text-teal-600 font-semibold">
+                            {isFr ? 'Cliquer pour telecharger' : 'Click to upload'}
+                          </span>{' '}
+                          {isFr ? 'ou glisser-deposer' : 'or drag and drop'}
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG {isFr ? 'jusqu\'a' : 'up to'} 5MB</p>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Background Upload Card */}
+              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <Upload className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {isFr ? 'Image d\'arriere-plan' : 'Background Image'}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {isFr ? 'Arriere-plan de votre page (format 9:16)' : 'Background for your page (9:16 ratio)'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-5">
+                  {/* Preview */}
+                  {backgroundPreview && (
+                    <div className="w-32 h-48 shrink-0 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative">
+                      <img src={backgroundPreview} alt="Background preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <p className="text-white text-xs text-center px-2">
+                          {isFr ? 'Avec superposition' : 'With overlay'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {/* Upload zone */}
+                  <div className="flex-1">
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-teal-500 transition-colors cursor-pointer">
+                      <input
+                        type="file"
+                        id="background-upload"
+                        accept="image/*"
+                        onChange={handleBackgroundChange}
+                        className="hidden"
+                      />
+                      <label htmlFor="background-upload" className="cursor-pointer">
+                        <Upload className="w-10 h-10 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">
+                          <span className="text-teal-600 font-semibold">
+                            {isFr ? 'Cliquer pour telecharger' : 'Click to upload'}
+                          </span>{' '}
+                          {isFr ? 'ou glisser-deposer' : 'or drag and drop'}
+                        </p>
+                        <p className="text-xs text-gray-500">PNG, JPG (9:16) {isFr ? 'jusqu\'a' : 'up to'} 10MB</p>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Logo Background Color Card */}
+              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <Palette className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">
+                      {isFr ? 'Couleur de fond du logo' : 'Logo Background Color'}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {isFr ? 'Couleur affichee derriere votre logo sur la roue' : 'Color displayed behind your logo on the wheel'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <input
+                    type="color"
+                    value={logoBackgroundColor}
+                    onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                    className="w-12 h-12 rounded-lg border border-gray-300 cursor-pointer p-1"
+                  />
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={logoBackgroundColor}
+                      onChange={(e) => setLogoBackgroundColor(e.target.value)}
+                      placeholder="#FFFFFF"
+                      className={inputClass}
+                    />
+                  </div>
+                  {/* Color preview with logo */}
+                  {logoPreview && (
+                    <div
+                      className="w-12 h-12 rounded-full flex items-center justify-center border border-gray-200 shadow-sm"
+                      style={{ backgroundColor: logoBackgroundColor }}
+                    >
+                      <img src={logoPreview} alt="Logo" className="w-8 h-8 object-contain" />
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </div>
+          )}
         </div>
 
-        {/* Preview */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Preview</h3>
-          <div className="bg-gray-100 rounded-lg p-4">
-            <div className="max-w-sm mx-auto aspect-[9/16] bg-white rounded-2xl shadow-xl overflow-hidden relative">
-              {backgroundPreview && (
-                <div className="absolute inset-0">
-                  <img src={backgroundPreview} alt="Background" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40"></div>
-                </div>
-              )}
-              <div className="relative z-10 p-6 flex flex-col items-center justify-center h-full">
-                {logoPreview && (
-                  <img src={logoPreview} alt="Logo" className="h-16 mb-4 object-contain" />
-                )}
-                <div className="bg-white rounded-2xl shadow-2xl p-6 w-full">
-                  <h3 className="text-xl font-bold text-center mb-4">{businessName || merchant.business_name}</h3>
-                  <p className="text-center text-gray-600 text-sm">Rating window preview</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
         {/* Save Button */}
-        <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setLogoFile(null);
-              setBackgroundFile(null);
-              setLogoPreview(merchant.logo_url || '');
-              setBackgroundPreview(merchant.background_url || '');
-              setBusinessName(merchant.business_name || '');
-              setEmail(merchant.email || '');
-              setPhone(merchant.phone || '');
-              setAddress(merchant.address || '');
-              setCity(merchant.city || '');
-              setCountry(merchant.country || '');
-              setGoogleReviewLink(merchant.google_review_link || '');
-              setInstagramUrl(merchant.instagram_url || '');
-              setTiktokUrl(merchant.tiktok_url || '');
-            }}
-          >
-            Reset
-          </Button>
+        <div className="flex justify-end pt-2">
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-teal-600 hover:bg-teal-700"
+            className="bg-teal-600 hover:bg-teal-700 text-white px-6"
           >
             {saving ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Saving...
+                {isFr ? 'Enregistrement...' : 'Saving...'}
               </>
             ) : (
               <>
                 <Save className="w-4 h-4 mr-2" />
-                Save Profile
+                {isFr ? 'Enregistrer' : 'Save'}
               </>
             )}
           </Button>

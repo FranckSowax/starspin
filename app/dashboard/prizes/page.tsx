@@ -6,9 +6,8 @@ import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/atoms/Input';
 import { Prize } from '@/lib/types/database';
-import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Info, Percent, TrendingUp, Pencil, X, Ban, RefreshCw, Lock, Palette } from 'lucide-react';
+import { Plus, Trash2, AlertCircle, Upload, Image as ImageIcon, Percent, Pencil, X, Ban, RefreshCw, Lock, Palette, Gift, Settings2 } from 'lucide-react';
 import { WheelPreview, PrizeWithQuantity } from '@/components/dashboard/WheelPreview';
 
 // Default segment colors (S1-S6 = prizes, S7 = #UNLUCKY#, S8 = #RÉESSAYER#)
@@ -32,6 +31,13 @@ const SPECIAL_SEGMENTS = {
   RETRY: 'retry',
 } as const;
 
+type TabId = 'prizes' | 'wheel';
+
+const TABS: { id: TabId; icon: React.ReactNode; label: string }[] = [
+  { id: 'prizes', icon: <Gift className="w-4 h-4" />, label: 'Prix' },
+  { id: 'wheel', icon: <Settings2 className="w-4 h-4" />, label: 'Config Roue' },
+];
+
 export default function PrizesPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -43,7 +49,9 @@ export default function PrizesPage() {
     description: '',
     probability: 10,
   });
-  
+
+  const [activeTab, setActiveTab] = useState<TabId>('prizes');
+
   // Segment quantities for the wheel (max 8 total segments)
   const MAX_SEGMENTS = 8;
   const [prizeQuantities, setPrizeQuantities] = useState<Record<string, number>>({});
@@ -60,14 +68,14 @@ export default function PrizesPage() {
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         router.push('/auth/login');
         return;
       }
 
       setUser(user);
-      
+
       const { data: merchantData } = await supabase
         .from('merchants')
         .select('*')
@@ -75,7 +83,7 @@ export default function PrizesPage() {
         .single();
 
       setMerchant(merchantData);
-      
+
       // Load segment quantities from merchant data (or use defaults)
       if (merchantData?.unlucky_quantity !== undefined) {
         setUnluckyQuantity(merchantData.unlucky_quantity);
@@ -89,7 +97,7 @@ export default function PrizesPage() {
       if (merchantData?.segment_colors && Array.isArray(merchantData.segment_colors) && merchantData.segment_colors.length > 0) {
         setSegmentColors(merchantData.segment_colors);
       }
-      
+
       fetchPrizes(user.id);
     };
 
@@ -113,9 +121,9 @@ export default function PrizesPage() {
 
     const { error: uploadError } = await supabase.storage
       .from('merchant-assets')
-      .upload(filePath, file, { 
+      .upload(filePath, file, {
         cacheControl: '3600',
-        upsert: true 
+        upsert: true
       });
 
     if (uploadError) {
@@ -223,46 +231,46 @@ export default function PrizesPage() {
   const totalPrizeSegments = Object.values(prizeQuantities).reduce((sum, qty) => sum + qty, 0);
   const totalSegments = totalPrizeSegments + unluckyQuantity + retryQuantity;
   const remainingSegments = MAX_SEGMENTS - totalSegments;
-  
+
   // Build prize quantities array for WheelPreview
   const prizeQuantitiesArray: PrizeWithQuantity[] = prizes.map(prize => ({
     prize,
     quantity: prizeQuantities[prize.id] || 0
   }));
-  
+
   // Update prize quantity
   const updatePrizeQuantity = (prizeId: string, delta: number) => {
     const currentQty = prizeQuantities[prizeId] || 0;
     const newQty = Math.max(0, currentQty + delta);
-    
+
     // Check if we can add more segments
     if (delta > 0 && totalSegments >= MAX_SEGMENTS) {
       return; // Can't add more
     }
-    
+
     setPrizeQuantities(prev => ({
       ...prev,
       [prizeId]: newQty
     }));
   };
-  
+
   // Update special segment quantity
   const updateUnluckyQuantity = (delta: number) => {
     const newQty = Math.max(0, unluckyQuantity + delta);
     if (delta > 0 && totalSegments >= MAX_SEGMENTS) return;
     setUnluckyQuantity(newQty);
   };
-  
+
   const updateRetryQuantity = (delta: number) => {
     const newQty = Math.max(0, retryQuantity + delta);
     if (delta > 0 && totalSegments >= MAX_SEGMENTS) return;
     setRetryQuantity(newQty);
   };
-  
+
   // Save segment quantities to merchant
   const saveSegmentQuantities = async () => {
     if (!user) return;
-    
+
     try {
       const { error } = await supabase
         .from('merchants')
@@ -273,7 +281,7 @@ export default function PrizesPage() {
           segment_colors: segmentColors,
         })
         .eq('id', user.id);
-      
+
       if (error) throw error;
       setMigrationNeeded(false);
     } catch (error: unknown) {
@@ -283,7 +291,7 @@ export default function PrizesPage() {
       }
     }
   };
-  
+
   // Auto-save when quantities change
   useEffect(() => {
     if (user) {
@@ -295,19 +303,19 @@ export default function PrizesPage() {
   }, [unluckyQuantity, retryQuantity, prizeQuantities, segmentColors, user]);
 
   const getChanceDescription = (prob: number) => {
-    if (prob >= 50) return { text: 'Très fréquent', color: 'text-green-600', bg: 'bg-green-50' };
-    if (prob >= 25) return { text: 'Fréquent', color: 'text-blue-600', bg: 'bg-blue-50' };
+    if (prob >= 50) return { text: 'Tres frequent', color: 'text-green-600', bg: 'bg-green-50' };
+    if (prob >= 25) return { text: 'Frequent', color: 'text-blue-600', bg: 'bg-blue-50' };
     if (prob >= 10) return { text: 'Moyen', color: 'text-yellow-600', bg: 'bg-yellow-50' };
     if (prob >= 5) return { text: 'Rare', color: 'text-orange-600', bg: 'bg-orange-50' };
-    return { text: 'Très rare', color: 'text-red-600', bg: 'bg-red-50' };
+    return { text: 'Tres rare', color: 'text-red-600', bg: 'bg-red-50' };
   };
 
   if (!user || !merchant) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#2D6A4F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading...</p>
+          <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Chargement...</p>
         </div>
       </div>
     );
@@ -315,16 +323,15 @@ export default function PrizesPage() {
 
   return (
     <DashboardLayout merchant={merchant}>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl">
         {/* Migration Warning */}
         {migrationNeeded && (
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-amber-800">Mise à jour de la base de données requise</h3>
+              <h3 className="font-semibold text-amber-800">Mise a jour de la base de donnees requise</h3>
               <p className="text-sm text-amber-700 mt-1">
-                Les colonnes pour les probabilités spéciales manquent dans la base de données. 
-                Veuillez exécuter la commande SQL suivante dans votre tableau de bord Supabase :
+                Les colonnes pour les probabilites speciales manquent dans la base de donnees.
               </p>
               <pre className="mt-2 bg-amber-100 p-2 rounded text-xs overflow-x-auto text-amber-900 border border-amber-200">
                 ALTER TABLE merchants ADD COLUMN IF NOT EXISTS unlucky_probability INTEGER DEFAULT 20;{'\n'}
@@ -334,528 +341,490 @@ export default function PrizesPage() {
           </div>
         )}
 
-        {/* Header with Probability Overview */}
-        <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">🎁 Gestion des Prix</h1>
-            <p className="text-gray-600">Configurez vos prix et leurs probabilités pour la roue</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">Gestion des Prix</h1>
+            <p className="text-gray-500 text-sm">Configurez vos prix et la roue de la chance</p>
           </div>
-          <Button 
-            onClick={() => showForm ? handleCancel() : setShowForm(true)} 
-            className={`gap-2 ${showForm ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-teal-600 hover:bg-teal-700 text-white'}`}
-            variant={showForm ? 'outline' : 'default'}
-          >
-            {showForm ? (
-              <>
-                <X className="w-4 h-4" />
-                <span>Annuler</span>
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                <span>Ajouter un Prix</span>
-              </>
-            )}
-          </Button>
+          {/* Summary badges */}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-teal-50 text-teal-700 text-xs font-medium border border-teal-200">
+              <Gift className="w-3.5 h-3.5" />
+              {prizes.length} prix
+            </span>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
+              remainingSegments === 0
+                ? 'bg-green-50 text-green-700 border-green-200'
+                : remainingSegments > 0
+                ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                : 'bg-red-50 text-red-700 border-red-200'
+            }`}>
+              <Percent className="w-3.5 h-3.5" />
+              {totalSegments}/{MAX_SEGMENTS} segments
+            </span>
+          </div>
         </div>
 
-        {/* Segment Counter Card */}
-        <Card className="p-6 bg-gradient-to-r from-teal-50 to-blue-50 border-teal-200">
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-2xl">🎡</span>
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Composition de la Roue</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-white rounded-lg p-4 border-2 border-teal-200">
-                  <p className="text-sm text-gray-600 mb-1">Segments utilisés</p>
-                  <p className="text-3xl font-bold text-teal-600">{totalSegments}/{MAX_SEGMENTS}</p>
-                </div>
-                <div className={`rounded-lg p-4 border-2 ${
-                  remainingSegments === 0 ? 'bg-green-50 border-green-200' : 
-                  remainingSegments > 0 ? 'bg-yellow-50 border-yellow-200' : 
-                  'bg-red-50 border-red-200'
-                }`}>
-                  <p className="text-sm text-gray-600 mb-1">Segments restants</p>
-                  <p className={`text-3xl font-bold ${
-                    remainingSegments === 0 ? 'text-green-600' : 
-                    remainingSegments > 0 ? 'text-yellow-600' : 
-                    'text-red-600'
-                  }`}>{remainingSegments}</p>
-                </div>
-                <div className="bg-white rounded-lg p-4 border-2 border-gray-200">
-                  <p className="text-sm text-gray-600 mb-1">Prix disponibles</p>
-                  <p className="text-3xl font-bold text-gray-900">{prizes.length}</p>
-                </div>
-              </div>
-              
-              {/* Segment Info */}
-              <div className="bg-white rounded-lg p-4 border border-teal-200">
-                <div className="flex items-center gap-2 mb-3">
-                  <Info className="w-5 h-5 text-teal-600" />
-                  <h4 className="font-semibold text-gray-900">💡 Comment ça marche</h4>
-                </div>
-                <div className="text-sm text-gray-600 space-y-2">
-                  <p>• La roue peut contenir <strong>maximum {MAX_SEGMENTS} segments</strong></p>
-                  <p>• Ajoutez des segments pour chaque prix en cliquant sur <strong>+</strong></p>
-                  <p>• Plus un prix a de segments, plus il a de chances d'être gagné</p>
-                  <p>• Les segments spéciaux (#UNLUCKY#, #RÉESSAYER#) sont configurables</p>
-                </div>
-              </div>
-
-              {totalSegments === 0 && (
-                <div className="mt-4 flex items-center gap-2 text-orange-700 bg-orange-50 border border-orange-200 rounded-lg p-3">
-                  <AlertCircle className="w-5 h-5" />
-                  <span className="font-medium">
-                    Ajoutez des segments à la roue pour la configurer !
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </Card>
-
-        {showForm && (
-          <Card className="p-6 border-2 border-teal-100 shadow-xl bg-white/80 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-teal-400 to-blue-500"></div>
-            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              {editingId ? (
-                <>
-                  <Pencil className="w-5 h-5 text-teal-600" />
-                  Modifier le Prix
-                </>
-              ) : (
-                <>
-                  <Plus className="w-5 h-5 text-teal-600" />
-                  Ajouter un Nouveau Prix
-                </>
-              )}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Prize Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Photo du Prix
-                </label>
-                {imagePreview ? (
-                  <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden border-2 border-teal-200">
-                    <img src={imagePreview} alt="Prize preview" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview('');
-                      }}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-teal-500 transition-colors">
-                    <input
-                      type="file"
-                      id="prize-image"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                    <label htmlFor="prize-image" className="cursor-pointer">
-                      <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-sm text-gray-600 mb-1">
-                        <span className="text-teal-600 font-semibold">Cliquez pour uploader</span> ou glissez-déposez
-                      </p>
-                      <p className="text-xs text-gray-500">PNG, JPG jusqu'à 5MB</p>
-                    </label>
-                  </div>
-                )}
-              </div>
-
-              <Input
-                label="Nom du Prix"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Réduction de 10%"
-                required
+        {/* Tabs Navigation */}
+        <nav className="flex gap-1 border-b-2 border-gray-100 overflow-x-auto" role="tablist">
+          {TABS.map(tab => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all duration-300 rounded-t-lg whitespace-nowrap
+                ${activeTab === tab.id
+                  ? 'text-teal-600'
+                  : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50/50'
+                }
+              `}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+              <span
+                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500 to-emerald-500 transition-transform duration-300 origin-left ${
+                  activeTab === tab.id ? 'scale-x-100' : 'scale-x-0'
+                }`}
               />
+            </button>
+          ))}
+        </nav>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Obtenez 10% de réduction sur votre prochain achat"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                  rows={3}
-                />
-              </div>
+        {/* Tab Content */}
+        <div className="animate-[fadeIn_0.3s_ease-out]" key={activeTab}>
 
-              {/* Probability Slider */}
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Probabilité de Gain
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-teal-600">{formData.probability}%</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${getChanceDescription(formData.probability).bg} ${getChanceDescription(formData.probability).color} font-medium`}>
-                      {getChanceDescription(formData.probability).text}
-                    </span>
-                  </div>
-                </div>
-                
-                <input
-                  type="range"
-                  min="1"
-                  max="100"
-                  step="1"
-                  value={formData.probability}
-                  onChange={(e) => setFormData({ ...formData, probability: parseFloat(e.target.value) })}
-                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
-                />
-                
-                <div className="flex justify-between text-xs text-gray-500 mt-2">
-                  <span>1% (Très rare)</span>
-                  <span>50% (Moyen)</span>
-                  <span>100% (Garanti)</span>
-                </div>
-
-                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800">
-                    💡 <strong>1 chance sur {Math.round(100 / formData.probability)}</strong> de gagner ce prix
-                    {formData.probability >= 10 && ` (environ tous les ${Math.round(100 / formData.probability)} tours)`}
-                  </p>
-                </div>
+          {/* ===== PRIZES TAB ===== */}
+          {activeTab === 'prizes' && (
+            <div className="space-y-5">
+              {/* Add Prize Button */}
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => showForm ? handleCancel() : setShowForm(true)}
+                  className={`gap-2 ${showForm ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-teal-600 hover:bg-teal-700 text-white'}`}
+                  variant={showForm ? 'outline' : 'default'}
+                  size="sm"
+                >
+                  {showForm ? (
+                    <>
+                      <X className="w-4 h-4" />
+                      <span>Annuler</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-4 h-4" />
+                      <span>Ajouter un Prix</span>
+                    </>
+                  )}
+                </Button>
               </div>
 
-              <Button 
-                type="submit" 
-                disabled={loading || uploading} 
-                className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-bold py-6 rounded-xl shadow-lg transform transition-transform active:scale-95"
-              >
-                {uploading ? 'Upload en cours...' : loading ? 'Sauvegarde...' : (editingId ? 'Mettre à jour le Prix' : 'Créer le Prix')}
-              </Button>
-            </form>
-          </Card>
-        )}
-
-        {/* Special Segments Section */}
-        <Card className="p-6 bg-gradient-to-r from-gray-900 to-gray-800 border-gray-700">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
-              <Lock className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">Segments Spéciaux (Permanents)</h3>
-              <p className="text-gray-400 text-sm">Ces segments sont toujours présents sur la roue</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* UNLUCKY Card */}
-            <div className="bg-gray-800 rounded-xl p-5 border-2 border-red-500/50">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-14 h-14 bg-red-900 rounded-full flex items-center justify-center">
-                  <Ban className="w-8 h-8 text-red-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-red-400">#UNLUCKY#</h4>
-                  <p className="text-gray-400 text-xs">Éliminatoire - Fin du jeu</p>
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">Segments sur la roue</label>
-                </div>
-                <div className="flex items-center justify-center gap-4">
-                  <Button
-                    onClick={() => updateUnluckyQuantity(-1)}
-                    disabled={unluckyQuantity <= 0}
-                    variant="outline"
-                    size="sm"
-                    className="w-10 h-10 rounded-full bg-red-900/50 border-red-500 text-red-400 hover:bg-red-800 disabled:opacity-50"
-                  >
-                    -
-                  </Button>
-                  <span className="text-3xl font-bold text-red-400 w-12 text-center">{unluckyQuantity}</span>
-                  <Button
-                    onClick={() => updateUnluckyQuantity(1)}
-                    disabled={totalSegments >= MAX_SEGMENTS}
-                    variant="outline"
-                    size="sm"
-                    className="w-10 h-10 rounded-full bg-red-900/50 border-red-500 text-red-400 hover:bg-red-800 disabled:opacity-50"
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-3">
-                <p className="text-xs text-red-300">
-                  ⚠️ Si la roue s'arrête sur ce segment, le joueur perd et ne peut plus rejouer.
-                </p>
-              </div>
-            </div>
-            
-            {/* RETRY Card */}
-            <div className="bg-gray-800 rounded-xl p-5 border-2 border-yellow-500/50">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-14 h-14 bg-yellow-900 rounded-full flex items-center justify-center">
-                  <RefreshCw className="w-8 h-8 text-yellow-400" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-yellow-400">#REESSAYER#</h4>
-                  <p className="text-gray-400 text-xs">Tour supplémentaire gratuit</p>
-                </div>
-              </div>
-              
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="text-sm font-medium text-gray-300">Segments sur la roue</label>
-                </div>
-                <div className="flex items-center justify-center gap-4">
-                  <Button
-                    onClick={() => updateRetryQuantity(-1)}
-                    disabled={retryQuantity <= 0}
-                    variant="outline"
-                    size="sm"
-                    className="w-10 h-10 rounded-full bg-yellow-900/50 border-yellow-500 text-yellow-400 hover:bg-yellow-800 disabled:opacity-50"
-                  >
-                    -
-                  </Button>
-                  <span className="text-3xl font-bold text-yellow-400 w-12 text-center">{retryQuantity}</span>
-                  <Button
-                    onClick={() => updateRetryQuantity(1)}
-                    disabled={totalSegments >= MAX_SEGMENTS}
-                    variant="outline"
-                    size="sm"
-                    className="w-10 h-10 rounded-full bg-yellow-900/50 border-yellow-500 text-yellow-400 hover:bg-yellow-800 disabled:opacity-50"
-                  >
-                    +
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="bg-yellow-900/30 border border-yellow-500/30 rounded-lg p-3">
-                <p className="text-xs text-yellow-300">
-                  🔄 Si la roue s'arrête sur ce segment, le joueur peut tourner à nouveau !
-                </p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Wheel Preview Section */}
-        <Card className="p-6 bg-gradient-to-br from-slate-50 to-gray-100 border-2 border-gray-200">
-          <div className="flex flex-col lg:flex-row items-center gap-8">
-            <div className="flex-shrink-0">
-              <WheelPreview
-                prizeQuantities={prizeQuantitiesArray}
-                unluckyQuantity={unluckyQuantity}
-                retryQuantity={retryQuantity}
-                size={320}
-                maxSegments={MAX_SEGMENTS}
-                segmentColors={segmentColors}
-              />
-            </div>
-            <div className="flex-1 text-center lg:text-left">
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">🎡 Aperçu de la Roue</h3>
-              <p className="text-gray-600 mb-4">
-                Voici un aperçu de votre roue avec tous les segments configurés.
-                Chaque segment représente un prix ou un segment spécial.
-              </p>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-white rounded-lg p-3 border">
-                  <p className="text-gray-500">Segments totaux</p>
-                  <p className="text-2xl font-bold text-teal-600">{totalSegments}/{MAX_SEGMENTS}</p>
-                </div>
-                <div className="bg-white rounded-lg p-3 border">
-                  <p className="text-gray-500">Prix sur la roue</p>
-                  <p className="text-2xl font-bold text-blue-600">{totalPrizeSegments}</p>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                  <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  #UNLUCKY# × {unluckyQuantity}
-                </span>
-                <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
-                  <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                  #RÉESSAYER# × {retryQuantity}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Segment Color Configuration */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Palette className="w-5 h-5 text-teal-600" />
-              <h4 className="font-bold text-gray-900">Couleurs des segments</h4>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {segmentColors.map((config, index) => {
-                const label = SEGMENT_LABELS[index] || `S${index + 1}`;
-                const isSpecial = index >= 6;
-                return (
-                  <div key={index} className={`rounded-lg p-3 border flex items-center gap-2 ${
-                    isSpecial ? 'bg-gray-50 border-gray-300' : 'bg-white border-gray-200'
-                  }`}>
-                    <span className={`text-xs w-auto flex-shrink-0 font-medium ${
-                      index === 6 ? 'text-red-600' : index === 7 ? 'text-yellow-600' : 'text-gray-500'
-                    }`}>{label}</span>
-                    <div className="flex gap-1 ml-auto">
-                      <label className="cursor-pointer" title="Couleur du segment">
-                        <input
-                          type="color"
-                          value={config.color}
-                          onChange={(e) => {
-                            const newColors = [...segmentColors];
-                            newColors[index] = { ...config, color: e.target.value, borderColor: e.target.value };
-                            setSegmentColors(newColors);
-                          }}
-                          className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                        />
-                      </label>
-                      <label className="cursor-pointer" title="Couleur du texte">
-                        <input
-                          type="color"
-                          value={config.textColor}
-                          onChange={(e) => {
-                            const newColors = [...segmentColors];
-                            newColors[index] = { ...config, textColor: e.target.value };
-                            setSegmentColors(newColors);
-                          }}
-                          className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-                        />
-                      </label>
+              {/* Inline Add/Edit Form */}
+              {showForm && (
+                <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                  <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  <h3 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                      {editingId ? <Pencil className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            <p className="text-xs text-gray-500 mt-2">Premier carré = fond du segment, second = couleur du texte. S7 et S8 = segments spéciaux.</p>
-          </div>
-        </Card>
+                    {editingId ? 'Modifier le Prix' : 'Nouveau Prix'}
+                  </h3>
+                  <form onSubmit={handleSubmit}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Left column: image */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1.5">Photo</label>
+                        {imagePreview ? (
+                          <div className="relative h-36 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                            <img src={imagePreview} alt="Prize preview" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => { setImageFile(null); setImagePreview(''); }}
+                              className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full hover:bg-red-600"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-teal-500 transition-colors h-36 flex flex-col items-center justify-center">
+                            <input
+                              type="file"
+                              id="prize-image"
+                              accept="image/*"
+                              onChange={handleImageChange}
+                              className="hidden"
+                            />
+                            <label htmlFor="prize-image" className="cursor-pointer">
+                              <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-xs text-gray-600">
+                                <span className="text-teal-600 font-semibold">Cliquez</span> pour uploader
+                              </p>
+                              <p className="text-xs text-gray-400">PNG, JPG</p>
+                            </label>
+                          </div>
+                        )}
+                      </div>
 
-        {/* Merchant Prizes Grid */}
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-            🎁 Vos Prix Personnalisés
-            <span className="text-sm font-normal text-gray-500">({prizes.length} prix)</span>
-          </h3>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {prizes.map((prize) => {
-            const quantity = prizeQuantities[prize.id] || 0;
-            return (
-              <Card key={prize.id} className={`overflow-hidden hover:shadow-xl transition-all border-2 ${quantity > 0 ? 'border-teal-400 bg-teal-50/30' : 'hover:border-teal-300'}`}>
-                {/* Prize Image */}
-                {prize.image_url ? (
-                  <div className="relative h-40 bg-gradient-to-br from-teal-100 to-blue-100">
-                    <img 
-                      src={prize.image_url} 
-                      alt={prize.name} 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-3 right-3">
-                      <div className={`px-3 py-1.5 ${quantity > 0 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'} rounded-full font-bold text-sm shadow-lg`}>
-                        × {quantity}
+                      {/* Right column: fields */}
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nom du Prix</label>
+                          <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            placeholder="Reduction de 10%"
+                            required
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-teal-50/30 transition-all duration-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                          <input
+                            type="text"
+                            value={formData.description}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            placeholder="Obtenez 10% de reduction..."
+                            className="w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-teal-50/30 transition-all duration-200"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-sm font-medium text-gray-700">Probabilite</label>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-lg font-bold text-teal-600">{formData.probability}%</span>
+                              <span className={`text-xs px-1.5 py-0.5 rounded-full ${getChanceDescription(formData.probability).bg} ${getChanceDescription(formData.probability).color} font-medium`}>
+                                {getChanceDescription(formData.probability).text}
+                              </span>
+                            </div>
+                          </div>
+                          <input
+                            type="range"
+                            min="1"
+                            max="100"
+                            step="1"
+                            value={formData.probability}
+                            onChange={(e) => setFormData({ ...formData, probability: parseFloat(e.target.value) })}
+                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-600"
+                          />
+                          <div className="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>1%</span>
+                            <span>50%</span>
+                            <span>100%</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="h-40 bg-gradient-to-br from-teal-100 to-blue-100 flex items-center justify-center relative">
-                    <span className="text-5xl">🎁</span>
-                    <div className="absolute top-3 right-3">
-                      <div className={`px-3 py-1.5 ${quantity > 0 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'} rounded-full font-bold text-sm shadow-lg`}>
-                        × {quantity}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="p-4">
-                  <div className="mb-3">
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">{prize.name}</h3>
-                    {prize.description && (
-                      <p className="text-gray-500 text-xs line-clamp-1">{prize.description}</p>
-                    )}
-                  </div>
-                  
-                  {/* Quantity Controls */}
-                  <div className="mb-4">
-                    <label className="text-xs font-medium text-gray-500 block mb-2">Segments sur la roue</label>
-                    <div className="flex items-center justify-center gap-3">
+                    <div className="mt-4 flex justify-end gap-2">
+                      <Button type="button" variant="outline" size="sm" onClick={handleCancel}>
+                        Annuler
+                      </Button>
                       <Button
-                        onClick={() => updatePrizeQuantity(prize.id, -1)}
-                        disabled={quantity <= 0}
+                        type="submit"
+                        disabled={loading || uploading}
+                        size="sm"
+                        className="bg-teal-600 hover:bg-teal-700 text-white px-6"
+                      >
+                        {uploading ? 'Upload...' : loading ? 'Sauvegarde...' : (editingId ? 'Mettre a jour' : 'Creer le Prix')}
+                      </Button>
+                    </div>
+                  </form>
+                </Card>
+              )}
+
+              {/* Prize Grid */}
+              {prizes.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {prizes.map((prize) => {
+                    const quantity = prizeQuantities[prize.id] || 0;
+                    return (
+                      <Card key={prize.id} className="group relative p-0 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                        <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left z-10" />
+
+                        {/* Image / Placeholder */}
+                        {prize.image_url ? (
+                          <div className="relative h-28 bg-gradient-to-br from-teal-100 to-emerald-50">
+                            <img src={prize.image_url} alt={prize.name} className="w-full h-full object-cover" />
+                            <div className="absolute top-2 right-2">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold shadow ${quantity > 0 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                x{quantity}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="relative h-28 bg-gradient-to-br from-teal-50 to-emerald-50 flex items-center justify-center">
+                            <Gift className="w-10 h-10 text-teal-300" />
+                            <div className="absolute top-2 right-2">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold shadow ${quantity > 0 ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                                x{quantity}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="p-3">
+                          <h4 className="text-sm font-semibold text-gray-900 truncate">{prize.name}</h4>
+                          {prize.description && (
+                            <p className="text-xs text-gray-500 truncate mt-0.5">{prize.description}</p>
+                          )}
+
+                          {/* Quantity Controls */}
+                          <div className="flex items-center justify-center gap-2 mt-2">
+                            <Button
+                              onClick={() => updatePrizeQuantity(prize.id, -1)}
+                              disabled={quantity <= 0}
+                              variant="outline"
+                              size="sm"
+                              className="w-7 h-7 rounded-full p-0 border-teal-300 text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+                            >
+                              -
+                            </Button>
+                            <span className="text-lg font-bold text-teal-600 w-6 text-center">{quantity}</span>
+                            <Button
+                              onClick={() => updatePrizeQuantity(prize.id, 1)}
+                              disabled={totalSegments >= MAX_SEGMENTS}
+                              variant="outline"
+                              size="sm"
+                              className="w-7 h-7 rounded-full p-0 border-teal-300 text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+                            >
+                              +
+                            </Button>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-1.5 mt-2">
+                            <Button
+                              onClick={() => handleEdit(prize)}
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 text-xs h-7 text-gray-600 border-gray-200 hover:bg-gray-50 gap-1"
+                            >
+                              <Pencil className="w-3 h-3" />
+                              Modifier
+                            </Button>
+                            <Button
+                              onClick={() => handleDelete(prize.id)}
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-red-600 border-red-200 hover:bg-red-50 px-2"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : !showForm ? (
+                <Card className="group relative p-10 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                  <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  <div className="text-center">
+                    <div className="w-14 h-14 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-3">
+                      <Gift className="w-7 h-7" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Aucun prix configure</h3>
+                    <p className="text-gray-500 text-sm mb-4">
+                      Ajoutez votre premier prix pour configurer la roue.
+                    </p>
+                    <Button onClick={() => setShowForm(true)} className="gap-2 bg-teal-600 hover:bg-teal-700 text-white" size="sm">
+                      <Plus className="w-4 h-4" />
+                      Ajouter mon Premier Prix
+                    </Button>
+                  </div>
+                </Card>
+              ) : null}
+            </div>
+          )}
+
+          {/* ===== WHEEL CONFIG TAB ===== */}
+          {activeTab === 'wheel' && (
+            <div className="space-y-5">
+              {/* Special Segments - Compact inline */}
+              <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <Lock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-gray-900">Segments Speciaux</h3>
+                    <p className="text-xs text-gray-500">Segments permanents sur la roue</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* UNLUCKY */}
+                  <div className="flex items-center gap-4 p-4 rounded-lg border border-red-200 bg-red-50/50">
+                    <div className="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+                      <Ban className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">#UNLUCKY#</p>
+                      <p className="text-xs text-gray-500">Eliminatoire</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => updateUnluckyQuantity(-1)}
+                        disabled={unluckyQuantity <= 0}
                         variant="outline"
                         size="sm"
-                        className="w-9 h-9 rounded-full border-teal-400 text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+                        className="w-7 h-7 rounded-full p-0 border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50"
                       >
                         -
                       </Button>
-                      <span className="text-2xl font-bold text-teal-600 w-10 text-center">{quantity}</span>
+                      <span className="text-xl font-bold text-red-600 w-6 text-center">{unluckyQuantity}</span>
                       <Button
-                        onClick={() => updatePrizeQuantity(prize.id, 1)}
+                        onClick={() => updateUnluckyQuantity(1)}
                         disabled={totalSegments >= MAX_SEGMENTS}
                         variant="outline"
                         size="sm"
-                        className="w-9 h-9 rounded-full border-teal-400 text-teal-600 hover:bg-teal-50 disabled:opacity-50"
+                        className="w-7 h-7 rounded-full p-0 border-red-300 text-red-600 hover:bg-red-50 disabled:opacity-50"
                       >
                         +
                       </Button>
                     </div>
                   </div>
-                  
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleEdit(prize)}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 text-gray-600 border-gray-300 hover:bg-gray-50 gap-1"
-                    >
-                      <Pencil className="w-3 h-3" />
-                      Modifier
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(prize.id)}
-                      variant="outline"
-                      size="sm"
-                      className="text-red-600 border-red-300 hover:bg-red-50"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
+
+                  {/* RETRY */}
+                  <div className="flex items-center gap-4 p-4 rounded-lg border border-yellow-200 bg-yellow-50/50">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-100 text-yellow-600 flex items-center justify-center flex-shrink-0">
+                      <RefreshCw className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">#REESSAYER#</p>
+                      <p className="text-xs text-gray-500">Tour supplementaire</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => updateRetryQuantity(-1)}
+                        disabled={retryQuantity <= 0}
+                        variant="outline"
+                        size="sm"
+                        className="w-7 h-7 rounded-full p-0 border-yellow-300 text-yellow-600 hover:bg-yellow-50 disabled:opacity-50"
+                      >
+                        -
+                      </Button>
+                      <span className="text-xl font-bold text-yellow-600 w-6 text-center">{retryQuantity}</span>
+                      <Button
+                        onClick={() => updateRetryQuantity(1)}
+                        disabled={totalSegments >= MAX_SEGMENTS}
+                        variant="outline"
+                        size="sm"
+                        className="w-7 h-7 rounded-full p-0 border-yellow-300 text-yellow-600 hover:bg-yellow-50 disabled:opacity-50"
+                      >
+                        +
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            );
-          })}
-        </div>
 
-        {prizes.length === 0 && !showForm && (
-          <Card className="p-12 bg-gradient-to-br from-gray-50 to-teal-50">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-5xl">🎁</span>
+                {totalSegments === 0 && (
+                  <div className="mt-4 flex items-center gap-2 text-orange-700 bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Ajoutez des segments a la roue pour la configurer.</span>
+                  </div>
+                )}
+              </Card>
+
+              {/* Wheel Preview + Segment Colors side by side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                {/* Wheel Preview */}
+                <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                  <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                      <Settings2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900">Apercu de la Roue</h3>
+                      <p className="text-xs text-gray-500">{totalSegments}/{MAX_SEGMENTS} segments configures</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-center">
+                    <WheelPreview
+                      prizeQuantities={prizeQuantitiesArray}
+                      unluckyQuantity={unluckyQuantity}
+                      retryQuantity={retryQuantity}
+                      size={260}
+                      maxSegments={MAX_SEGMENTS}
+                      segmentColors={segmentColors}
+                    />
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium border border-teal-200">
+                      Prix: {totalPrizeSegments}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-700 rounded-full text-xs font-medium border border-red-200">
+                      #UNLUCKY# x{unluckyQuantity}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-medium border border-yellow-200">
+                      #REESSAYER# x{retryQuantity}
+                    </span>
+                  </div>
+                </Card>
+
+                {/* Segment Colors */}
+                <Card className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md">
+                  <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                      <Palette className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-semibold text-gray-900">Couleurs des segments</h3>
+                      <p className="text-xs text-gray-500">Fond + texte par segment</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {segmentColors.map((config, index) => {
+                      const label = SEGMENT_LABELS[index] || `S${index + 1}`;
+                      const isSpecial = index >= 6;
+                      return (
+                        <div key={index} className={`rounded-lg p-2 border flex items-center gap-2 ${
+                          isSpecial ? 'bg-gray-50 border-gray-300' : 'bg-white border-gray-200'
+                        }`}>
+                          <span className={`text-xs flex-shrink-0 font-medium ${
+                            index === 6 ? 'text-red-600' : index === 7 ? 'text-yellow-600' : 'text-gray-500'
+                          }`}>{label}</span>
+                          <div className="flex gap-1 ml-auto">
+                            <label className="cursor-pointer" title="Couleur du segment">
+                              <input
+                                type="color"
+                                value={config.color}
+                                onChange={(e) => {
+                                  const newColors = [...segmentColors];
+                                  newColors[index] = { ...config, color: e.target.value, borderColor: e.target.value };
+                                  setSegmentColors(newColors);
+                                }}
+                                className="w-7 h-7 rounded cursor-pointer border-0 p-0"
+                              />
+                            </label>
+                            <label className="cursor-pointer" title="Couleur du texte">
+                              <input
+                                type="color"
+                                value={config.textColor}
+                                onChange={(e) => {
+                                  const newColors = [...segmentColors];
+                                  newColors[index] = { ...config, textColor: e.target.value };
+                                  setSegmentColors(newColors);
+                                }}
+                                className="w-7 h-7 rounded cursor-pointer border-0 p-0"
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">1er carre = fond, 2e = texte. S7/S8 = speciaux.</p>
+                </Card>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Aucun prix configuré</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                Ajoutez votre premier prix pour commencer à configurer votre roue de la chance !
-              </p>
-              <Button onClick={() => setShowForm(true)} className="gap-2 bg-teal-600 hover:bg-teal-700">
-                <Plus className="w-4 h-4" />
-                Ajouter mon Premier Prix
-              </Button>
             </div>
-          </Card>
-        )}
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
