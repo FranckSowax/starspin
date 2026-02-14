@@ -15,7 +15,8 @@ import '@/lib/i18n/config';
 
 export default function ScanPage() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isFr = i18n.language === 'fr';
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [scanResult, setScanResult] = useState<string | null>(null);
@@ -141,7 +142,7 @@ export default function ScanPage() {
 
       if (!res.ok) {
         setScanStatus('invalid');
-        setErrorMessage(t('loyalty.scan.loyaltyCardDetected') + ' - ' + t('common.error'));
+        setErrorMessage(isFr ? 'Carte fidélité détectée - Erreur' : 'Loyalty card detected - Error');
         return;
       }
 
@@ -149,7 +150,7 @@ export default function ScanPage() {
 
       if (!data.client) {
         setScanStatus('invalid');
-        setErrorMessage('Carte fidelite introuvable pour ce commerce.');
+        setErrorMessage(isFr ? 'Carte fidélité introuvable pour ce commerce.' : 'Loyalty card not found for this business.');
         return;
       }
 
@@ -157,7 +158,7 @@ export default function ScanPage() {
       setScanStatus('loyalty');
     } catch {
       setScanStatus('invalid');
-      setErrorMessage(t('common.error'));
+      setErrorMessage(isFr ? 'Une erreur est survenue.' : 'An error occurred.');
     }
   };
 
@@ -191,7 +192,7 @@ export default function ScanPage() {
           action: 'earn',
           points: pointsToAdd,
           purchaseAmount: parseFloat(purchaseAmount) || 0,
-          description: `Achat de ${purchaseAmount} ${merchant?.loyalty_currency || 'THB'}`
+          description: isFr ? `Achat de ${purchaseAmount} ${merchant?.loyalty_currency || 'THB'}` : `Purchase of ${purchaseAmount} ${merchant?.loyalty_currency || 'THB'}`
         })
       });
 
@@ -211,10 +212,10 @@ export default function ScanPage() {
         }, ...prev]);
       } else {
         const data = await res.json();
-        setErrorMessage(data.error || 'Erreur lors de l\'ajout des points');
+        setErrorMessage(data.error || (isFr ? 'Erreur lors de l\'ajout des points' : 'Error adding points'));
       }
     } catch {
-      setErrorMessage('Erreur lors de l\'ajout des points');
+      setErrorMessage(isFr ? 'Erreur lors de l\'ajout des points' : 'Error adding points');
     } finally {
       setAddingPoints(false);
     }
@@ -229,7 +230,7 @@ export default function ScanPage() {
 
       if (!res.ok) {
         setScanStatus('invalid');
-        setErrorMessage('Code de redemption introuvable.');
+        setErrorMessage(isFr ? 'Code de rédemption introuvable.' : 'Redemption code not found.');
         return;
       }
 
@@ -237,7 +238,7 @@ export default function ScanPage() {
 
       if (!data.found || !data.redeemedReward) {
         setScanStatus('invalid');
-        setErrorMessage('Code de redemption introuvable.');
+        setErrorMessage(isFr ? 'Code de rédemption introuvable.' : 'Redemption code not found.');
         return;
       }
 
@@ -246,7 +247,7 @@ export default function ScanPage() {
       // Check if it belongs to this merchant
       if (reward.merchant_id !== merchant.id) {
         setScanStatus('invalid');
-        setErrorMessage('Ce code appartient a un autre commerce.');
+        setErrorMessage(isFr ? 'Ce code appartient à un autre commerce.' : 'This code belongs to another business.');
         return;
       }
 
@@ -254,19 +255,19 @@ export default function ScanPage() {
 
       if (reward.status === 'used') {
         setScanStatus('invalid');
-        setErrorMessage(`Ce code a deja ete utilise le ${new Date(reward.used_at).toLocaleDateString()}.`);
+        setErrorMessage(isFr ? `Ce code a déjà été utilisé le ${new Date(reward.used_at).toLocaleDateString()}.` : `This code was already used on ${new Date(reward.used_at).toLocaleDateString()}.`);
       } else if (reward.status === 'expired' || (reward.expires_at && new Date(reward.expires_at) < new Date())) {
         setScanStatus('invalid');
-        setErrorMessage('Ce code de redemption a expire.');
+        setErrorMessage(isFr ? 'Ce code de rédemption a expiré.' : 'This redemption code has expired.');
       } else if (reward.status === 'cancelled') {
         setScanStatus('invalid');
-        setErrorMessage('Ce code de redemption a ete annule.');
+        setErrorMessage(isFr ? 'Ce code de rédemption a été annulé.' : 'This redemption code has been cancelled.');
       } else {
         setScanStatus('redemption');
       }
     } catch {
       setScanStatus('invalid');
-      setErrorMessage('Erreur lors de la verification du code.');
+      setErrorMessage(isFr ? 'Erreur lors de la vérification du code.' : 'Error verifying the code.');
     }
   };
 
@@ -301,10 +302,10 @@ export default function ScanPage() {
         }, ...prev]);
       } else {
         const data = await res.json();
-        setErrorMessage(data.error || 'Erreur lors de la validation.');
+        setErrorMessage(data.error || (isFr ? 'Erreur lors de la validation.' : 'Error during validation.'));
       }
     } catch {
-      setErrorMessage('Erreur lors de la validation du code.');
+      setErrorMessage(isFr ? 'Erreur lors de la validation du code.' : 'Error validating the code.');
     } finally {
       setValidatingRedemption(false);
     }
@@ -335,7 +336,7 @@ export default function ScanPage() {
 
       if (error || !coupon) {
         setScanStatus('invalid');
-        setErrorMessage(t('scan.invalidCode') || 'Code invalide ou appartenant a un autre commercant.');
+        setErrorMessage(isFr ? 'Code invalide ou appartenant à un autre commerçant.' : 'Invalid code or belongs to another merchant.');
         return;
       }
 
@@ -343,17 +344,17 @@ export default function ScanPage() {
 
       if (coupon.used) {
         setScanStatus('invalid');
-        setErrorMessage(`${t('scan.alreadyUsed') || 'Ce coupon a deja ete utilise le'} ${new Date(coupon.used_at).toLocaleDateString()}`);
+        setErrorMessage(isFr ? `Ce coupon a déjà été utilisé le ${new Date(coupon.used_at).toLocaleDateString()}` : `This coupon was already used on ${new Date(coupon.used_at).toLocaleDateString()}`);
       } else if (new Date(coupon.expires_at) < new Date()) {
         setScanStatus('invalid');
-        setErrorMessage(t('scan.expired') || 'Ce coupon a expire.');
+        setErrorMessage(isFr ? 'Ce coupon a expiré.' : 'This coupon has expired.');
       } else {
         setScanStatus('valid');
       }
 
     } catch {
       setScanStatus('invalid');
-      setErrorMessage(t('common.error') || 'Une erreur est survenue lors de la verification.');
+      setErrorMessage(isFr ? 'Une erreur est survenue lors de la vérification.' : 'An error occurred during verification.');
     }
   };
 
@@ -390,14 +391,14 @@ export default function ScanPage() {
         body: JSON.stringify({
           merchantId: merchant.id,
           type: 'coupon_used',
-          title: 'Coupon utilise',
-          message: `Le coupon "${couponDetails.code}" pour "${couponDetails.prize_name}" a ete valide.`,
+          title: isFr ? 'Coupon utilisé' : 'Coupon used',
+          message: isFr ? `Le coupon "${couponDetails.code}" pour "${couponDetails.prize_name}" a été validé.` : `Coupon "${couponDetails.code}" for "${couponDetails.prize_name}" has been validated.`,
           data: { couponCode: couponDetails.code, prizeName: couponDetails.prize_name },
         }),
       }).catch(() => {}); // Fire and forget
 
     } catch {
-      setErrorMessage('Impossible de valider le coupon. Veuillez reessayer.');
+      setErrorMessage(isFr ? 'Impossible de valider le coupon. Veuillez réessayer.' : 'Unable to validate coupon. Please try again.');
     }
   };
 
@@ -417,8 +418,8 @@ export default function ScanPage() {
       <div className="max-w-xl mx-auto space-y-4">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">{t('scan.title') || 'Scanner'}</h1>
-          <p className="text-sm text-gray-500 mt-1">{t('scan.subtitle') || 'Scannez le QR code du client pour verifier et valider.'}</p>
+          <h1 className="text-2xl font-bold text-gray-900">Scanner</h1>
+          <p className="text-sm text-gray-500 mt-1">{isFr ? 'Scannez le QR code du client pour verifier et valider.' : 'Scan the customer QR code to verify and validate.'}</p>
         </div>
 
         {/* Scanner Card */}
@@ -432,11 +433,11 @@ export default function ScanPage() {
                 <div className="w-14 h-14 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center mx-auto mb-4">
                   <ScanLine className="w-7 h-7" />
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-1">{t('scan.ready') || 'Pret a scanner'}</h3>
-                <p className="text-xs text-gray-500 mb-5">Coupon, carte fidelite ou code de redemption</p>
+                <h3 className="text-sm font-semibold text-gray-900 mb-1">{isFr ? 'Pret a scanner' : 'Ready to scan'}</h3>
+                <p className="text-xs text-gray-500 mb-5">{isFr ? 'Coupon, carte fidelite ou code de redemption' : 'Coupon, loyalty card or redemption code'}</p>
                 <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-2">
                   <ScanLine className="w-4 h-4" />
-                  {t('scan.start') || 'Lancer le scan'}
+                  {isFr ? 'Lancer le scan' : 'Start scanning'}
                 </Button>
               </div>
             )}
@@ -446,7 +447,7 @@ export default function ScanPage() {
               <div>
                 <div id="reader" className="w-full overflow-hidden rounded-lg border border-gray-200"></div>
                 <Button onClick={() => setScanStatus('idle')} variant="outline" className="w-full mt-3" size="sm">
-                  {t('dashboard.common.cancel') || 'Annuler'}
+                  {isFr ? 'Annuler' : 'Cancel'}
                 </Button>
               </div>
             )}
@@ -455,7 +456,7 @@ export default function ScanPage() {
             {scanStatus === 'verifying' && (
               <div className="text-center py-8">
                 <div className="w-10 h-10 border-3 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-sm font-medium text-gray-700">Verification du code...</p>
+                <p className="text-sm font-medium text-gray-700">{isFr ? 'Verification du code...' : 'Verifying code...'}</p>
               </div>
             )}
 
@@ -465,22 +466,22 @@ export default function ScanPage() {
                 <div className="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
-                <h2 className="text-lg font-bold text-green-700 mb-1">Coupon Valide</h2>
+                <h2 className="text-lg font-bold text-green-700 mb-1">{isFr ? 'Coupon Valide' : 'Valid Coupon'}</h2>
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-5 max-w-xs mx-auto">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-0.5">Prix a remettre</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-0.5">{isFr ? 'Prix a remettre' : 'Prize to give'}</p>
                   <p className="text-xl font-bold text-gray-900 mb-2">{couponDetails.prize_name}</p>
                   <div className="border-t border-gray-200 pt-2 space-y-1">
                     <p className="text-xs text-gray-600">Code: <span className="font-mono font-bold">{couponDetails.code}</span></p>
-                    <p className="text-xs text-gray-400">Expire le: {new Date(couponDetails.expires_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-400">{isFr ? 'Expire le' : 'Expires on'}: {new Date(couponDetails.expires_at).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="flex gap-3 justify-center">
                   <Button onClick={() => setScanStatus('idle')} variant="outline" size="sm">
-                    Annuler
+                    {isFr ? 'Annuler' : 'Cancel'}
                   </Button>
                   <Button onClick={redeemCoupon} className="bg-green-600 hover:bg-green-700 gap-1.5" size="sm">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Valider la remise
+                    {isFr ? 'Valider la remise' : 'Validate'}
                   </Button>
                 </div>
               </div>
@@ -492,11 +493,11 @@ export default function ScanPage() {
                 <div className="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
                   <XCircle className="w-7 h-7" />
                 </div>
-                <h2 className="text-lg font-bold text-red-700 mb-1">Invalide</h2>
+                <h2 className="text-lg font-bold text-red-700 mb-1">{isFr ? 'Invalide' : 'Invalid'}</h2>
                 <p className="text-sm text-gray-600 mb-5 max-w-xs mx-auto">{errorMessage}</p>
                 <Button onClick={startScanning} variant="outline" className="gap-1.5" size="sm">
                   <RefreshCw className="w-3.5 h-3.5" />
-                  Scanner un autre code
+                  {isFr ? 'Scanner un autre code' : 'Scan another code'}
                 </Button>
               </div>
             )}
@@ -507,11 +508,11 @@ export default function ScanPage() {
                 <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Gift className="w-7 h-7" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-1">Prix Valide</h2>
-                <p className="text-sm text-gray-500 mb-5">Le coupon a ete marque comme utilise.</p>
+                <h2 className="text-lg font-bold text-gray-900 mb-1">{isFr ? 'Prix Valide' : 'Prize Validated'}</h2>
+                <p className="text-sm text-gray-500 mb-5">{isFr ? 'Le coupon a ete marque comme utilise.' : 'The coupon has been marked as used.'}</p>
                 <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-1.5" size="sm">
                   <ScanLine className="w-3.5 h-3.5" />
-                  Scanner un autre client
+                  {isFr ? 'Scanner un autre client' : 'Scan another client'}
                 </Button>
               </div>
             )}
@@ -575,7 +576,7 @@ export default function ScanPage() {
 
                       <div className="flex gap-2">
                         <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1" size="sm">
-                          {t('dashboard.common.cancel')}
+                          {isFr ? 'Annuler' : 'Cancel'}
                         </Button>
                         <Button
                           onClick={handleAddPoints}
@@ -611,7 +612,7 @@ export default function ScanPage() {
                     </div>
                     <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-1.5" size="sm">
                       <ScanLine className="w-3.5 h-3.5" />
-                      Scanner un autre client
+                      {isFr ? 'Scanner un autre client' : 'Scan another client'}
                     </Button>
                   </div>
                 )}
@@ -625,23 +626,23 @@ export default function ScanPage() {
                   <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Gift className="w-7 h-7" />
                   </div>
-                  <h2 className="text-lg font-bold text-purple-700 mb-0.5">Redemption de recompense</h2>
+                  <h2 className="text-lg font-bold text-purple-700 mb-0.5">{isFr ? 'Redemption de recompense' : 'Reward Redemption'}</h2>
                   <p className="text-xs text-gray-500">Code : <span className="font-mono font-bold">{redemptionDetails.redemption_code}</span></p>
                 </div>
 
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Recompense</span>
+                    <span className="text-gray-500">{isFr ? 'Recompense' : 'Reward'}</span>
                     <span className="font-semibold text-gray-900 text-right">{redemptionDetails.reward_name}</span>
                   </div>
                   {redemptionDetails.reward_value && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Valeur</span>
+                      <span className="text-gray-500">{isFr ? 'Valeur' : 'Value'}</span>
                       <span className="font-medium text-gray-900">{redemptionDetails.reward_value}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Points depenses</span>
+                    <span className="text-gray-500">{isFr ? 'Points depenses' : 'Points spent'}</span>
                     <span className="font-medium text-amber-600">{redemptionDetails.points_spent} pts</span>
                   </div>
                   <div className="border-t border-gray-200 pt-2 flex justify-between">
@@ -657,26 +658,26 @@ export default function ScanPage() {
                     </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Echange le</span>
+                    <span className="text-gray-500">{isFr ? 'Echange le' : 'Redeemed on'}</span>
                     <span className="text-gray-700">{new Date(redemptionDetails.created_at).toLocaleDateString()}</span>
                   </div>
                   {redemptionDetails.expires_at && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Expire le</span>
+                      <span className="text-gray-500">{isFr ? 'Expire le' : 'Expires on'}</span>
                       <span className={`font-medium ${new Date(redemptionDetails.expires_at) < new Date() ? 'text-red-600' : 'text-green-600'}`}>
                         {new Date(redemptionDetails.expires_at).toLocaleDateString()}
                       </span>
                     </div>
                   )}
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Statut</span>
-                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">En attente</span>
+                    <span className="text-gray-500">{isFr ? 'Statut' : 'Status'}</span>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">{isFr ? 'En attente' : 'Pending'}</span>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
                   <Button onClick={() => setScanStatus('idle')} variant="outline" className="flex-1" size="sm">
-                    Annuler
+                    {isFr ? 'Annuler' : 'Cancel'}
                   </Button>
                   <Button
                     onClick={markRedemptionUsed}
@@ -689,7 +690,7 @@ export default function ScanPage() {
                     ) : (
                       <>
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        Valider la remise
+                        {isFr ? 'Valider la remise' : 'Validate reward'}
                       </>
                     )}
                   </Button>
@@ -703,14 +704,14 @@ export default function ScanPage() {
                 <div className="w-14 h-14 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
-                <h2 className="text-lg font-bold text-gray-900 mb-1">Recompense remise</h2>
+                <h2 className="text-lg font-bold text-gray-900 mb-1">{isFr ? 'Récompense remise' : 'Reward delivered'}</h2>
                 <p className="text-sm text-gray-600 mb-1">
-                  <span className="font-semibold">{redemptionDetails?.reward_name}</span> remise a {redemptionDetails?.loyalty_clients?.name || 'client'}.
+                  <span className="font-semibold">{redemptionDetails?.reward_name}</span> {isFr ? 'remise à' : 'delivered to'} {redemptionDetails?.loyalty_clients?.name || 'client'}.
                 </p>
                 <p className="text-xs text-gray-400 mb-5 font-mono">{redemptionDetails?.redemption_code}</p>
                 <Button onClick={startScanning} className="bg-teal-600 hover:bg-teal-700 gap-1.5" size="sm">
                   <ScanLine className="w-3.5 h-3.5" />
-                  Scanner un autre client
+                  {isFr ? 'Scanner un autre client' : 'Scan another client'}
                 </Button>
               </div>
             )}
@@ -730,8 +731,8 @@ export default function ScanPage() {
                   <Ticket className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Historique de la session</p>
-                  <p className="text-xs text-gray-500">{sessionHistory.length} element{sessionHistory.length > 1 ? 's' : ''}</p>
+                  <p className="text-sm font-semibold text-gray-900">{isFr ? 'Historique de la session' : 'Session history'}</p>
+                  <p className="text-xs text-gray-500">{sessionHistory.length} {isFr ? 'élément' : 'item'}{sessionHistory.length > 1 ? 's' : ''}</p>
                 </div>
               </div>
               {historyOpen ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
@@ -771,7 +772,7 @@ export default function ScanPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-medium text-purple-600">Remis</p>
+                          <p className="text-xs font-medium text-purple-600">{isFr ? 'Remis' : 'Delivered'}</p>
                           <p className="text-[10px] text-gray-400">
                             {new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
@@ -789,7 +790,7 @@ export default function ScanPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-xs font-medium text-green-600">Valide</p>
+                          <p className="text-xs font-medium text-green-600">{isFr ? 'Validé' : 'Validated'}</p>
                           <p className="text-[10px] text-gray-400">
                             {new Date(item.used_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </p>
