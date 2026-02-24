@@ -45,7 +45,7 @@ export default function QRCodePage() {
         setQrCodeUrl(merchantData.qr_code_url);
       } else {
         // Generate new QR code
-        const url = `${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`;
+        const url = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/rate/${user.id}`;
         const qr = await QRCode.toDataURL(url, {
           width: 400,
           margin: 2,
@@ -73,13 +73,13 @@ export default function QRCodePage() {
 
   const copyLink = () => {
     if (!user) return;
-    const url = `${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}`;
+    const url = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/rate/${user.id}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const reviewUrl = user ? `${process.env.NEXT_PUBLIC_APP_URL}/rate/${user.id}` : '';
+  const reviewUrl = user ? `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/rate/${user.id}` : '';
 
   if (!user || !merchant) {
     return (
