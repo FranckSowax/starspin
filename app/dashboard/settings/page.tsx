@@ -17,7 +17,7 @@ import '@/lib/i18n/config';
 type TabId = 'general' | 'links';
 
 const TABS: { id: TabId; icon: React.ReactNode; labelFr: string; labelEn: string }[] = [
-  { id: 'general', icon: <Settings className="w-4 h-4" />, labelFr: 'General', labelEn: 'General' },
+  { id: 'general', icon: <Settings className="w-4 h-4" />, labelFr: 'Général', labelEn: 'General' },
   { id: 'links', icon: <Link2 className="w-4 h-4" />, labelFr: 'Liens', labelEn: 'Links' },
 ];
 
@@ -108,12 +108,12 @@ export default function SettingsPage() {
 
       setMessage({
         type: 'success',
-        text: isFr ? 'Parametres enregistres avec succes !' : 'Settings saved successfully!',
+        text: isFr ? 'Paramètres enregistrés avec succès !' : 'Settings saved successfully!',
       });
     } catch (error: any) {
       setMessage({
         type: 'error',
-        text: error.message || (isFr ? 'Erreur lors de la sauvegarde' : 'Failed to save settings'),
+        text: error.message || (isFr ? 'Erreur lors de la sauvegarde' : 'Error saving settings'),
       });
     } finally {
       setSaving(false);
@@ -138,7 +138,7 @@ export default function SettingsPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 mb-1">{t('dashboard.nav.settings')}</h1>
           <p className="text-gray-500 text-sm">
-            {isFr ? 'Gerez vos preferences et configurations' : 'Manage your preferences and configurations'}
+            {isFr ? 'Gérez vos préférences et configurations' : 'Manage your preferences and configurations'}
           </p>
         </div>
 
@@ -205,7 +205,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h3 className="text-base font-semibold text-gray-900">
-                      {isFr ? 'Langue & Region' : 'Language & Region'}
+                      {isFr ? 'Langue & Région' : 'Language & Region'}
                     </h3>
                     <p className="text-xs text-gray-500">
                       {isFr ? 'Langue et fuseau horaire' : 'Language and timezone settings'}
@@ -253,7 +253,7 @@ export default function SettingsPage() {
                   <div>
                     <h3 className="text-base font-semibold text-gray-900">Notifications</h3>
                     <p className="text-xs text-gray-500">
-                      {isFr ? 'Gerez vos alertes' : 'Manage your alerts'}
+                      {isFr ? 'Gérez vos alertes' : 'Manage your alerts'}
                     </p>
                   </div>
                 </div>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                         {isFr ? 'Alertes nouveaux avis' : 'New Review Alerts'}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {isFr ? 'Etre notifie quand un client laisse un avis' : 'Get notified when a customer leaves a review'}
+                        {isFr ? 'Être notifié quand un client laisse un avis' : 'Get notified when a customer leaves a review'}
                       </p>
                     </div>
                     <div className="relative">
@@ -307,10 +307,10 @@ export default function SettingsPage() {
                   <label className="flex items-center justify-between py-4 cursor-pointer rounded-lg hover:bg-gray-50/50 transition-colors duration-200 px-1">
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        {isFr ? 'Resume hebdomadaire' : 'Weekly Summary'}
+                        {isFr ? 'Résumé hebdomadaire' : 'Weekly Summary'}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {isFr ? 'Recevoir un resume de performance chaque semaine' : 'Receive a weekly performance summary'}
+                        {isFr ? 'Recevoir un résumé de performance chaque semaine' : 'Receive a weekly performance summary'}
                       </p>
                     </div>
                     <div className="relative">
@@ -376,7 +376,7 @@ export default function SettingsPage() {
                     </h3>
                     <p className="text-xs text-gray-500">
                       {isFr
-                        ? 'Configurez les liens vers vos reseaux sociaux'
+                        ? 'Configurez les liens vers vos réseaux sociaux'
                         : 'Configure links to your social networks'}
                     </p>
                   </div>

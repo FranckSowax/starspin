@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n/config';
 import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
@@ -24,9 +26,10 @@ interface Customer {
 interface CustomerDetailsModalProps {
   customer: Customer | null;
   onClose: () => void;
+  isFr: boolean;
 }
 
-function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) {
+function CustomerDetailsModal({ customer, onClose, isFr }: CustomerDetailsModalProps) {
   if (!customer) return null;
 
   return (
@@ -45,7 +48,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
               </div>
               <div>
                 <h2 className="text-lg font-bold">
-                  {customer.email || customer.phone || 'Client Anonyme'}
+                  {customer.email || customer.phone || (isFr ? 'Client Anonyme' : 'Anonymous Customer')}
                 </h2>
                 <p className="text-teal-100 text-sm font-mono">
                   ID: {customer.user_token.substring(0, 12)}...
@@ -65,26 +68,26 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
         <div className="grid grid-cols-3 gap-4 p-5 bg-gray-50 border-b border-gray-200">
           <div className="text-center">
             <p className="text-2xl font-bold text-gray-900">{customer.total_reviews}</p>
-            <p className="text-xs text-gray-500">Avis Total</p>
+            <p className="text-xs text-gray-500">{isFr ? 'Avis Total' : 'Total Reviews'}</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1">
               <p className="text-2xl font-bold text-gray-900">{customer.avg_rating.toFixed(1)}</p>
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             </div>
-            <p className="text-xs text-gray-500">Note Moyenne</p>
+            <p className="text-xs text-gray-500">{isFr ? 'Note Moyenne' : 'Average Rating'}</p>
           </div>
           <div className="text-center">
             <p className="text-2xl font-bold text-gray-900">
-              {customer.total_reviews > 1 ? 'Habitu\u00e9' : 'Nouveau'}
+              {customer.total_reviews > 1 ? (isFr ? 'Habitué' : 'Regular') : (isFr ? 'Nouveau' : 'New')}
             </p>
-            <p className="text-xs text-gray-500">Statut</p>
+            <p className="text-xs text-gray-500">{isFr ? 'Statut' : 'Status'}</p>
           </div>
         </div>
 
         {/* Contact Info */}
         <div className="p-5 border-b border-gray-200">
-          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Coordonn\u00e9es</h3>
+          <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{isFr ? 'Coordonnées' : 'Contact Info'}</h3>
           <div className="space-y-2">
             {customer.email && (
               <div className="flex items-center gap-3 text-sm text-gray-700">
@@ -109,7 +112,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
               </div>
             )}
             {!customer.email && !customer.phone && (
-              <p className="text-sm text-gray-400 italic">Aucune coordonn\u00e9e disponible</p>
+              <p className="text-sm text-gray-400 italic">{isFr ? 'Aucune coordonnée disponible' : 'No contact info available'}</p>
             )}
           </div>
         </div>
@@ -117,7 +120,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
         {/* Feedbacks List */}
         <div className="p-5 max-h-[280px] overflow-y-auto">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-            Historique des Avis ({customer.feedbacks.length})
+            {isFr ? 'Historique des Avis' : 'Review History'} ({customer.feedbacks.length})
           </h3>
           <div className="space-y-2.5">
             {customer.feedbacks.map((feedback, index) => (
@@ -139,7 +142,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
                     ))}
                   </div>
                   <span className="text-xs text-gray-400">
-                    {new Date(feedback.created_at).toLocaleDateString('fr-FR', {
+                    {new Date(feedback.created_at).toLocaleDateString(isFr ? 'fr-FR' : 'en-US', {
                       day: 'numeric',
                       month: 'short',
                       year: 'numeric',
@@ -151,7 +154,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
                 {feedback.comment ? (
                   <p className="text-sm text-gray-600">{feedback.comment}</p>
                 ) : (
-                  <p className="text-sm text-gray-400 italic">Pas de commentaire</p>
+                  <p className="text-sm text-gray-400 italic">{isFr ? 'Pas de commentaire' : 'No comment'}</p>
                 )}
               </div>
             ))}
@@ -161,7 +164,7 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
         {/* Footer */}
         <div className="p-4 bg-gray-50 border-t border-gray-200 flex justify-end">
           <Button onClick={onClose} variant="outline" className="text-sm">
-            Fermer
+            {isFr ? 'Fermer' : 'Close'}
           </Button>
         </div>
       </div>
@@ -171,6 +174,8 @@ function CustomerDetailsModal({ customer, onClose }: CustomerDetailsModalProps) 
 
 export default function CustomersPage() {
   const router = useRouter();
+  const { i18n } = useTranslation(undefined, { useSuspense: false });
+  const isFr = i18n.language === 'fr';
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [webCustomers, setWebCustomers] = useState<Customer[]>([]);
@@ -282,7 +287,7 @@ export default function CustomersPage() {
     return (
       <DashboardLayout merchant={merchant}>
         <div className="flex items-center justify-center h-96">
-          <Loader2Spinner />
+          <Loader2Spinner isFr={isFr} />
         </div>
       </DashboardLayout>
     );
@@ -298,24 +303,24 @@ export default function CustomersPage() {
               <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                 <Users className="w-5 h-5" />
               </div>
-              Clients
+              {isFr ? 'Clients' : 'Customers'}
             </h1>
-            <p className="text-gray-500 mt-1 ml-[52px]">G\u00e9rez votre base de donn\u00e9es clients et leurs interactions</p>
+            <p className="text-gray-500 mt-1 ml-[52px]">{isFr ? 'Gérez votre base de données clients et leurs interactions' : 'Manage your customer database and interactions'}</p>
           </div>
           <Button variant="outline" className="gap-2 border-gray-200 text-gray-600 hover:bg-gray-50">
             <TrendingUp className="w-4 h-4" />
-            Exporter CSV
+            {isFr ? 'Exporter CSV' : 'Export CSV'}
           </Button>
         </div>
 
         {/* Stats Grid - compact 4-col */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Clients Totaux', value: totalCustomers, icon: Users, color: 'teal' },
-            { label: 'Emails Collect\u00e9s', value: totalEmails, icon: Mail, color: 'emerald' },
-            { label: 'WhatsApp Collect\u00e9s', value: totalPhones, icon: Phone, color: 'teal' },
+            { label: isFr ? 'Clients Totaux' : 'Total Customers', value: totalCustomers, icon: Users, color: 'teal' },
+            { label: isFr ? 'Emails Collectés' : 'Emails Collected', value: totalEmails, icon: Mail, color: 'emerald' },
+            { label: isFr ? 'WhatsApp Collectés' : 'WhatsApp Collected', value: totalPhones, icon: Phone, color: 'teal' },
             {
-              label: 'Avis Moyen/Client',
+              label: isFr ? 'Avis Moyen/Client' : 'Avg Reviews/Customer',
               value: totalCustomers > 0
                 ? (([...webCustomers, ...whatsappCustomers].reduce((sum, c) => sum + c.total_reviews, 0)) / totalCustomers).toFixed(1)
                 : '0',
@@ -349,7 +354,7 @@ export default function CustomersPage() {
             }`}
           >
             <Mail className="w-4 h-4" />
-            Workflow Web
+            {isFr ? 'Workflow Web' : 'Web Workflow'}
             <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">{webCustomers.length}</span>
           </button>
           <button
@@ -361,7 +366,7 @@ export default function CustomersPage() {
             }`}
           >
             <MessageCircle className="w-4 h-4" />
-            Workflow WhatsApp
+            {isFr ? 'Workflow WhatsApp' : 'WhatsApp Workflow'}
             <span className="ml-1 px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600">{whatsappCustomers.length}</span>
           </button>
         </div>
@@ -376,7 +381,7 @@ export default function CustomersPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder={activeTab === 'web' ? 'Rechercher par email...' : 'Rechercher par num\u00e9ro WhatsApp...'}
+                placeholder={activeTab === 'web' ? (isFr ? 'Rechercher par email...' : 'Search by email...') : (isFr ? 'Rechercher par numéro WhatsApp...' : 'Search by WhatsApp number...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-teal-50/30 transition-all duration-200"
@@ -389,14 +394,14 @@ export default function CustomersPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50/80">
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Client</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{isFr ? 'Client' : 'Customer'}</th>
                   <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                     {activeTab === 'web' ? 'Email' : 'WhatsApp'}
                   </th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Note</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Avis</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Derni\u00e8re Visite</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{isFr ? 'Statut' : 'Status'}</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{isFr ? 'Note' : 'Rating'}</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{isFr ? 'Avis' : 'Reviews'}</th>
+                  <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">{isFr ? 'Dernière Visite' : 'Last Visit'}</th>
                   <th className="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -423,8 +428,8 @@ export default function CustomersPage() {
                           <div>
                             <p className="text-sm font-medium text-gray-900">
                               {activeTab === 'web'
-                                ? (customer.email || 'Client Anonyme')
-                                : (customer.phone || 'Client Anonyme')
+                                ? (customer.email || (isFr ? 'Client Anonyme' : 'Anonymous Customer'))
+                                : (customer.phone || (isFr ? 'Client Anonyme' : 'Anonymous Customer'))
                               }
                             </p>
                             <p className="text-xs text-gray-400 font-mono">
@@ -457,11 +462,11 @@ export default function CustomersPage() {
                       <td className="px-5 py-3 whitespace-nowrap">
                         {customer.total_reviews > 1 ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-teal-50 text-teal-700">
-                            Habitu\u00e9
+                            {isFr ? 'Habitué' : 'Regular'}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                            Nouveau
+                            {isFr ? 'Nouveau' : 'New'}
                           </span>
                         )}
                       </td>
@@ -476,7 +481,7 @@ export default function CustomersPage() {
                       </td>
                       <td className="px-5 py-3 whitespace-nowrap">
                         <span className="text-sm text-gray-500">
-                          {new Date(customer.last_review).toLocaleDateString('fr-FR', {
+                          {new Date(customer.last_review).toLocaleDateString(isFr ? 'fr-FR' : 'en-US', {
                             day: 'numeric',
                             month: 'short',
                             year: 'numeric'
@@ -490,7 +495,7 @@ export default function CustomersPage() {
                           className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 text-xs"
                           onClick={() => setSelectedCustomer(customer)}
                         >
-                          D\u00e9tails
+                          {isFr ? 'Détails' : 'Details'}
                         </Button>
                       </td>
                     </tr>
@@ -506,14 +511,16 @@ export default function CustomersPage() {
                         )}
                         <p className="text-base font-medium text-gray-900">
                           {searchQuery
-                            ? 'Aucun client trouv\u00e9 pour cette recherche'
-                            : `Aucun client ${activeTab === 'web' ? 'Web' : 'WhatsApp'} trouv\u00e9`
+                            ? (isFr ? 'Aucun client trouvé pour cette recherche' : 'No customers found for this search')
+                            : (isFr ? `Aucun client ${activeTab === 'web' ? 'Web' : 'WhatsApp'} trouvé` : `No ${activeTab === 'web' ? 'Web' : 'WhatsApp'} customers found`)
                           }
                         </p>
                         <p className="text-sm text-gray-400 mt-1">
                           {searchQuery
-                            ? 'Essayez une autre recherche'
-                            : `Les clients du workflow ${activeTab === 'web' ? 'Web (email)' : 'WhatsApp'} appara\u00eetront ici.`
+                            ? (isFr ? 'Essayez une autre recherche' : 'Try a different search')
+                            : (isFr
+                                ? `Les clients du workflow ${activeTab === 'web' ? 'Web (email)' : 'WhatsApp'} apparaîtront ici.`
+                                : `${activeTab === 'web' ? 'Web (email)' : 'WhatsApp'} workflow customers will appear here.`)
                           }
                         </p>
                       </div>
@@ -531,17 +538,18 @@ export default function CustomersPage() {
         <CustomerDetailsModal
           customer={selectedCustomer}
           onClose={() => setSelectedCustomer(null)}
+          isFr={isFr}
         />
       )}
     </DashboardLayout>
   );
 }
 
-function Loader2Spinner() {
+function Loader2Spinner({ isFr }: { isFr: boolean }) {
   return (
     <div className="text-center">
       <div className="w-10 h-10 border-3 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-      <p className="text-sm text-gray-500">Chargement de vos clients...</p>
+      <p className="text-sm text-gray-500">{isFr ? 'Chargement de vos clients...' : 'Loading your customers...'}</p>
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n/config';
 import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -11,6 +13,8 @@ import QRCode from 'qrcode';
 
 export default function QRCodePage() {
   const router = useRouter();
+  const { i18n } = useTranslation(undefined, { useSuspense: false });
+  const isFr = i18n.language === 'fr';
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
@@ -94,7 +98,7 @@ export default function QRCodePage() {
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">QR Code</h1>
-          <p className="text-sm text-gray-500 mt-1">Partagez votre QR code pour collecter les avis clients</p>
+          <p className="text-sm text-gray-500 mt-1">{isFr ? 'Partagez votre QR code pour collecter les avis clients' : 'Share your QR code to collect customer reviews'}</p>
         </div>
 
         {/* QR Code Card */}
@@ -105,7 +109,7 @@ export default function QRCodePage() {
             {merchant?.qr_code_url && (
               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium mb-4">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                QR Code actif
+                {isFr ? 'QR Code actif' : 'Active QR Code'}
               </span>
             )}
 
@@ -166,8 +170,8 @@ export default function QRCodePage() {
                 <Copy className="w-5 h-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-900">Lien de review</p>
-                <p className="text-xs text-gray-500">Copiez et partagez directement</p>
+                <p className="text-sm font-semibold text-gray-900">{isFr ? 'Lien de review' : 'Review Link'}</p>
+                <p className="text-xs text-gray-500">{isFr ? 'Copiez et partagez directement' : 'Copy and share directly'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -183,12 +187,12 @@ export default function QRCodePage() {
                 {copied ? (
                   <>
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    Copie !
+                    {isFr ? 'Copié !' : 'Copied!'}
                   </>
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    Copier
+                    {isFr ? 'Copier' : 'Copy'}
                   </>
                 )}
               </Button>
@@ -204,15 +208,15 @@ export default function QRCodePage() {
               <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                 <QrCode className="w-5 h-5" />
               </div>
-              <p className="text-sm font-semibold text-gray-900">Comment utiliser votre QR Code</p>
+              <p className="text-sm font-semibold text-gray-900">{isFr ? 'Comment utiliser votre QR Code' : 'How to use your QR Code'}</p>
             </div>
 
             <div className="space-y-4">
               {[
-                { step: 1, title: 'Imprimez & Affichez', desc: 'Placez le QR code en caisse ou sur les tables' },
-                { step: 2, title: 'Les clients scannent', desc: 'Ils scannent et notent leur experience' },
-                { step: 3, title: 'Routage intelligent', desc: 'Les avis positifs vont directement sur Google' },
-                { step: 4, title: 'Feedback prive', desc: 'Les avis negatifs restent prives pour ameliorer votre service' },
+                { step: 1, title: isFr ? 'Imprimez & Affichez' : 'Print & Display', desc: isFr ? 'Placez le QR code en caisse ou sur les tables' : 'Place the QR code at the register or on tables' },
+                { step: 2, title: isFr ? 'Les clients scannent' : 'Customers scan', desc: isFr ? 'Ils scannent et notent leur expérience' : 'They scan and rate their experience' },
+                { step: 3, title: isFr ? 'Routage intelligent' : 'Smart routing', desc: isFr ? 'Les avis positifs vont directement sur Google' : 'Positive reviews go directly to Google' },
+                { step: 4, title: isFr ? 'Feedback privé' : 'Private feedback', desc: isFr ? 'Les avis négatifs restent privés pour améliorer votre service' : 'Negative reviews stay private to improve your service' },
               ].map((item, idx) => (
                 <div key={item.step} className="flex items-start gap-3">
                   <div className="relative flex flex-col items-center">

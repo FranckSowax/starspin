@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
+import '@/lib/i18n/config';
 import { supabase } from '@/lib/supabase/client';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, X, Loader2, Calendar, MapPin, Star, Music, Instagram as InstagramIcon, Globe, MessageCircle, Palette, Link2, Route } from 'lucide-react';
 
-const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-const DAYS_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
 const PLATFORMS = [
   { value: 'google_maps', label: 'Google Reviews', icon: MapPin, color: 'bg-red-500' },
   { value: 'tripadvisor', label: 'TripAdvisor', icon: Star, color: 'bg-green-500' },
@@ -19,13 +19,23 @@ const PLATFORMS = [
 
 type TabId = 'workflow' | 'routing';
 
-const TABS: { id: TabId; icon: React.ReactNode; label: string }[] = [
-  { id: 'workflow', icon: <Globe className="w-4 h-4" />, label: 'Workflow' },
-  { id: 'routing', icon: <Route className="w-4 h-4" />, label: 'Routage' },
-];
-
 export default function StrategyPage() {
   const router = useRouter();
+  const { i18n } = useTranslation(undefined, { useSuspense: false });
+  const isFr = i18n.language === 'fr';
+
+  const DAYS = isFr
+    ? ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const DAYS_SHORT = isFr
+    ? ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  const TABS: { id: TabId; icon: React.ReactNode; label: string }[] = [
+    { id: 'workflow', icon: <Globe className="w-4 h-4" />, label: 'Workflow' },
+    { id: 'routing', icon: <Route className="w-4 h-4" />, label: isFr ? 'Routage' : 'Routing' },
+  ];
+
   const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -136,7 +146,7 @@ export default function StrategyPage() {
 
       if (error) throw error;
 
-      setMessage({ type: 'success', text: 'Strategie sauvegardee avec succes !' });
+      setMessage({ type: 'success', text: isFr ? 'Stratégie sauvegardée avec succès !' : 'Strategy saved successfully!' });
 
       // Refresh merchant data
       const { data: merchantData } = await supabase
@@ -146,7 +156,7 @@ export default function StrategyPage() {
         .single();
       setMerchant(merchantData);
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Echec de la sauvegarde' });
+      setMessage({ type: 'error', text: error.message || (isFr ? 'Échec de la sauvegarde' : 'Failed to save') });
     } finally {
       setLoading(false);
     }
@@ -178,7 +188,7 @@ export default function StrategyPage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Chargement...</p>
+          <p className="text-lg text-gray-600">{isFr ? 'Chargement...' : 'Loading...'}</p>
         </div>
       </div>
     );
@@ -189,8 +199,8 @@ export default function StrategyPage() {
       <div className="space-y-6 max-w-4xl">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">Strategie de Redirection</h1>
-          <p className="text-gray-500 text-sm">Configurez vos liens et planifiez vos redirections</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">{isFr ? 'Stratégie de Redirection' : 'Redirect Strategy'}</h1>
+          <p className="text-gray-500 text-sm">{isFr ? 'Configurez vos liens et planifiez vos redirections' : 'Configure your links and schedule your redirects'}</p>
         </div>
 
         {/* Success/Error message */}
@@ -255,8 +265,8 @@ export default function StrategyPage() {
                     <Globe className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Mode de Workflow</h3>
-                    <p className="text-xs text-gray-500">Comment vos clients recoivent le lien vers la roue</p>
+                    <h3 className="text-base font-semibold text-gray-900">{isFr ? 'Mode de Workflow' : 'Workflow Mode'}</h3>
+                    <p className="text-xs text-gray-500">{isFr ? 'Comment vos clients reçoivent le lien vers la roue' : 'How your customers receive the link to the wheel'}</p>
                   </div>
                 </div>
 
@@ -278,15 +288,17 @@ export default function StrategyPage() {
                         <Globe className={`w-5 h-5 ${workflowMode === 'web' ? 'text-white' : 'text-gray-500'}`} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">Mode Web</h4>
-                        <p className="text-xs text-gray-500">Workflow actuel</p>
+                        <h4 className="font-semibold text-gray-900">{isFr ? 'Mode Web' : 'Web Mode'}</h4>
+                        <p className="text-xs text-gray-500">{isFr ? 'Workflow actuel' : 'Current workflow'}</p>
                       </div>
                       {workflowMode === 'web' && (
                         <Check className="w-5 h-5 text-teal-500 ml-auto" />
                       )}
                     </div>
                     <p className="text-sm text-gray-600">
-                      Apres l'avis Google, le client voit un timer de 15 secondes puis clique sur un bouton pour acceder a la roue.
+                      {isFr
+                        ? 'Après l\'avis Google, le client voit un timer de 15 secondes puis clique sur un bouton pour accéder à la roue.'
+                        : 'After the Google review, the customer sees a 15-second timer then clicks a button to access the wheel.'}
                     </p>
                   </button>
 
@@ -307,15 +319,17 @@ export default function StrategyPage() {
                         <MessageCircle className={`w-5 h-5 ${workflowMode === 'whatsapp' ? 'text-white' : 'text-gray-500'}`} />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-gray-900">Mode WhatsApp</h4>
-                        <p className="text-xs text-gray-500">Nouveau</p>
+                        <h4 className="font-semibold text-gray-900">{isFr ? 'Mode WhatsApp' : 'WhatsApp Mode'}</h4>
+                        <p className="text-xs text-gray-500">{isFr ? 'Nouveau' : 'New'}</p>
                       </div>
                       {workflowMode === 'whatsapp' && (
                         <Check className="w-5 h-5 text-green-500 ml-auto" />
                       )}
                     </div>
                     <p className="text-sm text-gray-600">
-                      Apres l'avis Google, le client recoit automatiquement un message WhatsApp avec le lien vers la roue.
+                      {isFr
+                        ? 'Après l\'avis Google, le client reçoit automatiquement un message WhatsApp avec le lien vers la roue.'
+                        : 'After the Google review, the customer automatically receives a WhatsApp message with the link to the wheel.'}
                     </p>
                   </button>
                 </div>
@@ -325,34 +339,41 @@ export default function StrategyPage() {
                   <div className="mt-5 p-4 bg-green-50 border border-green-200 rounded-lg space-y-3">
                     <h4 className="font-semibold text-gray-900 flex items-center gap-2 text-sm">
                       <MessageCircle className="w-4 h-4 text-green-600" />
-                      Configuration WhatsApp
+                      {isFr ? 'Configuration WhatsApp' : 'WhatsApp Configuration'}
                     </h4>
 
                     <div className="bg-white border border-green-200 rounded-lg p-3 space-y-2">
-                      <p className="text-sm text-gray-700 font-medium">Messages automatiques</p>
+                      <p className="text-sm text-gray-700 font-medium">{isFr ? 'Messages automatiques' : 'Automatic messages'}</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                         <div className="bg-green-50 rounded-lg p-2.5 border border-green-100">
-                          <p className="font-medium text-green-800 text-xs mb-0.5">Nouveau client</p>
+                          <p className="font-medium text-green-800 text-xs mb-0.5">{isFr ? 'Nouveau client' : 'New customer'}</p>
                           <p className="text-gray-600 text-xs">
-                            "Merci pour votre avis ! Tournez la roue pour gagner un cadeau."
+                            {isFr
+                              ? '"Merci pour votre avis ! Tournez la roue pour gagner un cadeau."'
+                              : '"Thank you for your review! Spin the wheel to win a gift."'}
                           </p>
                         </div>
                         <div className="bg-blue-50 rounded-lg p-2.5 border border-blue-100">
-                          <p className="font-medium text-blue-800 text-xs mb-0.5">Client fidele</p>
+                          <p className="font-medium text-blue-800 text-xs mb-0.5">{isFr ? 'Client fidèle' : 'Loyal customer'}</p>
                           <p className="text-gray-600 text-xs">
-                            "Bon retour ! Tournez la roue pour tenter de gagner un cadeau."
+                            {isFr
+                              ? '"Bon retour ! Tournez la roue pour tenter de gagner un cadeau."'
+                              : '"Welcome back! Spin the wheel to try and win a gift."'}
                           </p>
                         </div>
                       </div>
                       <p className="text-xs text-gray-500">
-                        Les messages sont traduits automatiquement (FR, EN, TH, ES, PT)
+                        {isFr
+                          ? 'Les messages sont traduits automatiquement (FR, EN, TH, ES, PT)'
+                          : 'Messages are automatically translated (FR, EN, TH, ES, PT)'}
                       </p>
                     </div>
 
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-2.5">
                       <p className="text-xs text-blue-800">
-                        Le client entre son numero WhatsApp au lieu de son email.
-                        Apres l'avis, il recoit un message avec 2 boutons : <strong>Tourner la Roue</strong> et <strong>Ma Carte Fidelite</strong>.
+                        {isFr
+                          ? <>Le client entre son numéro WhatsApp au lieu de son email. Après l&apos;avis, il reçoit un message avec 2 boutons : <strong>Tourner la Roue</strong> et <strong>Ma Carte Fidélité</strong>.</>
+                          : <>The customer enters their WhatsApp number instead of email. After the review, they receive a message with 2 buttons: <strong>Spin the Wheel</strong> and <strong>My Loyalty Card</strong>.</>}
                       </p>
                     </div>
                   </div>
@@ -367,8 +388,8 @@ export default function StrategyPage() {
                     <Palette className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Couleur de Fond du Logo</h3>
-                    <p className="text-xs text-gray-500">Cercle contenant votre logo sur la roue et la page coupon</p>
+                    <h3 className="text-base font-semibold text-gray-900">{isFr ? 'Couleur de Fond du Logo' : 'Logo Background Color'}</h3>
+                    <p className="text-xs text-gray-500">{isFr ? 'Cercle contenant votre logo sur la roue et la page coupon' : 'Circle containing your logo on the wheel and coupon page'}</p>
                   </div>
                 </div>
 
@@ -391,7 +412,7 @@ export default function StrategyPage() {
 
                   {/* Preview */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">Apercu :</span>
+                    <span className="text-xs text-gray-500">{isFr ? 'Aperçu' : 'Preview'} :</span>
                     <div
                       className="w-12 h-12 rounded-full border-4 border-[#ffd700] flex items-center justify-center shadow-md"
                       style={{ backgroundColor: logoBackgroundColor }}
@@ -411,10 +432,10 @@ export default function StrategyPage() {
                   {/* Presets */}
                   <div className="flex gap-1.5">
                     {[
-                      { label: 'Blanc', value: '#FFFFFF' },
-                      { label: 'Noir', value: '#000000' },
-                      { label: 'Or', value: '#FFD700' },
-                      { label: 'Nuit', value: '#1a1a2e' },
+                      { label: isFr ? 'Blanc' : 'White', value: '#FFFFFF' },
+                      { label: isFr ? 'Noir' : 'Black', value: '#000000' },
+                      { label: isFr ? 'Or' : 'Gold', value: '#FFD700' },
+                      { label: isFr ? 'Nuit' : 'Night', value: '#1a1a2e' },
                     ].map(preset => (
                       <button
                         key={preset.value}
@@ -446,8 +467,8 @@ export default function StrategyPage() {
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Planification Hebdomadaire</h3>
-                    <p className="text-xs text-gray-500">Plateforme de redirection par jour de la semaine</p>
+                    <h3 className="text-base font-semibold text-gray-900">{isFr ? 'Planification Hebdomadaire' : 'Weekly Schedule'}</h3>
+                    <p className="text-xs text-gray-500">{isFr ? 'Plateforme de redirection par jour de la semaine' : 'Redirect platform per day of the week'}</p>
                   </div>
                 </div>
 
@@ -493,7 +514,7 @@ export default function StrategyPage() {
                       })}
                     </div>
                     <p className="text-sm text-gray-700">
-                      <span className="font-medium">Aujourd'hui ({DAYS[currentDayIndex]})</span> : redirection vers{' '}
+                      <span className="font-medium">{isFr ? `Aujourd'hui (${DAYS[currentDayIndex]})` : `Today (${DAYS[currentDayIndex]})`}</span>{isFr ? ' : redirection vers ' : ' : redirecting to '}
                       <span className="font-bold text-teal-700">
                         {getPlatformInfo(weeklySchedule[currentDayIndex]).label}
                       </span>
@@ -510,8 +531,8 @@ export default function StrategyPage() {
                     <Link2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-gray-900">Liens de Redirection</h3>
-                    <p className="text-xs text-gray-500">URLs vers lesquelles rediriger vos clients</p>
+                    <h3 className="text-base font-semibold text-gray-900">{isFr ? 'Liens de Redirection' : 'Redirect Links'}</h3>
+                    <p className="text-xs text-gray-500">{isFr ? 'URLs vers lesquelles rediriger vos clients' : 'URLs to redirect your customers to'}</p>
                   </div>
                 </div>
 
@@ -584,7 +605,7 @@ export default function StrategyPage() {
         {/* Save / Reset Buttons */}
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="outline" onClick={handleReset}>
-            Reinitialiser
+            {isFr ? 'Réinitialiser' : 'Reset'}
           </Button>
           <Button
             onClick={handleSave}
@@ -594,10 +615,10 @@ export default function StrategyPage() {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Sauvegarde...
+                {isFr ? 'Sauvegarde...' : 'Saving...'}
               </>
             ) : (
-              'Sauvegarder'
+              isFr ? 'Sauvegarder' : 'Save'
             )}
           </Button>
         </div>
