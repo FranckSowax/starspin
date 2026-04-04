@@ -20,7 +20,7 @@
   },
   "social": {
     "title": "Share your experience",
-    "subtitle": "Share your positive feedback with other customers",
+    "subtitle": "And receive your loyalty card on your phone",
     "googleReview": "Leave a Google Review",
     "followInstagram": "Follow us on Instagram",
     "followTikTok": "Follow us on TikTok"
@@ -47,7 +47,7 @@
     "iDoneLaunchWheel": "I'm done - Spin the wheel",
     "buttonActiveIn": "Button will be active in {{seconds}} second(s)",
     "clickToSpinAndWin": "Click to spin the wheel and win!",
-    "whatsappHintTitle": "🎁 A surprise awaits you!",
+    "whatsappHintTitle": "A gift awaits you! Complete the next step and come back to spin the Wheel & win.",
     "whatsappHintMessage": "While you leave your review, we're preparing your gift wheel. You'll receive a WhatsApp with your exclusive link to try your luck!"
   },
   "wheel": {
@@ -55,8 +55,8 @@
     "spin": "Spin the Wheel",
     "congratulations": "Congratulations!",
     "youWon": "You won",
-    "alreadySpun": "You've already spun the wheel today",
-    "tryAgainTomorrow": "Come back tomorrow for another chance!",
+    "alreadySpun": "You've already spun the wheel",
+    "tryAgainTomorrow": "Try your luck on your next visit!",
     "retry": "Try again!",
     "unlucky": "No luck...",
     "spinsRemaining": "Spins remaining",
@@ -140,6 +140,7 @@
       "customers": "Customers",
       "billing": "Subscription",
       "settings": "Settings",
+      "account": "My Account",
       "signOut": "Sign Out",
       "loyaltySection": "Loyalty",
       "loyalty": "Loyalty Card",
@@ -173,7 +174,7 @@
     "phoneRequired": "Phone number is required",
     "phoneInvalid": "Invalid format (e.g. +33612345678)",
     "phonePlaceholder": "+33612345678",
-    "phoneHint": "We'll send the wheel link via WhatsApp"
+    "phoneHint": "You'll receive the wheel link via WhatsApp"
   },
   "whatsapp": {
     "sending": "Sending WhatsApp message...",
@@ -266,11 +267,11 @@
       "tag": "Pricing",
       "title": "Choose your plan",
       "subtitle": "Simple and transparent pricing for all types of businesses",
-      "discovery": "Discovery",
-      "discoveryPrice": "0฿",
-      "discoveryPeriod": "Free 15 days",
-      "pro": "Pro",
-      "proPrice": "1,000฿",
+      "discovery": "Free",
+      "discoveryPrice": "€0",
+      "discoveryPeriod": "14-day free trial",
+      "pro": "Solo",
+      "proPrice": "€49",
       "proPeriod": "per month",
       "popular": "POPULAR",
       "enterprise": "Enterprise",
@@ -309,7 +310,7 @@
       "q1": "How does it work exactly?",
       "a1": "You print a QR code, the customer scans it, rates their experience. If positive (4-5★), they access the wheel to win an instant gift.",
       "q2": "What happens to negative reviews?",
-      "a2": "They arrive in your private dashboard. You can handle them internally without affecting your public reputation.",
+      "a2": "We ask the customer to rate their experience. If the rating is below 4 stars, they are redirected to a private feedback form where they can express their concerns. If they wish, they can then leave a review on the Google page.",
       "q3": "Is it compatible with my POS system?",
       "a3": "StarSpin works independently via QR code. No technical integration required.",
       "q4": "How much do the gifts cost?",

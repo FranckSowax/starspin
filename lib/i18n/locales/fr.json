@@ -20,7 +20,7 @@
   },
   "social": {
     "title": "Partagez votre expérience",
-    "subtitle": "Partagez votre avis positif avec d'autres clients",
+    "subtitle": "Et recevez votre carte de fidélité sur votre téléphone",
     "googleReview": "Laisser un avis Google",
     "followInstagram": "Suivez-nous sur Instagram",
     "followTikTok": "Suivez-nous sur TikTok"
@@ -47,7 +47,7 @@
     "iDoneLaunchWheel": "J'ai fait - Lancer la roue",
     "buttonActiveIn": "Le bouton sera actif dans {{seconds}} seconde(s)",
     "clickToSpinAndWin": "Cliquez pour tourner la roue et gagner !",
-    "whatsappHintTitle": "🎁 Une surprise vous attend !",
+    "whatsappHintTitle": "Un cadeau vous attend ! Complétez l'étape suivante et revenez pour tourner la Roue & gagner.",
     "whatsappHintMessage": "Pendant que vous donnez votre avis, nous préparons votre roue des cadeaux. Vous recevrez un WhatsApp avec votre lien exclusif pour tenter de gagner !"
   },
   "wheel": {
@@ -55,8 +55,8 @@
     "spin": "Tourner la roue",
     "congratulations": "Félicitations!",
     "youWon": "Vous avez gagné",
-    "alreadySpun": "Vous avez déjà tourné la roue aujourd'hui",
-    "tryAgainTomorrow": "Revenez demain pour une autre chance!",
+    "alreadySpun": "Vous avez déjà tourné la roue",
+    "tryAgainTomorrow": "Tentez votre chance lors de votre prochaine visite !",
     "retry": "Réessayez !",
     "unlucky": "Dommage...",
     "spinsRemaining": "Tours restants",
@@ -140,6 +140,7 @@
       "customers": "Clients",
       "billing": "Abonnement",
       "settings": "Paramètres",
+      "account": "Mon Compte",
       "signOut": "Déconnexion",
       "loyaltySection": "Fidélité",
       "loyalty": "Carte Fidélité",
@@ -173,7 +174,7 @@
     "phoneRequired": "Le numéro de téléphone est obligatoire",
     "phoneInvalid": "Format invalide (ex: +33612345678)",
     "phonePlaceholder": "+33612345678",
-    "phoneHint": "Nous vous enverrons le lien de la roue par WhatsApp"
+    "phoneHint": "Vous recevrez le lien vers la roue par WhatsApp"
   },
   "whatsapp": {
     "sending": "Envoi du message WhatsApp...",
@@ -266,11 +267,11 @@
       "tag": "Tarification",
       "title": "Choisissez votre plan",
       "subtitle": "Tarification simple et transparente pour tous les types de commerces",
-      "discovery": "Découverte",
-      "discoveryPrice": "0฿",
-      "discoveryPeriod": "Gratuit 15 jours",
-      "pro": "Pro",
-      "proPrice": "1,000฿",
+      "discovery": "Gratuit",
+      "discoveryPrice": "0€",
+      "discoveryPeriod": "14 jours d'essai gratuit",
+      "pro": "Solo",
+      "proPrice": "49€",
       "proPeriod": "par mois",
       "popular": "POPULAIRE",
       "enterprise": "Entreprise",
@@ -309,7 +310,7 @@
       "q1": "Comment ça marche concrètement ?",
       "a1": "Vous imprimez un QR code, le client le scanne, note son expérience. Si c'est positif (4-5★), il accède à la roue pour gagner un cadeau instantané.",
       "q2": "Que deviennent les avis négatifs ?",
-      "a2": "Ils arrivent dans votre dashboard privé. Vous pouvez les traiter en interne sans qu'ils n'affectent votre réputation publique.",
+      "a2": "Nous demandons au client de noter son expérience. Si la note est inférieure à 4 étoiles, il est redirigé vers un formulaire de feedback privé, lui permettant d'exprimer les raisons de son mécontentement. S'il le souhaite, il peut ensuite laisser une note sur la page Google.",
       "q3": "C'est compatible avec mon système de caisse ?",
       "a3": "StarSpin fonctionne de manière autonome via QR code. Aucune intégration technique nécessaire.",
       "q4": "Combien coûtent les cadeaux ?",

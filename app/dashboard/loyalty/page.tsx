@@ -27,6 +27,7 @@ import {
   Upload,
   Image as ImageIcon
 } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -406,7 +407,7 @@ export default function LoyaltyPage() {
                       </div>
                       <h3 className="font-semibold text-gray-900">{t('loyalty.settings.currency')}</h3>
                     </div>
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('loyalty.settings.currency')}</label>
                         <p className="text-xs text-gray-500 mb-2">{t('loyalty.settings.currencyDesc')}</p>
@@ -453,27 +454,24 @@ export default function LoyaltyPage() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {loyaltyCardPreview && (
-                      <div className="relative w-full aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                        <img src={loyaltyCardPreview} alt="Loyalty card preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <div className="border-2 border-dashed border-teal-200 rounded-lg p-6 text-center hover:border-teal-400 transition-colors bg-teal-50/30">
-                      <input
-                        type="file"
-                        id="loyalty-card-upload"
-                        accept="image/*"
-                        onChange={handleLoyaltyCardChange}
-                        className="hidden"
-                      />
-                      <label htmlFor="loyalty-card-upload" className="cursor-pointer">
-                        <Upload className="w-10 h-10 text-teal-400 mx-auto mb-3" />
-                        <p className="text-sm text-gray-600 mb-1">
-                          <span className="text-teal-600 font-semibold">{t('loyalty.settings.uploadImage')}</span>
-                        </p>
-                        <p className="text-xs text-gray-500">PNG, JPG (16:9) up to 5MB</p>
-                      </label>
-                    </div>
+                    <ImageUpload
+                      preview={loyaltyCardPreview || null}
+                      onFileSelect={(file) => {
+                        setLoyaltyCardFile(file);
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setLoyaltyCardPreview(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                      onDelete={() => {
+                        setLoyaltyCardFile(null);
+                        setLoyaltyCardPreview('');
+                      }}
+                      label={t('loyalty.settings.uploadImage')}
+                      sublabel="PNG, JPG (16:9) up to 5MB"
+                      aspectRatio="16/9"
+                    />
                   </div>
                 </div>
 

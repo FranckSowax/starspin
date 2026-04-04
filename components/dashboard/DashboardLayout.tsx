@@ -26,7 +26,8 @@ import {
   ChevronRight,
   Store,
   Award,
-  UserCircle
+  UserCircle,
+  Shield
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -83,6 +84,7 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
     {
       label: i18n.language === 'fr' ? 'Compte' : 'Account',
       items: [
+        { name: t('dashboard.nav.account'), href: '/dashboard/account', icon: Shield },
         { name: t('dashboard.nav.profile'), href: '/dashboard/profile', icon: UserCircle },
         { name: t('dashboard.nav.billing'), href: '/dashboard/billing', icon: CreditCard },
         { name: t('dashboard.nav.settings'), href: '/dashboard/settings', icon: Settings },
@@ -226,21 +228,11 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
                 <h1 className="text-xl font-bold text-slate-900">
                   {navigation.find(item => item.href === pathname)?.name || t('dashboard.nav.dashboard')}
                 </h1>
-                <p className="text-sm text-slate-500 hidden sm:block">
-                  {t('dashboard.common.online')}
-                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <LanguageSwitcher variant="dark" />
-              <div className="h-9 px-4 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-2 text-sm font-medium hidden sm:flex">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                {t('dashboard.common.online')}
-              </div>
               {merchant && <NotificationDropdown merchantId={merchant.id} />}
               <button
                 onClick={handleSignOut}

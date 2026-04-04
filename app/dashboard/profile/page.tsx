@@ -8,8 +8,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Upload, Image as ImageIcon, Check, X, Loader2, Save,
-  UserCircle, Palette, Building2, Mail, Phone, MapPin
+  UserCircle, Palette, Building2, Mail, Phone, MapPin, Globe, User
 } from 'lucide-react';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 
@@ -42,6 +43,10 @@ export default function ProfilePage() {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('');
+  const [website, setWebsite] = useState('');
+  const [managerName, setManagerName] = useState('');
+  const [managerPhone, setManagerPhone] = useState('');
+  const [siret, setSiret] = useState('');
 
   // Appearance state
   const [logoBackgroundColor, setLogoBackgroundColor] = useState('#FFFFFF');
@@ -71,6 +76,10 @@ export default function ProfilePage() {
         setAddress(merchantData.address || '');
         setCity(merchantData.city || '');
         setCountry(merchantData.country || '');
+        setWebsite(merchantData?.website || '');
+        setManagerName(merchantData?.manager_name || '');
+        setManagerPhone(merchantData?.manager_phone || '');
+        setSiret(merchantData?.siret || '');
         setLogoBackgroundColor(merchantData.logo_background_color || '#FFFFFF');
         if (merchantData.logo_url) setLogoPreview(merchantData.logo_url);
         if (merchantData.background_url) setBackgroundPreview(merchantData.background_url);
@@ -161,6 +170,10 @@ export default function ProfilePage() {
         updates.address = address;
         updates.city = city;
         updates.country = country;
+        updates.website = website || null;
+        updates.manager_name = managerName || null;
+        updates.manager_phone = managerPhone || null;
+        updates.siret = siret || null;
       } else if (activeTab === 'appearance') {
         updates.logo_background_color = logoBackgroundColor || '#FFFFFF';
 
@@ -332,37 +345,87 @@ CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'm
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {isFr ? 'Nom du commerce' : 'Business Name'}
-                    </label>
-                    <input
-                      type="text"
-                      value={businessName}
-                      onChange={(e) => setBusinessName(e.target.value)}
-                      className={inputClass}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                  {/* Left column */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {isFr ? 'Nom de l\'etablissement' : 'Business Name'}
+                      </label>
+                      <input
+                        type="text"
+                        value={businessName}
+                        onChange={(e) => setBusinessName(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {isFr ? 'Telephone' : 'Phone'}
+                      </label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {isFr ? 'Site web' : 'Website'}
+                      </label>
+                      <input
+                        type="url"
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                        placeholder="https://"
+                        className={inputClass}
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={inputClass}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {isFr ? 'Telephone' : 'Phone'}
-                    </label>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className={inputClass}
-                    />
+
+                  {/* Right column */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {isFr ? 'Nom du gerant' : 'Manager Name'}
+                      </label>
+                      <input
+                        type="text"
+                        value={managerName}
+                        onChange={(e) => setManagerName(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {isFr ? 'Telephone du gerant' : 'Manager Phone'}
+                      </label>
+                      <input
+                        type="tel"
+                        value={managerPhone}
+                        onChange={(e) => setManagerPhone(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">SIRET</label>
+                      <input
+                        type="text"
+                        value={siret}
+                        onChange={(e) => setSiret(e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -444,34 +507,24 @@ CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'm
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-5">
-                  {/* Preview */}
-                  {logoPreview && (
-                    <div className="w-32 h-32 shrink-0 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border border-gray-200">
-                      <img src={logoPreview} alt="Logo preview" className="max-h-full max-w-full object-contain" />
-                    </div>
-                  )}
-                  {/* Upload zone */}
-                  <div className="flex-1">
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-teal-500 transition-colors cursor-pointer">
-                      <input
-                        type="file"
-                        id="logo-upload"
-                        accept="image/*"
-                        onChange={handleLogoChange}
-                        className="hidden"
-                      />
-                      <label htmlFor="logo-upload" className="cursor-pointer">
-                        <ImageIcon className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 mb-1">
-                          <span className="text-teal-600 font-semibold">
-                            {isFr ? 'Cliquer pour telecharger' : 'Click to upload'}
-                          </span>{' '}
-                          {isFr ? 'ou glisser-deposer' : 'or drag and drop'}
-                        </p>
-                        <p className="text-xs text-gray-500">PNG, JPG {isFr ? 'jusqu\'a' : 'up to'} 5MB</p>
-                      </label>
-                    </div>
-                  </div>
+                  <ImageUpload
+                    preview={logoPreview || null}
+                    onFileSelect={(file) => {
+                      setLogoFile(file);
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setLogoPreview(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    onDelete={() => {
+                      setLogoFile(null);
+                      setLogoPreview('');
+                    }}
+                    label={isFr ? 'Cliquer pour telecharger' : 'Click to upload'}
+                    sublabel={`PNG, JPG ${isFr ? "jusqu'a" : 'up to'} 5MB`}
+                    className={logoPreview ? 'w-32 h-32 shrink-0' : 'flex-1'}
+                  />
                 </div>
               </Card>
 
@@ -493,39 +546,43 @@ CREATE POLICY "Auth Update" ON storage.objects FOR UPDATE USING ( bucket_id = 'm
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-5">
-                  {/* Preview */}
-                  {backgroundPreview && (
-                    <div className="w-32 h-48 shrink-0 bg-gray-100 rounded-xl overflow-hidden border border-gray-200 relative">
-                      <img src={backgroundPreview} alt="Background preview" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                        <p className="text-white text-xs text-center px-2">
-                          {isFr ? 'Avec superposition' : 'With overlay'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  {/* Upload zone */}
-                  <div className="flex-1">
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-teal-500 transition-colors cursor-pointer">
-                      <input
-                        type="file"
-                        id="background-upload"
-                        accept="image/*"
-                        onChange={handleBackgroundChange}
-                        className="hidden"
-                      />
-                      <label htmlFor="background-upload" className="cursor-pointer">
-                        <Upload className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 mb-1">
-                          <span className="text-teal-600 font-semibold">
-                            {isFr ? 'Cliquer pour telecharger' : 'Click to upload'}
-                          </span>{' '}
-                          {isFr ? 'ou glisser-deposer' : 'or drag and drop'}
-                        </p>
-                        <p className="text-xs text-gray-500">PNG, JPG (9:16) {isFr ? 'jusqu\'a' : 'up to'} 10MB</p>
-                      </label>
-                    </div>
-                  </div>
+                  <ImageUpload
+                    preview={backgroundPreview || null}
+                    onFileSelect={(file) => {
+                      setBackgroundFile(file);
+
+                      const img = new Image();
+                      img.onload = () => {
+                        const aspectRatio = img.width / img.height;
+                        const target = 9 / 16;
+                        if (Math.abs(aspectRatio - target) > 0.15) {
+                          setMessage({
+                            type: 'error',
+                            text: isFr
+                              ? `Le ratio de l'image est ${(aspectRatio * 16 / 9).toFixed(2)}:16. Recommande : 9:16 (format vertical)`
+                              : `Image ratio is ${(aspectRatio * 16 / 9).toFixed(2)}:16. Recommended: 9:16 (vertical format)`
+                          });
+                        } else {
+                          setMessage(null);
+                        }
+                      };
+                      img.src = URL.createObjectURL(file);
+
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setBackgroundPreview(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    onDelete={() => {
+                      setBackgroundFile(null);
+                      setBackgroundPreview('');
+                    }}
+                    label={isFr ? 'Cliquer pour telecharger' : 'Click to upload'}
+                    sublabel={`PNG, JPG (9:16) ${isFr ? "jusqu'a" : 'up to'} 10MB`}
+                    aspectRatio={backgroundPreview ? '9/16' : undefined}
+                    className={backgroundPreview ? 'w-32 shrink-0' : 'flex-1'}
+                  />
                 </div>
               </Card>
 
