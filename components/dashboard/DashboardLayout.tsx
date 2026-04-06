@@ -27,7 +27,8 @@ import {
   Store,
   Award,
   UserCircle,
-  Shield
+  Shield,
+  Megaphone
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -72,6 +73,12 @@ export function DashboardLayout({ children, merchant }: DashboardLayoutProps) {
         { name: t('dashboard.nav.loyalty'), href: '/dashboard/loyalty', icon: Award },
         { name: t('dashboard.nav.feedback'), href: '/dashboard/feedback', icon: MessageSquare },
         { name: t('dashboard.nav.strategy'), href: '/dashboard/strategy', icon: Target },
+      ],
+    },
+    {
+      label: 'Marketing',
+      items: [
+        { name: t('dashboard.nav.whatsappCampaign'), href: '/dashboard/marketing/whatsapp-campaign', icon: Megaphone },
       ],
     },
     {
