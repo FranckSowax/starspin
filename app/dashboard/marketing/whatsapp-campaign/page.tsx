@@ -1,787 +1,797 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase/client';
+import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import '@/lib/i18n/config';
 import {
-  Plus,
-  Trash2,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  MessageSquare,
-  Send,
-  Eye,
-  Check,
-  Upload,
-  X,
-  ChevronUp,
-  ChevronDown,
-  Loader2,
-  AlertCircle,
-  Users,
-  Save,
-  FolderOpen,
-  Star,
-  Clock,
-  EyeOff,
-  ChevronRight,
+  Megaphone, RefreshCw, Plus, Trash2, Send, Check, X, Loader2,
+  AlertCircle, Users, Star, Phone, FileText, Eye, ChevronRight,
+  Coins, ShoppingCart, Clock, CheckCircle, XCircle, BarChart3,
+  MessageCircle, Globe, Video, Image as ImageIcon, Type,
 } from 'lucide-react';
+import type { TemplateStatus } from '@/lib/whatsapp/types';
+import { CREDIT_PACKS } from '@/lib/whatsapp/types';
 
-interface CarouselCard {
+type TabId = 'templates' | 'campaigns' | 'new';
+
+interface WaTemplate {
   id: string;
-  mediaUrl: string;
-  mediaType: 'image' | 'video';
-  text: string;
-  buttonType: 'url' | 'quick_reply';
-  buttonTitle: string;
-  buttonUrl?: string;
+  name: string;
+  language: string;
+  category: string;
+  status: TemplateStatus;
+  components: any;
+  rejection_reason: string | null;
+  created_at: string;
 }
 
-interface SavedCampaign {
+interface WaCampaign {
   id: string;
-  merchant_id: string;
   name: string;
-  main_message: string;
-  cards: CarouselCard[];
-  created_at: string;
-  updated_at: string;
-  is_favorite: boolean;
+  template_id: string;
+  template_name?: string;
+  total_recipients: number;
+  estimated_cost_fcfa: number;
+  actual_cost_fcfa: number;
+  total_sent?: number;
+  total_delivered?: number;
+  total_read?: number;
+  total_failed?: number;
+  status?: string;
   send_count: number;
   last_sent_at: string | null;
+  created_at: string;
 }
 
-const generateId = () => Math.random().toString(36).substring(2, 9);
+interface Recipient {
+  phone: string;
+  name: string | null;
+  avg_rating: number;
+  total_reviews: number;
+  is_positive: boolean;
+}
+
+const STATUS_COLORS: Record<string, string> = {
+  APPROVED: 'bg-green-100 text-green-700',
+  PENDING: 'bg-amber-100 text-amber-700',
+  REJECTED: 'bg-red-100 text-red-700',
+  DRAFT: 'bg-gray-100 text-gray-600',
+  PAUSED: 'bg-blue-100 text-blue-700',
+  DISABLED: 'bg-gray-100 text-gray-400',
+};
+
+const inputClass = 'w-full px-3 py-2.5 border border-gray-300 rounded-lg bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-teal-50/30 transition-all duration-200';
 
 export default function WhatsAppCampaignPage() {
-  const { t } = useTranslation();
   const router = useRouter();
+  const { i18n } = useTranslation(undefined, { useSuspense: false });
+  const isFr = i18n.language === 'fr';
+
+  const [user, setUser] = useState<any>(null);
   const [merchant, setMerchant] = useState<any>(null);
+  const [hasConfig, setHasConfig] = useState<boolean | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>('templates');
   const [loading, setLoading] = useState(true);
-  const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-  // Campaign state
-  const [campaignName, setCampaignName] = useState('');
-  const [mainMessage, setMainMessage] = useState('');
-  const [cards, setCards] = useState<CarouselCard[]>([
-    {
-      id: generateId(),
-      mediaUrl: '',
-      mediaType: 'image',
-      text: '',
-      buttonType: 'url',
-      buttonTitle: '',
-      buttonUrl: '',
-    },
-  ]);
+  // Credits
+  const [credits, setCredits] = useState(0);
+  const [buyingPack, setBuyingPack] = useState<string | null>(null);
 
-  // UI state
-  const [showPreview, setShowPreview] = useState(true);
-  const [uploadingCard, setUploadingCard] = useState<string | null>(null);
+  // Templates
+  const [templates, setTemplates] = useState<WaTemplate[]>([]);
+  const [syncing, setSyncing] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [tplForm, setTplForm] = useState({
+    name: '', language: 'fr', category: 'MARKETING',
+    headerType: 'NONE', headerContent: '',
+    bodyText: '', footerText: '',
+    buttons: [] as { type: string; text: string; url: string; phone: string }[],
+  });
 
-  // Saved campaigns state
-  const [savedCampaigns, setSavedCampaigns] = useState<SavedCampaign[]>([]);
-  const [showSavedCampaigns, setShowSavedCampaigns] = useState(false);
-  const [currentCampaignId, setCurrentCampaignId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  // Campaigns
+  const [campaigns, setCampaigns] = useState<WaCampaign[]>([]);
+  const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
+  const [campaignMessages, setCampaignMessages] = useState<any[]>([]);
+
+  // New campaign wizard
+  const [wizardStep, setWizardStep] = useState(1);
+  const [selectedTemplate, setSelectedTemplate] = useState<WaTemplate | null>(null);
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [selectedPhones, setSelectedPhones] = useState<Set<string>>(new Set());
+  const [createdCampaignId, setCreatedCampaignId] = useState<string | null>(null);
+  const [campaignCost, setCampaignCost] = useState(0);
+  const [sending, setSending] = useState(false);
+  const [sendResult, setSendResult] = useState<any>(null);
+
+  // Auth helpers
+  const getAuthHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session ? { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' } : null;
+  };
+
+  // ==================== DATA LOADING ====================
 
   useEffect(() => {
-    const fetchMerchant = async () => {
+    const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from('merchants')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setMerchant(data);
+      if (!user) { router.push('/auth/login'); return; }
+      setUser(user);
 
-        // Fetch saved campaigns
-        fetchSavedCampaigns(user.id);
-      }
+      const { data: m } = await supabase.from('merchants').select('*').eq('id', user.id).single();
+      setMerchant(m);
+
+      // Check WA config
+      const { data: config } = await supabase.from('merchant_whatsapp_config').select('id').eq('merchant_id', user.id).single();
+      setHasConfig(!!config);
+
       setLoading(false);
     };
-    fetchMerchant();
-  }, []);
+    init();
+  }, [router]);
 
-  const fetchSavedCampaigns = async (merchantId: string) => {
-    try {
-      const response = await fetch(`/api/whatsapp/campaigns?merchantId=${merchantId}`);
-      const data = await response.json();
-      if (data.campaigns) {
-        setSavedCampaigns(data.campaigns);
-      }
-    } catch (error) {
-      console.error('Error fetching campaigns:', error);
+  useEffect(() => {
+    if (!user) return;
+    loadCredits();
+    loadTemplates();
+    loadCampaigns();
+  }, [user]);
+
+  const loadCredits = async () => {
+    if (!user) return;
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    const res = await fetch(`/api/whatsapp/credits?merchantId=${user.id}`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      setCredits(data.credits || 0);
     }
   };
 
-  const saveCampaign = async () => {
-    if (!merchant || !campaignName.trim()) return;
+  const loadTemplates = async () => {
+    if (!user) return;
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    const res = await fetch(`/api/whatsapp/templates?merchantId=${user.id}`, { headers });
+    if (res.ok) setTemplates(await res.json());
+  };
 
-    setIsSaving(true);
-    setSaveMessage(null);
+  const loadCampaigns = async () => {
+    if (!user) return;
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    const res = await fetch(`/api/whatsapp/wa-campaigns?merchantId=${user.id}`, { headers });
+    if (res.ok) setCampaigns(await res.json());
+  };
 
-    try {
-      const payload = {
-        merchantId: merchant.id,
-        name: campaignName,
-        mainMessage: mainMessage,
-        cards: cards,
-      };
+  const loadRecipients = async () => {
+    if (!user) return;
+    const { data: feedbacks } = await supabase
+      .from('feedback')
+      .select('customer_phone, customer_email, rating, is_positive')
+      .eq('merchant_id', user.id)
+      .not('customer_phone', 'is', null);
 
-      let response;
-      if (currentCampaignId) {
-        // Update existing campaign
-        response = await fetch('/api/whatsapp/campaigns', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, id: currentCampaignId }),
+    const { data: loyaltyClients } = await supabase
+      .from('loyalty_clients')
+      .select('phone, name')
+      .eq('merchant_id', user.id)
+      .not('phone', 'is', null);
+
+    const phoneMap = new Map<string, Recipient>();
+
+    (feedbacks || []).forEach((f: any) => {
+      if (!f.customer_phone) return;
+      const existing = phoneMap.get(f.customer_phone);
+      if (!existing) {
+        phoneMap.set(f.customer_phone, {
+          phone: f.customer_phone,
+          name: f.customer_email || null,
+          avg_rating: f.rating,
+          total_reviews: 1,
+          is_positive: f.is_positive,
         });
       } else {
-        // Create new campaign
-        response = await fetch('/api/whatsapp/campaigns', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
+        existing.total_reviews++;
+        existing.avg_rating = (existing.avg_rating * (existing.total_reviews - 1) + f.rating) / existing.total_reviews;
+        if (f.rating >= 4) existing.is_positive = true;
       }
+    });
 
-      const data = await response.json();
-      if (response.ok && data.campaign) {
-        setSaveMessage({ type: 'success', text: t('marketing.whatsappCampaign.campaignSaved') });
-        setCurrentCampaignId(data.campaign.id);
-        fetchSavedCampaigns(merchant.id);
-        setTimeout(() => setSaveMessage(null), 3000);
+    (loyaltyClients || []).forEach((c: any) => {
+      if (!c.phone || phoneMap.has(c.phone)) return;
+      phoneMap.set(c.phone, { phone: c.phone, name: c.name, avg_rating: 0, total_reviews: 0, is_positive: false });
+    });
+
+    setRecipients(Array.from(phoneMap.values()));
+  };
+
+  // ==================== ACTIONS ====================
+
+  const syncTemplates = async () => {
+    setSyncing(true);
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    try {
+      const res = await fetch('/api/whatsapp/templates', {
+        method: 'POST', headers,
+        body: JSON.stringify({ action: 'sync', merchantId: user.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ type: 'success', text: isFr ? `${data.synced} templates synchronisés` : `${data.synced} templates synced` });
+        loadTemplates();
       } else {
-        setSaveMessage({ type: 'error', text: data.error || t('marketing.whatsappCampaign.saveFailed') });
+        setMessage({ type: 'error', text: data.error });
       }
-    } catch (error) {
-      setSaveMessage({ type: 'error', text: t('marketing.whatsappCampaign.saveFailed') });
-    } finally {
-      setIsSaving(false);
+    } catch (e: any) {
+      setMessage({ type: 'error', text: e.message });
+    } finally { setSyncing(false); }
+  };
+
+  const createTemplate = async (submitToMeta: boolean) => {
+    setSubmitting(true);
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+
+    const components: any[] = [];
+    if (tplForm.headerType !== 'NONE' && tplForm.headerContent) {
+      if (tplForm.headerType === 'TEXT') {
+        components.push({ type: 'HEADER', format: 'TEXT', text: tplForm.headerContent });
+      } else {
+        components.push({ type: 'HEADER', format: tplForm.headerType, example: { header_handle: [tplForm.headerContent] } });
+      }
     }
-  };
-
-  const loadCampaign = (campaign: SavedCampaign) => {
-    setCampaignName(campaign.name);
-    setMainMessage(campaign.main_message);
-    setCards(campaign.cards);
-    setCurrentCampaignId(campaign.id);
-    setShowSavedCampaigns(false);
-  };
-
-  const deleteCampaign = async (campaignId: string) => {
-    if (!merchant) return;
+    components.push({ type: 'BODY', text: tplForm.bodyText });
+    if (tplForm.footerText) components.push({ type: 'FOOTER', text: tplForm.footerText });
+    if (tplForm.buttons.length > 0) {
+      components.push({
+        type: 'BUTTONS',
+        buttons: tplForm.buttons.map(b => ({
+          type: b.type, text: b.text,
+          ...(b.type === 'URL' && b.url ? { url: b.url } : {}),
+          ...(b.type === 'PHONE_NUMBER' && b.phone ? { phone_number: b.phone } : {}),
+        })),
+      });
+    }
 
     try {
-      const response = await fetch(
-        `/api/whatsapp/campaigns?id=${campaignId}&merchantId=${merchant.id}`,
-        { method: 'DELETE' }
-      );
-
-      if (response.ok) {
-        setSavedCampaigns(savedCampaigns.filter(c => c.id !== campaignId));
-        if (currentCampaignId === campaignId) {
-          setCurrentCampaignId(null);
-        }
-      }
-    } catch (error) {
-      console.error('Error deleting campaign:', error);
-    }
-  };
-
-  const toggleFavorite = async (campaignId: string, currentValue: boolean) => {
-    if (!merchant) return;
-
-    try {
-      await fetch('/api/whatsapp/campaigns', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch('/api/whatsapp/templates', {
+        method: 'POST', headers,
         body: JSON.stringify({
-          id: campaignId,
-          merchantId: merchant.id,
-          isFavorite: !currentValue,
+          action: 'create', merchantId: user.id, submitToMeta,
+          name: tplForm.name, language: tplForm.language, category: tplForm.category,
+          components,
         }),
       });
-
-      setSavedCampaigns(savedCampaigns.map(c =>
-        c.id === campaignId ? { ...c, is_favorite: !currentValue } : c
-      ));
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-    }
+      const data = await res.json();
+      if (res.ok) {
+        setMessage({ type: 'success', text: submitToMeta ? (isFr ? 'Template soumis à Meta' : 'Template submitted to Meta') : (isFr ? 'Brouillon enregistré' : 'Draft saved') });
+        setShowCreateForm(false);
+        setTplForm({ name: '', language: 'fr', category: 'MARKETING', headerType: 'NONE', headerContent: '', bodyText: '', footerText: '', buttons: [] });
+        loadTemplates();
+      } else {
+        setMessage({ type: 'error', text: data.error });
+      }
+    } catch (e: any) {
+      setMessage({ type: 'error', text: e.message });
+    } finally { setSubmitting(false); }
   };
 
-  const startNewCampaign = () => {
-    setCampaignName('');
-    setMainMessage('');
-    setCards([{
-      id: generateId(),
-      mediaUrl: '',
-      mediaType: 'image',
-      text: '',
-      buttonType: 'url',
-      buttonTitle: '',
-      buttonUrl: '',
-    }]);
-    setCurrentCampaignId(null);
-    setShowSavedCampaigns(false);
+  const deleteTemplate = async (id: string) => {
+    if (!confirm(isFr ? 'Supprimer ce template ?' : 'Delete this template?')) return;
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    await fetch(`/api/whatsapp/templates?id=${id}&merchantId=${user.id}`, { method: 'DELETE', headers });
+    loadTemplates();
   };
 
-  const addCard = () => {
-    if (cards.length >= 10) return;
-    setCards([
-      ...cards,
-      {
-        id: generateId(),
-        mediaUrl: '',
-        mediaType: 'image',
-        text: '',
-        buttonType: 'url',
-        buttonTitle: '',
-        buttonUrl: '',
-      },
-    ]);
-  };
-
-  const removeCard = (id: string) => {
-    if (cards.length <= 1) return;
-    setCards(cards.filter((card) => card.id !== id));
-  };
-
-  const updateCard = (id: string, updates: Partial<CarouselCard>) => {
-    setCards(cards.map((card) => (card.id === id ? { ...card, ...updates } : card)));
-  };
-
-  const moveCard = (index: number, direction: 'up' | 'down') => {
-    const newCards = [...cards];
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= cards.length) return;
-    [newCards[index], newCards[newIndex]] = [newCards[newIndex], newCards[index]];
-    setCards(newCards);
-  };
-
-  const handleFileUpload = async (cardId: string, file: File) => {
-    if (!merchant) return;
-
-    setUploadingCard(cardId);
-
+  const buyCredits = async (packId: string) => {
+    setBuyingPack(packId);
+    const headers = await getAuthHeaders();
+    if (!headers) return;
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${merchant.id}/campaigns/${cardId}_${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('merchant-assets')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('merchant-assets')
-        .getPublicUrl(fileName);
-
-      const mediaType = file.type.startsWith('video/') ? 'video' : 'image';
-      updateCard(cardId, { mediaUrl: publicUrl, mediaType });
-    } catch (error) {
-      console.error('Upload error:', error);
-    } finally {
-      setUploadingCard(null);
-    }
+      const res = await fetch('/api/whatsapp/credits', {
+        method: 'POST', headers,
+        body: JSON.stringify({ merchantId: user.id, packId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCredits(data.credits);
+        setMessage({ type: 'success', text: isFr ? 'Crédits ajoutés !' : 'Credits added!' });
+      }
+    } finally { setBuyingPack(null); }
   };
 
-  const isCardValid = (card: CarouselCard) => {
-    return card.mediaUrl && card.text && card.buttonTitle && (card.buttonType !== 'url' || card.buttonUrl);
+  const createCampaign = async () => {
+    if (!selectedTemplate || selectedPhones.size === 0) return;
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/whatsapp/wa-campaigns', {
+        method: 'POST', headers,
+        body: JSON.stringify({
+          merchantId: user.id,
+          templateId: selectedTemplate.id,
+          name: `${selectedTemplate.name} - ${new Date().toLocaleDateString(isFr ? 'fr-FR' : 'en-US')}`,
+          recipients: Array.from(selectedPhones),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCreatedCampaignId(data.id);
+        setCampaignCost(data.pricing?.total_cost || data.estimated_cost_fcfa || 0);
+        setMessage({ type: 'success', text: isFr ? 'Campagne créée' : 'Campaign created' });
+      } else {
+        setMessage({ type: 'error', text: data.error });
+      }
+    } finally { setSubmitting(false); }
   };
 
-  const isCampaignValid = () => {
-    return mainMessage && cards.every(isCardValid);
+  const sendCampaign = async () => {
+    if (!createdCampaignId) return;
+    setSending(true);
+    const headers = await getAuthHeaders();
+    if (!headers) return;
+    try {
+      const res = await fetch('/api/whatsapp/campaign/send', {
+        method: 'POST', headers,
+        body: JSON.stringify({ merchantId: user.id, campaignId: createdCampaignId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSendResult(data);
+        setCredits(data.creditsRemaining ?? credits);
+        loadCampaigns();
+      } else {
+        setMessage({ type: 'error', text: data.error });
+      }
+    } finally { setSending(false); }
   };
 
-  // Wizard step indicators
-  const step1Done = !!campaignName.trim() && !!mainMessage.trim();
-  const step2Done = cards.every(isCardValid);
-  const step3Done = step1Done && step2Done;
+  // ==================== RENDER ====================
 
-  if (loading) {
+  if (loading || !merchant) {
     return (
-      <DashboardLayout>
+      <DashboardLayout merchant={merchant}>
         <div className="flex items-center justify-center h-96">
-          <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
+          <Loader2 className="w-8 h-8 text-teal-600 animate-spin" />
         </div>
       </DashboardLayout>
     );
   }
 
+  const TABS: { id: TabId; icon: React.ReactNode; label: string }[] = [
+    { id: 'templates', icon: <FileText className="w-4 h-4" />, label: 'Templates' },
+    { id: 'campaigns', icon: <BarChart3 className="w-4 h-4" />, label: isFr ? 'Campagnes' : 'Campaigns' },
+    { id: 'new', icon: <Send className="w-4 h-4" />, label: isFr ? 'Nouvelle Campagne' : 'New Campaign' },
+  ];
+
+  const approvedTemplates = templates.filter(t => t.status === 'APPROVED');
+
   return (
     <DashboardLayout merchant={merchant}>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('marketing.whatsappCampaign.title')}</h1>
-            <p className="text-sm text-gray-500 mt-1">{t('marketing.whatsappCampaign.subtitle')}</p>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                <Megaphone className="w-5 h-5" />
+              </div>
+              {isFr ? 'Campagnes WhatsApp' : 'WhatsApp Campaigns'}
+            </h1>
+            <p className="text-gray-500 mt-1 ml-[52px]">{isFr ? 'Envoyez des campagnes marketing via WhatsApp Business' : 'Send marketing campaigns via WhatsApp Business'}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowSavedCampaigns(!showSavedCampaigns)}
-              className="gap-1.5"
-            >
-              <FolderOpen className="w-3.5 h-3.5" />
-              {t('marketing.whatsappCampaign.myCampaigns')} ({savedCampaigns.length})
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={startNewCampaign}
-              className="gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              {t('marketing.whatsappCampaign.newCampaign')}
-            </Button>
-            <Button
-              onClick={saveCampaign}
-              disabled={!campaignName.trim() || isSaving}
-              size="sm"
-              className="gap-1.5 bg-teal-600 hover:bg-teal-700"
-            >
-              {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-              {currentCampaignId ? t('marketing.whatsappCampaign.updateCampaign') : t('marketing.whatsappCampaign.saveCampaign')}
-            </Button>
+          {/* Credits badge */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-teal-50 border border-teal-200 rounded-xl">
+            <Coins className="w-4 h-4 text-teal-600" />
+            <span className="text-sm font-bold text-teal-700">{credits}</span>
+            <span className="text-xs text-teal-600">{isFr ? 'crédits' : 'credits'}</span>
           </div>
         </div>
 
-        {/* Save Message */}
-        {saveMessage && (
-          <div className={`p-2.5 rounded-lg flex items-center gap-2 text-sm ${
-            saveMessage.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
-          }`}>
-            {saveMessage.type === 'success' ? <Check className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-            <span>{saveMessage.text}</span>
+        {/* No config banner */}
+        {hasConfig === false && (
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800">{isFr ? 'WhatsApp Business non configuré' : 'WhatsApp Business not configured'}</p>
+              <p className="text-xs text-amber-600 mt-1">{isFr ? 'Contactez l\'administrateur pour configurer vos identifiants Meta.' : 'Contact your administrator to set up your Meta credentials.'}</p>
+            </div>
           </div>
         )}
 
-        {/* Wizard Steps Indicator */}
-        <div className="flex items-center gap-2">
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step1Done ? 'bg-teal-50 text-teal-700' : 'bg-gray-100 text-gray-500'}`}>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step1Done ? 'bg-teal-600 text-white' : 'bg-gray-300 text-white'}`}>
-              {step1Done ? <Check className="w-3 h-3" /> : '1'}
-            </div>
-            {t('marketing.whatsappCampaign.campaignDetails')}
+        {/* Message */}
+        {message && (
+          <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-teal-50 border border-teal-200 text-teal-700' : 'bg-red-50 border border-red-200 text-red-700'}`}>
+            {message.type === 'success' ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+            {message.text}
+            <button onClick={() => setMessage(null)} className="ml-auto"><X className="w-3.5 h-3.5" /></button>
           </div>
-          <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step2Done ? 'bg-teal-50 text-teal-700' : 'bg-gray-100 text-gray-500'}`}>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step2Done ? 'bg-teal-600 text-white' : 'bg-gray-300 text-white'}`}>
-              {step2Done ? <Check className="w-3 h-3" /> : '2'}
-            </div>
-            {t('marketing.whatsappCampaign.carouselCards')}
-          </div>
-          <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${step3Done ? 'bg-teal-50 text-teal-700' : 'bg-gray-100 text-gray-500'}`}>
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step3Done ? 'bg-teal-600 text-white' : 'bg-gray-300 text-white'}`}>
-              {step3Done ? <Check className="w-3 h-3" /> : '3'}
-            </div>
-            {t('marketing.whatsappCampaign.selectRecipients')}
-          </div>
+        )}
+
+        {/* Credit packs */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {CREDIT_PACKS.map(pack => (
+            <button key={pack.id} onClick={() => buyCredits(pack.id)} disabled={buyingPack === pack.id}
+              className="group relative p-3 border border-gray-200 rounded-xl hover:border-teal-300 hover:shadow-md transition-all bg-white text-left">
+              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              <p className="text-lg font-bold text-gray-900">{pack.credits}</p>
+              <p className="text-xs text-gray-500">{isFr ? 'crédits' : 'credits'}</p>
+              <p className="text-sm font-semibold text-teal-600 mt-1">{pack.price_fcfa.toLocaleString()} FCFA</p>
+              {buyingPack === pack.id && <Loader2 className="w-4 h-4 text-teal-600 animate-spin absolute top-3 right-3" />}
+            </button>
+          ))}
         </div>
 
-        {/* Saved Campaigns Panel - Collapsible */}
-        {showSavedCampaigns && (
-          <div className="group relative border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
-            <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-            <div className="p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                    <FolderOpen className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-gray-900">{t('marketing.whatsappCampaign.savedCampaigns')}</h2>
-                </div>
-                <Button variant="ghost" size="sm" onClick={() => setShowSavedCampaigns(false)} className="h-8 w-8 p-0">
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
+        {/* Tabs */}
+        <nav className="flex gap-1 border-b-2 border-gray-100">
+          {TABS.map(tab => (
+            <button key={tab.id} onClick={() => { setActiveTab(tab.id); setMessage(null); if (tab.id === 'new') { setWizardStep(1); setCreatedCampaignId(null); setSendResult(null); loadRecipients(); } }}
+              className={`relative flex items-center gap-2 px-5 py-3 text-sm font-medium transition-all rounded-t-lg ${activeTab === tab.id ? 'text-teal-600' : 'text-gray-500 hover:text-teal-700 hover:bg-teal-50/50'}`}>
+              {tab.icon} <span>{tab.label}</span>
+              <span className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500 to-emerald-500 transition-transform duration-300 origin-left ${activeTab === tab.id ? 'scale-x-100' : 'scale-x-0'}`} />
+            </button>
+          ))}
+        </nav>
 
-              {savedCampaigns.length === 0 ? (
-                <div className="text-center py-6 text-gray-500">
-                  <FolderOpen className="w-10 h-10 mx-auto mb-2 text-gray-300" />
-                  <p className="text-sm">{t('marketing.whatsappCampaign.noCampaigns')}</p>
+        {/* ==================== TAB: TEMPLATES ==================== */}
+        {activeTab === 'templates' && (
+          <div className="space-y-5">
+            <div className="flex gap-3">
+              <Button onClick={syncTemplates} disabled={syncing || !hasConfig} variant="outline" className="gap-2">
+                <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
+                {isFr ? 'Synchroniser depuis Meta' : 'Sync from Meta'}
+              </Button>
+              <Button onClick={() => setShowCreateForm(true)} disabled={!hasConfig} className="gap-2 bg-teal-600 hover:bg-teal-700 text-white">
+                <Plus className="w-4 h-4" />
+                {isFr ? 'Créer un template' : 'Create template'}
+              </Button>
+            </div>
+
+            {/* Template creation form */}
+            {showCreateForm && (
+              <Card className="p-6 border border-gray-200 rounded-xl space-y-4">
+                <h3 className="font-semibold text-gray-900">{isFr ? 'Nouveau Template' : 'New Template'}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{isFr ? 'Nom (minuscules, _)' : 'Name (lowercase, _)'}</label>
+                    <input value={tplForm.name} onChange={e => setTplForm({ ...tplForm, name: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_') })} placeholder="promo_ete_2025" className={inputClass} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{isFr ? 'Langue' : 'Language'}</label>
+                    <select value={tplForm.language} onChange={e => setTplForm({ ...tplForm, language: e.target.value })} className={inputClass}>
+                      {['fr', 'en', 'es', 'pt', 'de', 'it', 'ar', 'th'].map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">{isFr ? 'Catégorie' : 'Category'}</label>
+                    <select value={tplForm.category} onChange={e => setTplForm({ ...tplForm, category: e.target.value })} className={inputClass}>
+                      <option value="MARKETING">Marketing</option>
+                      <option value="UTILITY">{isFr ? 'Utilitaire' : 'Utility'}</option>
+                    </select>
+                  </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {savedCampaigns
-                    .sort((a, b) => {
-                      if (a.is_favorite && !b.is_favorite) return -1;
-                      if (!a.is_favorite && b.is_favorite) return 1;
-                      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-                    })
-                    .map((campaign) => (
-                    <div
-                      key={campaign.id}
-                      className={`border rounded-lg p-3 hover:border-teal-400 transition-colors cursor-pointer ${
-                        currentCampaignId === campaign.id ? 'border-teal-500 bg-teal-50' : 'border-gray-200'
-                      }`}
-                      onClick={() => loadCampaign(campaign)}
-                    >
-                      <div className="flex items-start justify-between mb-1.5">
-                        <h3 className="text-sm font-medium text-gray-900 line-clamp-1">{campaign.name}</h3>
-                        <div className="flex items-center gap-0.5 shrink-0 ml-2">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(campaign.id, campaign.is_favorite);
-                            }}
-                            className={`p-1 rounded hover:bg-gray-100 ${campaign.is_favorite ? 'text-amber-500' : 'text-gray-300'}`}
-                          >
-                            <Star className={`w-3.5 h-3.5 ${campaign.is_favorite ? 'fill-amber-500' : ''}`} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (confirm(t('marketing.whatsappCampaign.confirmDelete'))) {
-                                deleteCampaign(campaign.id);
-                              }
-                            }}
-                            className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-500 line-clamp-1 mb-2">{campaign.main_message}</p>
-                      <div className="flex items-center justify-between text-[10px] text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3" />
-                          {campaign.cards.length} {t('marketing.whatsappCampaign.cards')}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(campaign.updated_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      {campaign.send_count > 0 && (
-                        <div className="mt-1.5 text-[10px] text-teal-600 flex items-center gap-1">
-                          <Send className="w-3 h-3" />
-                          {t('marketing.whatsappCampaign.sentTimes', { count: campaign.send_count })}
-                        </div>
+
+                {/* Header */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Header</label>
+                  <div className="flex gap-2 mb-2">
+                    {['NONE', 'TEXT', 'IMAGE', 'VIDEO'].map(h => (
+                      <button key={h} onClick={() => setTplForm({ ...tplForm, headerType: h, headerContent: '' })}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${tplForm.headerType === h ? 'bg-teal-100 text-teal-700 border border-teal-300' : 'bg-gray-100 text-gray-600 border border-gray-200'}`}>
+                        {h === 'NONE' ? (isFr ? 'Aucun' : 'None') : h === 'TEXT' ? <Type className="w-3 h-3 inline" /> : h === 'IMAGE' ? <ImageIcon className="w-3 h-3 inline" /> : <Video className="w-3 h-3 inline" />}
+                        {h !== 'NONE' && <span className="ml-1">{h}</span>}
+                      </button>
+                    ))}
+                  </div>
+                  {tplForm.headerType !== 'NONE' && (
+                    <input value={tplForm.headerContent} onChange={e => setTplForm({ ...tplForm, headerContent: e.target.value })}
+                      placeholder={tplForm.headerType === 'TEXT' ? (isFr ? 'Texte du header...' : 'Header text...') : 'URL du média...'}
+                      className={inputClass} />
+                  )}
+                </div>
+
+                {/* Body */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Body *</label>
+                  <textarea value={tplForm.bodyText} onChange={e => setTplForm({ ...tplForm, bodyText: e.target.value })} rows={4}
+                    placeholder={isFr ? 'Bonjour {{1}}, découvrez notre offre...' : 'Hello {{1}}, check out our offer...'} className={inputClass} />
+                  <p className="text-xs text-gray-400 mt-1">{isFr ? 'Utilisez {{1}}, {{2}} pour les variables' : 'Use {{1}}, {{2}} for variables'}</p>
+                </div>
+
+                {/* Footer */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Footer ({isFr ? 'optionnel' : 'optional'})</label>
+                  <input value={tplForm.footerText} onChange={e => setTplForm({ ...tplForm, footerText: e.target.value })} placeholder={isFr ? 'Texte du footer...' : 'Footer text...'} className={inputClass} />
+                </div>
+
+                {/* Buttons */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">{isFr ? 'Boutons' : 'Buttons'} ({tplForm.buttons.length}/3)</label>
+                    {tplForm.buttons.length < 3 && (
+                      <button onClick={() => setTplForm({ ...tplForm, buttons: [...tplForm.buttons, { type: 'URL', text: '', url: '', phone: '' }] })}
+                        className="text-xs text-teal-600 hover:text-teal-700 font-medium">+ {isFr ? 'Ajouter' : 'Add'}</button>
+                    )}
+                  </div>
+                  {tplForm.buttons.map((btn, i) => (
+                    <div key={i} className="flex gap-2 mb-2 items-center">
+                      <select value={btn.type} onChange={e => { const btns = [...tplForm.buttons]; btns[i] = { ...btn, type: e.target.value }; setTplForm({ ...tplForm, buttons: btns }); }}
+                        className="px-2 py-2 border border-gray-300 rounded-lg text-xs bg-gray-50 w-32">
+                        <option value="URL">URL</option>
+                        <option value="PHONE_NUMBER">{isFr ? 'Téléphone' : 'Phone'}</option>
+                        <option value="QUICK_REPLY">{isFr ? 'Réponse rapide' : 'Quick Reply'}</option>
+                      </select>
+                      <input value={btn.text} onChange={e => { const btns = [...tplForm.buttons]; btns[i] = { ...btn, text: e.target.value }; setTplForm({ ...tplForm, buttons: btns }); }}
+                        placeholder={isFr ? 'Texte du bouton' : 'Button text'} className="flex-1 px-2 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50" />
+                      {btn.type === 'URL' && (
+                        <input value={btn.url} onChange={e => { const btns = [...tplForm.buttons]; btns[i] = { ...btn, url: e.target.value }; setTplForm({ ...tplForm, buttons: btns }); }}
+                          placeholder="https://..." className="flex-1 px-2 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50" />
                       )}
+                      {btn.type === 'PHONE_NUMBER' && (
+                        <input value={btn.phone} onChange={e => { const btns = [...tplForm.buttons]; btns[i] = { ...btn, phone: e.target.value }; setTplForm({ ...tplForm, buttons: btns }); }}
+                          placeholder="+33..." className="flex-1 px-2 py-2 border border-gray-300 rounded-lg text-sm bg-gray-50" />
+                      )}
+                      <button onClick={() => setTplForm({ ...tplForm, buttons: tplForm.buttons.filter((_, j) => j !== i) })} className="text-red-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   ))}
                 </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" onClick={() => setShowCreateForm(false)}>{isFr ? 'Annuler' : 'Cancel'}</Button>
+                  <Button variant="outline" disabled={submitting || !tplForm.name || !tplForm.bodyText} onClick={() => createTemplate(false)}>
+                    {isFr ? 'Enregistrer brouillon' : 'Save draft'}
+                  </Button>
+                  <Button disabled={submitting || !tplForm.name || !tplForm.bodyText} onClick={() => createTemplate(true)} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isFr ? 'Soumettre à Meta' : 'Submit to Meta'}
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {/* Template list */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {templates.map(tpl => (
+                <Card key={tpl.id} className="group relative p-4 border border-gray-200 rounded-xl overflow-hidden hover:border-gray-300 hover:shadow-md transition-all">
+                  <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="font-semibold text-gray-900 text-sm font-mono">{tpl.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[tpl.status] || STATUS_COLORS.DRAFT}`}>{tpl.status}</span>
+                        <span className="text-xs text-gray-400">{tpl.language.toUpperCase()}</span>
+                        <span className="text-xs text-gray-400">{tpl.category}</span>
+                      </div>
+                    </div>
+                    <button onClick={() => deleteTemplate(tpl.id)} className="text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                  {tpl.components && (
+                    <p className="text-xs text-gray-500 mt-2 line-clamp-2">
+                      {Array.isArray(tpl.components) ? tpl.components.find((c: any) => c.type === 'BODY')?.text || '' : ''}
+                    </p>
+                  )}
+                  {tpl.rejection_reason && <p className="text-xs text-red-500 mt-1">{tpl.rejection_reason}</p>}
+                </Card>
+              ))}
+              {templates.length === 0 && (
+                <div className="col-span-2 text-center py-12 text-gray-400">
+                  <FileText className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                  <p>{isFr ? 'Aucun template. Synchronisez depuis Meta ou créez-en un.' : 'No templates. Sync from Meta or create one.'}</p>
+                </div>
               )}
             </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* Campaign Builder - Left Column (3/5) */}
-          <div className="lg:col-span-3 space-y-5">
-            {/* Step 1: Campaign Details */}
-            <div className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
-              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                  <MessageSquare className="w-5 h-5" />
-                </div>
-                <h2 className="text-sm font-semibold text-gray-900">{t('marketing.whatsappCampaign.campaignDetails')}</h2>
+        {/* ==================== TAB: CAMPAIGNS ==================== */}
+        {activeTab === 'campaigns' && (
+          <div className="space-y-4">
+            {campaigns.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <BarChart3 className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+                <p>{isFr ? 'Aucune campagne envoyée.' : 'No campaigns sent.'}</p>
               </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    {t('marketing.whatsappCampaign.campaignName')}
-                  </label>
-                  <input
-                    type="text"
-                    value={campaignName}
-                    onChange={(e) => setCampaignName(e.target.value)}
-                    placeholder={t('marketing.whatsappCampaign.campaignNamePlaceholder')}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    {t('marketing.whatsappCampaign.mainMessage')}
-                  </label>
-                  <textarea
-                    value={mainMessage}
-                    onChange={(e) => setMainMessage(e.target.value)}
-                    placeholder={t('marketing.whatsappCampaign.mainMessagePlaceholder')}
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none text-sm"
-                  />
-                </div>
+            ) : (
+              <div className="group relative border border-gray-200 rounded-xl overflow-hidden bg-white">
+                <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500" />
+                <table className="w-full">
+                  <thead><tr className="bg-gray-50/80">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{isFr ? 'Nom' : 'Name'}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Template</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{isFr ? 'Dest.' : 'Recip.'}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{isFr ? 'Coût' : 'Cost'}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">{isFr ? 'Envoyés' : 'Sent'}</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
+                  </tr></thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {campaigns.map(c => (
+                      <tr key={c.id} className="hover:bg-teal-50/30 transition-colors cursor-pointer" onClick={() => setExpandedCampaign(expandedCampaign === c.id ? null : c.id)}>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600 font-mono">{c.template_name || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{c.total_recipients}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{(c.actual_cost_fcfa || c.estimated_cost_fcfa || 0).toLocaleString()} F</td>
+                        <td className="px-4 py-3 text-sm">
+                          <span className="text-green-600">{c.total_sent || c.send_count || 0}</span>
+                          {(c.total_failed || 0) > 0 && <span className="text-red-500 ml-1">/ {c.total_failed} ✗</span>}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-500">{c.last_sent_at ? new Date(c.last_sent_at).toLocaleDateString(isFr ? 'fr-FR' : 'en-US') : '-'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
-
-            {/* Step 2: Carousel Cards */}
-            <div className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
-              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                    <ImageIcon className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-gray-900">
-                    {t('marketing.whatsappCampaign.carouselCards')} ({cards.length}/10)
-                  </h2>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={addCard}
-                  disabled={cards.length >= 10}
-                  className="gap-1 text-xs h-8"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  {t('marketing.whatsappCampaign.addCard')}
-                </Button>
-              </div>
-
-              {/* Horizontal scrollable card list */}
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
-                {cards.map((card, index) => (
-                  <div
-                    key={card.id}
-                    className="flex-shrink-0 w-72 border border-gray-200 rounded-lg p-3 bg-gray-50/50"
-                  >
-                    {/* Card Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-xs font-semibold text-gray-700">
-                        {t('marketing.whatsappCampaign.card')} {index + 1}
-                      </span>
-                      <div className="flex items-center gap-0.5">
-                        <button
-                          onClick={() => moveCard(index, 'up')}
-                          disabled={index === 0}
-                          className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                          <ChevronUp className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => moveCard(index, 'down')}
-                          disabled={index === cards.length - 1}
-                          className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                          <ChevronDown className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => removeCard(card.id)}
-                          disabled={cards.length <= 1}
-                          className="p-1 rounded hover:bg-red-100 text-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Media Upload */}
-                    <div className="mb-3">
-                      {card.mediaUrl ? (
-                        <div className="relative w-full h-28 rounded-lg overflow-hidden bg-gray-200">
-                          {card.mediaType === 'video' ? (
-                            <video src={card.mediaUrl} className="w-full h-full object-cover" controls />
-                          ) : (
-                            <img src={card.mediaUrl} alt={`Card ${index + 1}`} className="w-full h-full object-cover" />
-                          )}
-                          <button
-                            onClick={() => updateCard(card.id, { mediaUrl: '', mediaType: 'image' })}
-                            className="absolute top-1.5 right-1.5 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div
-                          onClick={() => fileInputRefs.current[card.id]?.click()}
-                          className="w-full h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-teal-500 hover:bg-teal-50/50 transition-colors"
-                        >
-                          {uploadingCard === card.id ? (
-                            <Loader2 className="w-6 h-6 animate-spin text-teal-600" />
-                          ) : (
-                            <>
-                              <Upload className="w-5 h-5 text-gray-400 mb-1" />
-                              <span className="text-[10px] text-gray-500">{t('marketing.whatsappCampaign.uploadMedia')}</span>
-                            </>
-                          )}
-                        </div>
-                      )}
-                      <input
-                        ref={(el) => { fileInputRefs.current[card.id] = el; }}
-                        type="file"
-                        accept="image/jpeg,image/jpg,image/png,video/mp4"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(card.id, file);
-                        }}
-                        className="hidden"
-                      />
-                    </div>
-
-                    {/* Card Text */}
-                    <textarea
-                      value={card.text}
-                      onChange={(e) => updateCard(card.id, { text: e.target.value })}
-                      placeholder={t('marketing.whatsappCampaign.cardTextPlaceholder')}
-                      rows={2}
-                      className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none text-xs mb-3"
-                    />
-
-                    {/* Button Type Toggle */}
-                    <div className="flex gap-1 mb-2">
-                      <button
-                        onClick={() => updateCard(card.id, { buttonType: 'url' })}
-                        className={`flex-1 py-1.5 px-2 rounded text-[10px] font-medium flex items-center justify-center gap-1 transition-colors ${
-                          card.buttonType === 'url'
-                            ? 'bg-teal-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        <LinkIcon className="w-3 h-3" />
-                        {t('marketing.whatsappCampaign.urlButton')}
-                      </button>
-                      <button
-                        onClick={() => updateCard(card.id, { buttonType: 'quick_reply' })}
-                        className={`flex-1 py-1.5 px-2 rounded text-[10px] font-medium flex items-center justify-center gap-1 transition-colors ${
-                          card.buttonType === 'quick_reply'
-                            ? 'bg-teal-600 text-white'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                        }`}
-                      >
-                        <MessageSquare className="w-3 h-3" />
-                        {t('marketing.whatsappCampaign.quickReply')}
-                      </button>
-                    </div>
-
-                    {/* Button Title */}
-                    <input
-                      type="text"
-                      value={card.buttonTitle}
-                      onChange={(e) => updateCard(card.id, { buttonTitle: e.target.value })}
-                      placeholder={t('marketing.whatsappCampaign.buttonTitlePlaceholder')}
-                      className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-xs mb-2"
-                    />
-
-                    {/* Button URL (only for URL type) */}
-                    {card.buttonType === 'url' && (
-                      <input
-                        type="url"
-                        value={card.buttonUrl}
-                        onChange={(e) => updateCard(card.id, { buttonUrl: e.target.value })}
-                        placeholder="https://example.com"
-                        className="w-full px-2.5 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-xs"
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
+        )}
 
-          {/* Preview & Actions - Right Column (2/5) */}
-          <div className="lg:col-span-2 space-y-5 lg:sticky lg:top-4 lg:self-start">
-            {/* WhatsApp Preview */}
-            <div className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-white">
-              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
-                    <Eye className="w-5 h-5" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-gray-900">{t('marketing.whatsappCampaign.preview')}</h2>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowPreview(!showPreview)}
-                  className="h-7 w-7 p-0"
-                >
-                  {showPreview ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </Button>
-              </div>
+        {/* ==================== TAB: NEW CAMPAIGN ==================== */}
+        {activeTab === 'new' && (
+          <div className="space-y-5">
+            {/* Step indicator */}
+            <div className="flex items-center gap-2">
+              {[1, 2, 3].map(s => (
+                <React.Fragment key={s}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${wizardStep >= s ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-500'}`}>{s}</div>
+                  {s < 3 && <div className={`flex-1 h-0.5 ${wizardStep > s ? 'bg-teal-500' : 'bg-gray-200'}`} />}
+                </React.Fragment>
+              ))}
+            </div>
 
-              {showPreview && (
-                <div className="bg-[#E5DDD5] rounded-xl p-3 max-h-[400px] overflow-y-auto">
-                  {/* Main Message */}
-                  {mainMessage && (
-                    <div className="bg-white rounded-lg p-2.5 shadow-sm mb-2 max-w-[90%]">
-                      <p className="text-xs text-gray-800">{mainMessage}</p>
-                    </div>
-                  )}
-
-                  {/* Carousel Preview */}
-                  <div className="flex gap-2 overflow-x-auto pb-1">
-                    {cards.map((card, index) => (
-                      <div
-                        key={card.id}
-                        className="flex-shrink-0 w-44 bg-white rounded-lg shadow-sm overflow-hidden"
-                      >
-                        <div className="h-24 bg-gray-200">
-                          {card.mediaUrl ? (
-                            card.mediaType === 'video' ? (
-                              <video src={card.mediaUrl} className="w-full h-full object-cover" />
-                            ) : (
-                              <img src={card.mediaUrl} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                            )
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <ImageIcon className="w-6 h-6 text-gray-400" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-2">
-                          <p className="text-[10px] text-gray-700 line-clamp-2 mb-1.5">
-                            {card.text || t('marketing.whatsappCampaign.cardTextPlaceholder')}
+            {/* Step 1: Select template */}
+            {wizardStep === 1 && (
+              <Card className="p-6 border border-gray-200 rounded-xl space-y-4">
+                <h3 className="font-semibold text-gray-900">{isFr ? '1. Sélectionnez un template approuvé' : '1. Select an approved template'}</h3>
+                {approvedTemplates.length === 0 ? (
+                  <p className="text-sm text-gray-500">{isFr ? 'Aucun template approuvé. Créez et soumettez un template dans l\'onglet Templates.' : 'No approved templates. Create and submit one in the Templates tab.'}</p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {approvedTemplates.map(tpl => (
+                      <button key={tpl.id} onClick={() => setSelectedTemplate(tpl)}
+                        className={`p-4 rounded-xl border-2 text-left transition-all ${selectedTemplate?.id === tpl.id ? 'border-teal-500 bg-teal-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <p className="font-semibold text-sm text-gray-900 font-mono">{tpl.name}</p>
+                        <p className="text-xs text-gray-500 mt-1">{tpl.language.toUpperCase()} · {tpl.category}</p>
+                        {tpl.components && (
+                          <p className="text-xs text-gray-400 mt-2 line-clamp-2">
+                            {Array.isArray(tpl.components) ? tpl.components.find((c: any) => c.type === 'BODY')?.text : ''}
                           </p>
-                          <button className="w-full py-1 bg-gray-100 rounded text-[10px] font-medium text-teal-600 flex items-center justify-center gap-1">
-                            {card.buttonType === 'url' ? <LinkIcon className="w-2.5 h-2.5" /> : <MessageSquare className="w-2.5 h-2.5" />}
-                            {card.buttonTitle || t('marketing.whatsappCampaign.buttonTitlePlaceholder')}
-                          </button>
-                        </div>
-                      </div>
+                        )}
+                      </button>
                     ))}
                   </div>
+                )}
+                <div className="flex justify-end">
+                  <Button disabled={!selectedTemplate} onClick={() => { setWizardStep(2); loadRecipients(); }} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                    {isFr ? 'Suivant' : 'Next'} <ChevronRight className="w-4 h-4" />
+                  </Button>
                 </div>
-              )}
-            </div>
+              </Card>
+            )}
 
-            {/* Next Step CTA */}
-            <div className="group relative p-6 border border-gray-200 rounded-xl overflow-hidden transition-all duration-300 hover:border-gray-300 hover:shadow-md bg-gradient-to-br from-teal-50 to-emerald-50">
-              <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-teal-100 text-teal-600 flex items-center justify-center">
-                  <Users className="w-5 h-5" />
+            {/* Step 2: Select recipients */}
+            {wizardStep === 2 && (
+              <Card className="p-6 border border-gray-200 rounded-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900">{isFr ? '2. Sélectionnez les destinataires' : '2. Select recipients'}</h3>
+                  <span className="text-sm text-teal-600 font-medium">{selectedPhones.size} {isFr ? 'sélectionnés' : 'selected'}</span>
                 </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-teal-900">{t('marketing.whatsappCampaign.nextStep')}</h3>
-                  <p className="text-xs text-teal-700">{t('marketing.whatsappCampaign.nextStepDescription')}</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setSelectedPhones(new Set(recipients.map(r => r.phone)))}>
+                    {isFr ? 'Tout sélectionner' : 'Select all'} ({recipients.length})
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedPhones(new Set(recipients.filter(r => r.is_positive).map(r => r.phone)))}>
+                    <Star className="w-3.5 h-3.5 mr-1 text-amber-500" /> {isFr ? 'Positifs (4-5★)' : 'Positive (4-5★)'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedPhones(new Set())}>{isFr ? 'Désélectionner' : 'Deselect'}</Button>
                 </div>
-              </div>
-              <Button
-                className="w-full bg-teal-600 hover:bg-teal-700 gap-2"
-                disabled={!isCampaignValid()}
-                onClick={() => {
-                  localStorage.setItem('whatsapp_campaign_draft', JSON.stringify({
-                    campaignName,
-                    mainMessage,
-                    cards,
-                  }));
-                  router.push('/dashboard/marketing/whatsapp-campaign/send');
-                }}
-              >
-                <Users className="w-4 h-4" />
-                {t('marketing.whatsappCampaign.selectRecipients')}
-              </Button>
-            </div>
+                <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
+                  <table className="w-full">
+                    <thead><tr className="bg-gray-50 sticky top-0">
+                      <th className="px-3 py-2 w-10"></th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500">{isFr ? 'Numéro' : 'Number'}</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500">{isFr ? 'Note' : 'Rating'}</th>
+                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500">{isFr ? 'Avis' : 'Reviews'}</th>
+                    </tr></thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {recipients.map(r => (
+                        <tr key={r.phone} className="hover:bg-gray-50">
+                          <td className="px-3 py-2">
+                            <input type="checkbox" checked={selectedPhones.has(r.phone)}
+                              onChange={() => { const s = new Set(selectedPhones); s.has(r.phone) ? s.delete(r.phone) : s.add(r.phone); setSelectedPhones(s); }}
+                              className="rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-700 font-mono">{r.phone}</td>
+                          <td className="px-3 py-2 text-sm">
+                            {r.total_reviews > 0 ? <span className="flex items-center gap-1">{r.avg_rating.toFixed(1)} <Star className="w-3 h-3 text-amber-400 fill-amber-400" /></span> : '-'}
+                          </td>
+                          <td className="px-3 py-2 text-sm text-gray-600">{r.total_reviews}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setWizardStep(1)}>{isFr ? 'Retour' : 'Back'}</Button>
+                  <Button disabled={selectedPhones.size === 0} onClick={() => setWizardStep(3)} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                    {isFr ? 'Suivant' : 'Next'} <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </Card>
+            )}
+
+            {/* Step 3: Summary & Send */}
+            {wizardStep === 3 && (
+              <Card className="p-6 border border-gray-200 rounded-xl space-y-5">
+                <h3 className="font-semibold text-gray-900">{isFr ? '3. Récapitulatif & Envoi' : '3. Summary & Send'}</h3>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <p className="text-xs text-gray-500">Template</p>
+                    <p className="text-sm font-semibold text-gray-900 font-mono">{selectedTemplate?.name}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <p className="text-xs text-gray-500">{isFr ? 'Destinataires' : 'Recipients'}</p>
+                    <p className="text-xl font-bold text-gray-900">{selectedPhones.size}</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <p className="text-xs text-gray-500">{isFr ? 'Coût estimé' : 'Estimated cost'}</p>
+                    <p className="text-xl font-bold text-teal-700">{(selectedPhones.size * 50).toLocaleString()} F</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-lg text-center">
+                    <p className="text-xs text-gray-500">{isFr ? 'Crédits disponibles' : 'Available credits'}</p>
+                    <p className={`text-xl font-bold ${credits >= selectedPhones.size ? 'text-green-600' : 'text-red-600'}`}>{credits}</p>
+                  </div>
+                </div>
+
+                {credits < selectedPhones.size && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600" />
+                    <p className="text-sm text-red-700">{isFr ? `Crédits insuffisants. Il vous manque ${selectedPhones.size - credits} crédits.` : `Insufficient credits. You need ${selectedPhones.size - credits} more.`}</p>
+                  </div>
+                )}
+
+                {sendResult && (
+                  <div className="p-4 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
+                    <p className="text-sm font-semibold text-teal-800">{isFr ? 'Campagne envoyée !' : 'Campaign sent!'}</p>
+                    <div className="flex gap-4 text-sm">
+                      <span className="text-green-700">✓ {sendResult.sent} {isFr ? 'envoyés' : 'sent'}</span>
+                      {sendResult.failed > 0 && <span className="text-red-600">✗ {sendResult.failed} {isFr ? 'échoués' : 'failed'}</span>}
+                      <span className="text-gray-600">{isFr ? 'Crédits restants' : 'Credits remaining'}: {sendResult.creditsRemaining}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setWizardStep(2)}>{isFr ? 'Retour' : 'Back'}</Button>
+                  <div className="flex gap-3">
+                    {!createdCampaignId && (
+                      <Button disabled={submitting || credits < selectedPhones.size} onClick={createCampaign} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                        {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                        {isFr ? 'Créer la campagne' : 'Create campaign'}
+                      </Button>
+                    )}
+                    {createdCampaignId && !sendResult && (
+                      <Button disabled={sending} onClick={sendCampaign} className="bg-green-600 hover:bg-green-700 text-white gap-2">
+                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        {isFr ? 'Envoyer la campagne' : 'Send campaign'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )}
           </div>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );
