@@ -107,10 +107,10 @@ export async function POST(request: NextRequest) {
     .from('campaign_credit_purchases')
     .insert({
       merchant_id: merchantId,
-      pack_id: pack.id,
       pack_name: pack.name,
       credits: pack.credits,
-      price_fcfa: pack.price_fcfa,
+      price: pack.price,
+      currency: pack.currency,
     });
 
   if (purchaseError) {

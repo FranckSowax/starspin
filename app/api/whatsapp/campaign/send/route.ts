@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     .update({
       status: failed === messages.length ? 'FAILED' : 'SENT',
       send_count: (campaign.send_count || 0) + sent,
-      actual_cost_fcfa: (campaign.actual_cost_fcfa || 0) + creditsUsed,
+      actual_cost: (campaign.actual_cost || 0) + creditsUsed,
       last_sent_at: now,
     })
     .eq('id', campaignId);

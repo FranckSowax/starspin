@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS merchant_whatsapp_config (
   -- Whapi credentials (legacy / per-merchant override)
   whapi_api_key TEXT,
   -- Pricing
-  message_price_fcfa INTEGER DEFAULT 50,
+  message_price NUMERIC(10,2) DEFAULT 1.80,
+  price_currency TEXT DEFAULT 'THB',
   -- Audit
   configured_by UUID,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -83,8 +84,9 @@ CREATE POLICY "Merchants can delete own templates"
 ALTER TABLE whatsapp_campaigns
   ADD COLUMN IF NOT EXISTS template_id UUID REFERENCES whatsapp_templates(id),
   ADD COLUMN IF NOT EXISTS template_variables JSONB DEFAULT '{}',
-  ADD COLUMN IF NOT EXISTS estimated_cost_fcfa INTEGER DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS actual_cost_fcfa INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS estimated_cost NUMERIC(10,2) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS actual_cost NUMERIC(10,2) DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS cost_currency TEXT DEFAULT 'THB',
   ADD COLUMN IF NOT EXISTS total_recipients INTEGER DEFAULT 0;
 
 -- ============================================
@@ -99,7 +101,7 @@ CREATE TABLE IF NOT EXISTS whatsapp_campaign_messages (
   meta_message_id TEXT,
   status TEXT NOT NULL DEFAULT 'queued' CHECK (status IN ('queued', 'sent', 'delivered', 'read', 'failed')),
   error_message TEXT,
-  cost_fcfa INTEGER DEFAULT 50,
+  cost NUMERIC(10,2) DEFAULT 1.80,
   sent_at TIMESTAMPTZ,
   delivered_at TIMESTAMPTZ,
   read_at TIMESTAMPTZ,
@@ -127,7 +129,8 @@ CREATE TABLE IF NOT EXISTS campaign_credit_purchases (
   merchant_id UUID NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
   pack_name TEXT NOT NULL,
   credits INTEGER NOT NULL,
-  price_fcfa INTEGER NOT NULL,
+  price NUMERIC(10,2) NOT NULL,
+  currency TEXT DEFAULT 'THB',
   purchased_at TIMESTAMPTZ DEFAULT NOW()
 );
 

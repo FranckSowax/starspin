@@ -86,7 +86,8 @@ export interface MerchantWhatsAppConfig {
   is_verified: boolean;
   webhook_verify_token: string | null;
   whapi_api_key: string | null;
-  message_price_fcfa: number;
+  message_price: number;
+  price_currency: string;
   configured_by: string | null;
   created_at: string;
   updated_at: string;
@@ -119,7 +120,7 @@ export interface WhatsAppCampaignMessage {
   meta_message_id: string | null;
   status: 'queued' | 'sent' | 'delivered' | 'read' | 'failed';
   error_message: string | null;
-  cost_fcfa: number;
+  cost: number;
   sent_at: string | null;
   delivered_at: string | null;
   read_at: string | null;
@@ -132,8 +133,8 @@ export interface WhatsAppCampaignMessage {
 // ==========================================
 
 export const CREDIT_PACKS = [
-  { id: 'pack_100', name: '100 crédits', credits: 100, price_fcfa: 8000 },
-  { id: 'pack_500', name: '500 crédits', credits: 500, price_fcfa: 30000 },
-  { id: 'pack_1000', name: '1 000 crédits', credits: 1000, price_fcfa: 50000 },
-  { id: 'pack_5000', name: '5 000 crédits', credits: 5000, price_fcfa: 200000 },
+  { id: 'pack_100', name: '100 crédits', credits: 100, price: 180, currency: 'THB' },
+  { id: 'pack_500', name: '500 crédits', credits: 500, price: 750, currency: 'THB' },
+  { id: 'pack_1000', name: '1 000 crédits', credits: 1000, price: 1200, currency: 'THB' },
+  { id: 'pack_5000', name: '5 000 crédits', credits: 5000, price: 5000, currency: 'THB' },
 ];

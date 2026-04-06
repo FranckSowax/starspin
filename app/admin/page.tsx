@@ -210,7 +210,7 @@ export default function AdminDashboard() {
   const [waConfigForm, setWaConfigForm] = useState({
     merchant_id: '', provider: 'meta' as 'meta' | 'whapi',
     waba_id: '', phone_number_id: '', access_token: '',
-    display_phone: '', whapi_api_key: '', message_price_fcfa: '50',
+    display_phone: '', whapi_api_key: '', message_price: '1.80',
   });
 
   const handleRefresh = async () => {
@@ -1769,7 +1769,7 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-bold text-white">Configurations WhatsApp Business</h3>
                   <p className="text-sm text-slate-400">Gérez les identifiants WABA pour chaque merchant</p>
                 </div>
-                <button onClick={() => { setShowWaConfigForm(true); setWaConfigForm({ merchant_id: '', provider: 'meta', waba_id: '', phone_number_id: '', access_token: '', display_phone: '', whapi_api_key: '', message_price_fcfa: '50' }); }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                <button onClick={() => { setShowWaConfigForm(true); setWaConfigForm({ merchant_id: '', provider: 'meta', waba_id: '', phone_number_id: '', access_token: '', display_phone: '', whapi_api_key: '', message_price: '1.80' }); }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
                   + Ajouter
                 </button>
               </div>
@@ -1803,9 +1803,9 @@ export default function AdminDashboard() {
                           </span>
                           {cfg.is_verified && <span className="ml-1 text-green-400 text-xs">✓</span>}
                         </td>
-                        <td className="py-3 px-4 text-sm text-slate-300">{cfg.message_price_fcfa || 50} FCFA</td>
+                        <td className="py-3 px-4 text-sm text-slate-300">{cfg.message_price || 1.80} ฿</td>
                         <td className="py-3 px-4 text-right">
-                          <button onClick={() => { setWaConfigForm({ merchant_id: cfg.merchant_id, provider: cfg.provider || 'meta', waba_id: cfg.waba_id || '', phone_number_id: cfg.phone_number_id || '', access_token: '', display_phone: cfg.display_phone || '', whapi_api_key: '', message_price_fcfa: String(cfg.message_price_fcfa || 50) }); setShowWaConfigForm(true); }} className="text-blue-400 hover:text-blue-300 text-sm mr-3">Modifier</button>
+                          <button onClick={() => { setWaConfigForm({ merchant_id: cfg.merchant_id, provider: cfg.provider || 'meta', waba_id: cfg.waba_id || '', phone_number_id: cfg.phone_number_id || '', access_token: '', display_phone: cfg.display_phone || '', whapi_api_key: '', message_price: String(cfg.message_price || 1.80) }); setShowWaConfigForm(true); }} className="text-blue-400 hover:text-blue-300 text-sm mr-3">Modifier</button>
                           <button onClick={async () => { if (!confirm('Supprimer cette configuration ?')) return; const { data: { session } } = await supabase.auth.getSession(); if (!session) return; await fetch(`/api/admin/whatsapp-config?merchant_id=${cfg.merchant_id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${session.access_token}` } }); loadWhatsAppData(); }} className="text-red-400 hover:text-red-300 text-sm">Supprimer</button>
                         </td>
                       </tr>
@@ -1856,8 +1856,8 @@ export default function AdminDashboard() {
                       </div>
                     )}
                     <div>
-                      <label className="block text-sm text-slate-400 mb-1">Prix par message (FCFA)</label>
-                      <input type="number" value={waConfigForm.message_price_fcfa} onChange={(e) => setWaConfigForm({ ...waConfigForm, message_price_fcfa: e.target.value })} placeholder="50" className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm" />
+                      <label className="block text-sm text-slate-400 mb-1">Prix par message (THB ฿)</label>
+                      <input type="number" value={waConfigForm.message_price} onChange={(e) => setWaConfigForm({ ...waConfigForm, message_price: e.target.value })} placeholder="50" className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm" />
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 mt-6">

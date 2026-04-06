@@ -36,8 +36,8 @@ interface WaCampaign {
   template_id: string;
   template_name?: string;
   total_recipients: number;
-  estimated_cost_fcfa: number;
-  actual_cost_fcfa: number;
+  estimated_cost: number;
+  actual_cost: number;
   total_sent?: number;
   total_delivered?: number;
   total_read?: number;
@@ -426,7 +426,7 @@ export default function WhatsAppCampaignPage() {
               <span className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-teal-500 to-emerald-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
               <p className="text-lg font-bold text-gray-900">{pack.credits}</p>
               <p className="text-xs text-gray-500">{isFr ? 'crédits' : 'credits'}</p>
-              <p className="text-sm font-semibold text-teal-600 mt-1">{pack.price_fcfa.toLocaleString()} FCFA</p>
+              <p className="text-sm font-semibold text-teal-600 mt-1">{pack.price.toLocaleString()} ฿</p>
               {buyingPack === pack.id && <Loader2 className="w-4 h-4 text-teal-600 animate-spin absolute top-3 right-3" />}
             </button>
           ))}
@@ -620,7 +620,7 @@ export default function WhatsAppCampaignPage() {
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">{c.name}</td>
                         <td className="px-4 py-3 text-sm text-gray-600 font-mono">{c.template_name || '-'}</td>
                         <td className="px-4 py-3 text-sm text-gray-600">{c.total_recipients}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{(c.actual_cost_fcfa || c.estimated_cost_fcfa || 0).toLocaleString()} F</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{(c.actual_cost || c.estimated_cost || 0).toLocaleString()} ฿</td>
                         <td className="px-4 py-3 text-sm">
                           <span className="text-green-600">{c.total_sent || c.send_count || 0}</span>
                           {(c.total_failed || 0) > 0 && <span className="text-red-500 ml-1">/ {c.total_failed} ✗</span>}
@@ -745,7 +745,7 @@ export default function WhatsAppCampaignPage() {
                   </div>
                   <div className="p-3 bg-gray-50 rounded-lg text-center">
                     <p className="text-xs text-gray-500">{isFr ? 'Coût estimé' : 'Estimated cost'}</p>
-                    <p className="text-xl font-bold text-teal-700">{(selectedPhones.size * 50).toLocaleString()} F</p>
+                    <p className="text-xl font-bold text-teal-700">{(selectedPhones.size * 1.80).toLocaleString()} ฿</p>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-lg text-center">
                     <p className="text-xs text-gray-500">{isFr ? 'Crédits disponibles' : 'Available credits'}</p>

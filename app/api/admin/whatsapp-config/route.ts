@@ -64,7 +64,8 @@ export async function POST(request: NextRequest) {
     access_token,
     display_phone,
     whapi_api_key,
-    message_price_fcfa,
+    message_price,
+    price_currency,
   } = body;
 
   if (!merchant_id) {
@@ -92,7 +93,8 @@ export async function POST(request: NextRequest) {
         access_token,
         display_phone: result.display_phone || display_phone || null,
         whapi_api_key: whapi_api_key || null,
-        message_price_fcfa: message_price_fcfa ?? 80,
+        message_price: message_price ?? 1.80,
+        price_currency: price_currency || 'THB',
         is_verified: true,
         configured_by: user.id,
         updated_at: new Date().toISOString(),
@@ -115,7 +117,8 @@ export async function POST(request: NextRequest) {
       access_token: access_token || null,
       display_phone: display_phone || null,
       whapi_api_key: whapi_api_key || null,
-      message_price_fcfa: message_price_fcfa ?? 80,
+      message_price: message_price ?? 1.80,
+      price_currency: price_currency || 'THB',
       configured_by: user.id,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'merchant_id' })
