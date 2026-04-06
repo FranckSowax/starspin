@@ -1,7 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { NextRequest, NextResponse } from 'next/server';
-import { createTemplate, buildTemplateComponents, deleteTemplate as deleteMetaTemplate } from '@/lib/whatsapp/meta-api';
-import type { WaBusinessConfig, TemplateCategory, HeaderType, TemplateButton } from '@/lib/whatsapp/meta-api';
+import { getWhatsAppConfig } from '@/lib/whatsapp/config';
+import {
+  syncTemplatesFromMeta,
+  createTemplateOnMeta,
+  deleteTemplateOnMeta,
+} from '@/lib/whatsapp/client';
 
 let supabaseAdmin: SupabaseClient | null = null;
 function getSupabaseAdmin(): SupabaseClient | null {
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
   if (merchantId !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { data, error } = await adminClient
-    .from('wa_templates')
+    .from('whatsapp_templates')
     .select('*')
     .eq('merchant_id', merchantId)
     .order('created_at', { ascending: false });
@@ -44,7 +48,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(data || []);
 }
 
-// POST - Create template (optionally submit to Meta)
+// POST - Sync, create, or submit templates
 export async function POST(request: NextRequest) {
   const adminClient = getSupabaseAdmin();
   if (!adminClient) return NextResponse.json({ error: 'Not configured' }, { status: 500 });
@@ -53,81 +57,101 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json();
-  const { merchantId, name, language, category, headerType, headerContent, bodyText, footerText, buttons, submitToMeta } = body;
+  const { action, merchantId } = body;
 
   if (merchantId !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  if (!name || !bodyText) return NextResponse.json({ error: 'name and bodyText required' }, { status: 400 });
 
-  // Save to DB
-  const templateData: any = {
-    merchant_id: merchantId,
-    name: name.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-    language: language || 'fr',
-    category: category || 'MARKETING',
-    status: 'DRAFT',
-    header_type: headerType || 'NONE',
-    header_content: headerContent || null,
-    body_text: bodyText,
-    footer_text: footerText || null,
-    buttons: JSON.stringify(buttons || []),
-  };
-
-  // Submit to Meta if requested
-  if (submitToMeta) {
-    const { data: config } = await adminClient
-      .from('wa_business_config')
-      .select('*')
-      .eq('merchant_id', merchantId)
-      .single();
-
-    if (!config) {
-      return NextResponse.json({ error: 'WhatsApp Business not configured' }, { status: 400 });
+  // ---- Sync templates from Meta ----
+  if (action === 'sync') {
+    const config = await getWhatsAppConfig(merchantId);
+    if (config.provider !== 'meta') {
+      return NextResponse.json({ error: 'Meta Cloud API config required for sync' }, { status: 400 });
     }
 
     try {
-      const waConfig: WaBusinessConfig = {
-        waba_id: config.waba_id,
-        phone_number_id: config.phone_number_id,
-        access_token: config.access_token,
-        business_id: config.business_id,
-        app_id: config.app_id,
-      };
+      const metaTemplates = await syncTemplatesFromMeta(config);
 
-      const components = buildTemplateComponents({
-        headerType: (headerType || 'NONE') as HeaderType,
-        headerContent,
-        bodyText,
-        footerText,
-        buttons: (buttons || []) as TemplateButton[],
-      });
+      let upserted = 0;
+      for (const mt of metaTemplates) {
+        const { error } = await adminClient
+          .from('whatsapp_templates')
+          .upsert({
+            merchant_id: merchantId,
+            meta_template_id: mt.id,
+            name: mt.name,
+            language: mt.language,
+            category: mt.category,
+            status: mt.status,
+            components: mt.components,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'merchant_id,name,language' })
+          .select();
 
-      const metaResult = await createTemplate(waConfig, {
-        name: templateData.name,
-        language: templateData.language,
-        category: templateData.category as TemplateCategory,
-        components,
-      });
+        if (!error) upserted++;
+      }
 
-      templateData.meta_template_id = metaResult.id;
-      templateData.status = metaResult.status || 'PENDING';
-      templateData.meta_response = JSON.stringify(metaResult);
-      templateData.submitted_at = new Date().toISOString();
+      return NextResponse.json({ synced: upserted, total: metaTemplates.length });
     } catch (err: any) {
       return NextResponse.json({ error: `Meta API: ${err.message}` }, { status: 400 });
     }
   }
 
-  const { data, error } = await adminClient
-    .from('wa_templates')
-    .insert(templateData)
-    .select()
-    .single();
+  // ---- Create template ----
+  if (action === 'create') {
+    const { name, language, category, components, submitToMeta } = body;
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+    if (!name || !components) {
+      return NextResponse.json({ error: 'name and components required' }, { status: 400 });
+    }
+
+    const sanitizedName = name.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+
+    const templateData: any = {
+      merchant_id: merchantId,
+      name: sanitizedName,
+      language: language || 'fr',
+      category: category || 'MARKETING',
+      status: 'DRAFT',
+      components,
+    };
+
+    // Submit to Meta if requested
+    if (submitToMeta) {
+      const config = await getWhatsAppConfig(merchantId);
+      if (config.provider !== 'meta') {
+        return NextResponse.json({ error: 'Meta Cloud API config required' }, { status: 400 });
+      }
+
+      try {
+        const metaResult = await createTemplateOnMeta(config, {
+          name: sanitizedName,
+          language: templateData.language,
+          category: templateData.category,
+          components,
+        });
+
+        templateData.meta_template_id = metaResult.id;
+        templateData.status = metaResult.status || 'PENDING';
+        templateData.submitted_at = new Date().toISOString();
+      } catch (err: any) {
+        return NextResponse.json({ error: `Meta API: ${err.message}` }, { status: 400 });
+      }
+    }
+
+    const { data, error } = await adminClient
+      .from('whatsapp_templates')
+      .insert(templateData)
+      .select()
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  }
+
+  return NextResponse.json({ error: 'Invalid action. Use "sync" or "create".' }, { status: 400 });
 }
 
-// DELETE - Delete template
+// DELETE - Delete template locally and optionally from Meta
 export async function DELETE(request: NextRequest) {
   const adminClient = getSupabaseAdmin();
   if (!adminClient) return NextResponse.json({ error: 'Not configured' }, { status: 500 });
@@ -139,9 +163,9 @@ export async function DELETE(request: NextRequest) {
   const merchantId = request.nextUrl.searchParams.get('merchantId');
   if (!id || merchantId !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  // Get template to check if it's on Meta
+  // Fetch template
   const { data: template } = await adminClient
-    .from('wa_templates')
+    .from('whatsapp_templates')
     .select('*')
     .eq('id', id)
     .eq('merchant_id', merchantId)
@@ -149,30 +173,24 @@ export async function DELETE(request: NextRequest) {
 
   if (!template) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  // Delete from Meta if submitted
+  // Delete from Meta if it has a meta_template_id
   if (template.meta_template_id) {
-    const { data: config } = await adminClient
-      .from('wa_business_config')
-      .select('*')
-      .eq('merchant_id', merchantId)
-      .single();
-
-    if (config) {
-      try {
-        await deleteMetaTemplate({
-          waba_id: config.waba_id,
-          phone_number_id: config.phone_number_id,
-          access_token: config.access_token,
-        }, template.name);
-      } catch (err) {
-        // Non-blocking: template may already be deleted on Meta
-        console.warn('Meta template delete failed:', err);
+    try {
+      const config = await getWhatsAppConfig(merchantId);
+      if (config.provider === 'meta') {
+        await deleteTemplateOnMeta(config, template.name);
       }
+    } catch (err) {
+      // Non-blocking: template may already be deleted on Meta
+      console.warn('Meta template delete failed:', err);
     }
   }
 
-  const { error } = await adminClient.from('wa_templates').delete().eq('id', id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { error } = await adminClient
+    .from('whatsapp_templates')
+    .delete()
+    .eq('id', id);
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

@@ -205,14 +205,13 @@ export default function AdminDashboard() {
 
   // WhatsApp state
   const [waConfigs, setWaConfigs] = useState<any[]>([]);
-  const [waPricing, setWaPricing] = useState<any[]>([]);
+  const [verifyingConfig, setVerifyingConfig] = useState(false);
   const [showWaConfigForm, setShowWaConfigForm] = useState(false);
   const [waConfigForm, setWaConfigForm] = useState({
-    merchant_id: '', waba_id: '', phone_number_id: '', access_token: '',
-    display_phone: '', business_id: '', app_id: '',
+    merchant_id: '', provider: 'meta' as 'meta' | 'whapi',
+    waba_id: '', phone_number_id: '', access_token: '',
+    display_phone: '', whapi_api_key: '', message_price_fcfa: '50',
   });
-  const [editingPricingId, setEditingPricingId] = useState<string | null>(null);
-  const [editingPriceValue, setEditingPriceValue] = useState('');
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -325,12 +324,8 @@ export default function AdminDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       const headers = { Authorization: `Bearer ${session.access_token}` };
-      const [configRes, pricingRes] = await Promise.all([
-        fetch('/api/admin/whatsapp/config', { headers }),
-        fetch('/api/admin/whatsapp/pricing', { headers }),
-      ]);
+      const configRes = await fetch('/api/admin/whatsapp-config', { headers });
       if (configRes.ok) setWaConfigs(await configRes.json());
-      if (pricingRes.ok) setWaPricing(await pricingRes.json());
     } catch (e) { console.error('Error loading WA data:', e); }
   };
 
@@ -1774,7 +1769,7 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-bold text-white">Configurations WhatsApp Business</h3>
                   <p className="text-sm text-slate-400">Gérez les identifiants WABA pour chaque merchant</p>
                 </div>
-                <button onClick={() => { setShowWaConfigForm(true); setWaConfigForm({ merchant_id: '', waba_id: '', phone_number_id: '', access_token: '', display_phone: '', business_id: '', app_id: '' }); }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
+                <button onClick={() => { setShowWaConfigForm(true); setWaConfigForm({ merchant_id: '', provider: 'meta', waba_id: '', phone_number_id: '', access_token: '', display_phone: '', whapi_api_key: '', message_price_fcfa: '50' }); }} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
                   + Ajouter
                 </button>
               </div>
@@ -1788,13 +1783,14 @@ export default function AdminDashboard() {
                       <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Téléphone</th>
                       <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">WABA ID</th>
                       <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Phone Number ID</th>
-                      <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Statut</th>
+                      <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Provider</th>
+                      <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Prix/msg</th>
                       <th className="text-right text-xs font-semibold text-slate-400 uppercase py-3 px-4">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {waConfigs.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center py-8 text-slate-500">Aucune configuration</td></tr>
+                      <tr><td colSpan={7} className="text-center py-8 text-slate-500">Aucune configuration</td></tr>
                     ) : waConfigs.map((cfg: any) => (
                       <tr key={cfg.id} className="border-b border-slate-700/30 hover:bg-slate-700/20">
                         <td className="py-3 px-4 text-sm text-white">{cfg.business_name || cfg.merchant_id}</td>
@@ -1802,13 +1798,15 @@ export default function AdminDashboard() {
                         <td className="py-3 px-4 text-sm text-slate-400 font-mono text-xs">{cfg.waba_id}</td>
                         <td className="py-3 px-4 text-sm text-slate-400 font-mono text-xs">{cfg.phone_number_id}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${cfg.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                            {cfg.is_active ? 'Actif' : 'Inactif'}
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${cfg.provider === 'meta' ? 'bg-blue-500/20 text-blue-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                            {cfg.provider === 'meta' ? 'Meta Cloud' : 'Whapi'}
                           </span>
+                          {cfg.is_verified && <span className="ml-1 text-green-400 text-xs">✓</span>}
                         </td>
+                        <td className="py-3 px-4 text-sm text-slate-300">{cfg.message_price_fcfa || 50} FCFA</td>
                         <td className="py-3 px-4 text-right">
-                          <button onClick={() => { setWaConfigForm({ merchant_id: cfg.merchant_id, waba_id: cfg.waba_id, phone_number_id: cfg.phone_number_id, access_token: cfg.access_token || '', display_phone: cfg.display_phone || '', business_id: cfg.business_id || '', app_id: cfg.app_id || '' }); setShowWaConfigForm(true); }} className="text-blue-400 hover:text-blue-300 text-sm mr-3">Modifier</button>
-                          <button onClick={async () => { if (!confirm('Supprimer cette configuration ?')) return; const { data: { session } } = await supabase.auth.getSession(); if (!session) return; await fetch(`/api/admin/whatsapp/config?merchant_id=${cfg.merchant_id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${session.access_token}` } }); loadWhatsAppData(); }} className="text-red-400 hover:text-red-300 text-sm">Supprimer</button>
+                          <button onClick={() => { setWaConfigForm({ merchant_id: cfg.merchant_id, provider: cfg.provider || 'meta', waba_id: cfg.waba_id || '', phone_number_id: cfg.phone_number_id || '', access_token: '', display_phone: cfg.display_phone || '', whapi_api_key: '', message_price_fcfa: String(cfg.message_price_fcfa || 50) }); setShowWaConfigForm(true); }} className="text-blue-400 hover:text-blue-300 text-sm mr-3">Modifier</button>
+                          <button onClick={async () => { if (!confirm('Supprimer cette configuration ?')) return; const { data: { session } } = await supabase.auth.getSession(); if (!session) return; await fetch(`/api/admin/whatsapp-config?merchant_id=${cfg.merchant_id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${session.access_token}` } }); loadWhatsAppData(); }} className="text-red-400 hover:text-red-300 text-sm">Supprimer</button>
                         </td>
                       </tr>
                     ))}
@@ -1830,26 +1828,61 @@ export default function AdminDashboard() {
                         {merchants.map((m: any) => <option key={m.id} value={m.id}>{m.business_name || m.email}</option>)}
                       </select>
                     </div>
-                    {[
-                      { key: 'waba_id', label: 'WABA ID', placeholder: 'Ex: 123456789' },
-                      { key: 'phone_number_id', label: 'Phone Number ID', placeholder: 'Ex: 987654321' },
-                      { key: 'access_token', label: 'Access Token', placeholder: 'Token permanent...' },
-                      { key: 'display_phone', label: 'Numéro affiché', placeholder: '+33612345678' },
-                      { key: 'business_id', label: 'Business ID (optionnel)', placeholder: '' },
-                      { key: 'app_id', label: 'App ID (optionnel)', placeholder: '' },
-                    ].map(field => (
-                      <div key={field.key}>
-                        <label className="block text-sm text-slate-400 mb-1">{field.label}</label>
-                        <input type={field.key === 'access_token' ? 'password' : 'text'} value={(waConfigForm as any)[field.key]} onChange={(e) => setWaConfigForm({ ...waConfigForm, [field.key]: e.target.value })} placeholder={field.placeholder} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm" />
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-1">Provider</label>
+                      <select value={waConfigForm.provider} onChange={(e) => setWaConfigForm({ ...waConfigForm, provider: e.target.value as 'meta' | 'whapi' })} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm">
+                        <option value="meta">Meta Cloud API</option>
+                        <option value="whapi">Whapi (Legacy)</option>
+                      </select>
+                    </div>
+                    {waConfigForm.provider === 'meta' ? (
+                      <>
+                        {[
+                          { key: 'waba_id', label: 'WABA ID', placeholder: 'Ex: 123456789' },
+                          { key: 'phone_number_id', label: 'Phone Number ID', placeholder: 'Ex: 987654321' },
+                          { key: 'access_token', label: 'Access Token', placeholder: 'Token permanent...' },
+                          { key: 'display_phone', label: 'Numéro affiché', placeholder: '+33612345678' },
+                        ].map(field => (
+                          <div key={field.key}>
+                            <label className="block text-sm text-slate-400 mb-1">{field.label}</label>
+                            <input type={field.key === 'access_token' ? 'password' : 'text'} value={(waConfigForm as any)[field.key]} onChange={(e) => setWaConfigForm({ ...waConfigForm, [field.key]: e.target.value })} placeholder={field.placeholder} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm" />
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <div>
+                        <label className="block text-sm text-slate-400 mb-1">Whapi API Key</label>
+                        <input type="password" value={waConfigForm.whapi_api_key} onChange={(e) => setWaConfigForm({ ...waConfigForm, whapi_api_key: e.target.value })} placeholder="Clé API Whapi..." className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm" />
                       </div>
-                    ))}
+                    )}
+                    <div>
+                      <label className="block text-sm text-slate-400 mb-1">Prix par message (FCFA)</label>
+                      <input type="number" value={waConfigForm.message_price_fcfa} onChange={(e) => setWaConfigForm({ ...waConfigForm, message_price_fcfa: e.target.value })} placeholder="50" className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm" />
+                    </div>
                   </div>
                   <div className="flex justify-end gap-3 mt-6">
                     <button onClick={() => setShowWaConfigForm(false)} className="px-4 py-2 text-slate-400 hover:text-white text-sm">Annuler</button>
+                    {waConfigForm.provider === 'meta' && waConfigForm.phone_number_id && waConfigForm.access_token && (
+                      <button disabled={verifyingConfig} onClick={async () => {
+                        setVerifyingConfig(true);
+                        const { data: { session } } = await supabase.auth.getSession();
+                        if (!session) { setVerifyingConfig(false); return; }
+                        const res = await fetch('/api/admin/whatsapp-config', {
+                          method: 'POST',
+                          headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ ...waConfigForm, action: 'verify' }),
+                        });
+                        const data = await res.json();
+                        setVerifyingConfig(false);
+                        alert(data.is_verified ? `Vérifié ! Numéro: ${data.display_phone}` : `Échec: ${data.error || 'Token invalide'}`);
+                      }} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50">
+                        {verifyingConfig ? 'Vérification...' : 'Vérifier'}
+                      </button>
+                    )}
                     <button onClick={async () => {
                       const { data: { session } } = await supabase.auth.getSession();
                       if (!session) return;
-                      await fetch('/api/admin/whatsapp/config', {
+                      await fetch('/api/admin/whatsapp-config', {
                         method: 'POST',
                         headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
                         body: JSON.stringify(waConfigForm),
@@ -1862,61 +1895,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* Pricing Table */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-white mb-4">Tarification des Messages</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-slate-700/50">
-                      <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Devise</th>
-                      <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Prix par message</th>
-                      <th className="text-left text-xs font-semibold text-slate-400 uppercase py-3 px-4">Statut</th>
-                      <th className="text-right text-xs font-semibold text-slate-400 uppercase py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {waPricing.map((p: any) => (
-                      <tr key={p.id} className="border-b border-slate-700/30">
-                        <td className="py-3 px-4 text-sm text-white font-medium">{p.currency}</td>
-                        <td className="py-3 px-4">
-                          {editingPricingId === p.id ? (
-                            <input type="number" step="0.001" value={editingPriceValue} onChange={(e) => setEditingPriceValue(e.target.value)} className="w-24 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-white text-sm" autoFocus />
-                          ) : (
-                            <span className="text-sm text-slate-300">{p.price_per_message}</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${p.is_active ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}`}>
-                            {p.is_active ? 'Actif' : 'Inactif'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          {editingPricingId === p.id ? (
-                            <>
-                              <button onClick={async () => {
-                                const { data: { session } } = await supabase.auth.getSession();
-                                if (!session) return;
-                                await fetch('/api/admin/whatsapp/pricing', {
-                                  method: 'PUT',
-                                  headers: { Authorization: `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ id: p.id, price_per_message: parseFloat(editingPriceValue) }),
-                                });
-                                setEditingPricingId(null);
-                                loadWhatsAppData();
-                              }} className="text-green-400 hover:text-green-300 text-sm mr-3">Sauver</button>
-                              <button onClick={() => setEditingPricingId(null)} className="text-slate-400 hover:text-white text-sm">Annuler</button>
-                            </>
-                          ) : (
-                            <button onClick={() => { setEditingPricingId(p.id); setEditingPriceValue(String(p.price_per_message)); }} className="text-blue-400 hover:text-blue-300 text-sm">Modifier</button>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
           </div>
         )}
         </div>
